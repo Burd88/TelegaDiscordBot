@@ -14,6 +14,7 @@ using Telegram.Bot.Types.Enums;
 using Telegram.Bot.Types.ReplyMarkups;
 using Telegram.Bot.Types;
 using Telegram.Bot.Extensions.Polling;
+using Discord.Net;
 
 namespace DiscordBot
 {
@@ -67,8 +68,9 @@ namespace DiscordBot
             discordClient = new DiscordSocketClient();
             discordClient.MessageReceived += CommandsHandler;
             discordClient.Log += Log;
-
+            discordClient.Ready += Client_Ready;
             discordClient.ButtonExecuted += MyButtonHandler;
+            discordClient.SlashCommandExecuted += SlashCommandHandler;
 
             await discordClient.LoginAsync(TokenType.Bot, settings.DiscordBotToken);
             await discordClient.StartAsync();
@@ -77,8 +79,8 @@ namespace DiscordBot
             TimerCallback tmAutoriz = new(OnTimerHandlerAutorizationsBattleNet);
             Timer timerAutoriz = new(tmAutoriz, num, 0, 1000 * 60 * 60);
 
-            //TimerCallback tmPoolRT = new(OnTimerHandlerPoolRT);
-            //  Timer timerPoolRT = new(tmPoolRT, num, 0, 1000);
+            TimerCallback tmPoolRT = new(OnTimerHandlerPoolRT);
+            Timer timerPoolRT = new(tmPoolRT, num, 0, 1000);
 
             TimerCallback tmCheckReboot = new(OnTimerHandlerheckReboot);
             Timer timerheckReboot = new(tmCheckReboot, num, 0, 10000);
@@ -104,113 +106,414 @@ namespace DiscordBot
             TimerCallback tmUpdateStatic = new(OnTimerHandlerUpdateStatic);
             Timer timerUpdateStatic = new(tmUpdateStatic, num, 10000, 60000 * 60);
             telegramClient = new TelegramBotClient(settings.TelegramBotToken);
-            var receiverOptions = new ReceiverOptions
-            {
-                AllowedUpdates = { } // receive all update types
-            };
-            updateReceiver = new QueuedUpdateReceiver(telegramClient, receiverOptions);
+            using var cts = new CancellationTokenSource();
+
+        //var receiverOptions = new ReceiverOptions
+         //  {
+         //       AllowedUpdates = { } // receive all update types
+        //   };
+         //   telegramClient.StartReceiving(
+         //       HandleUpdateAsync,
+        //        HandleErrorAsync,
+        //        receiverOptions,
+         //       cancellationToken: cts.Token
+        //        );
+         //   updateReceiver = new QueuedUpdateReceiver(telegramClient, receiverOptions);
 
             // to cancel
-            var cts = new CancellationTokenSource();
+          //  var cts = new CancellationTokenSource();
+
+      //      try
+        //    {
+        //        await foreach (Update update in updateReceiver.WithCancellation(cts.Token))
+        //        {
+         //           if (update.Message is Message message)
+        //            {
+          //              HandlerTelegramCommands(message);
+          //          }
+        //        }
+       //     }
+   //         catch (OperationCanceledException exception)
+    //        {
+     //       }
+            Console.ReadLine();
+            cts.Cancel();
+        }
+
+        private async Task SlashCommandHandler(SocketSlashCommand command)
+        {
+            switch (command.Data.Name)
+            {
+                case "аффикс":
+                    await HandleAffixCommand(command);
+                    break;
+                case "чар":
+                    await HandleCharCommand(command);
+                    break;
+            }
+        }
+
+        private async Task HandleCharCommand(SocketSlashCommand command)
+        {
+            CharInfo pers = new();
+
+           
+            var builder = new EmbedBuilder();
+            var fullInfo = pers.GetCharInfo((string)command.Data.Options.First().Value);
+
+            if (fullInfo != null)
+            {
+                builder = new EmbedBuilder()
+                    .WithTitle($"{fullInfo.Name}({fullInfo.Lvl} уровень) {fullInfo.Race}")
+                    .WithUrl(fullInfo.LinkBnet).WithDescription($"Информация о персонаже  :")
+                    .WithColor(Color.DarkRed).AddField("Уровень\nпредметов:", fullInfo.ILvl, true)
+                    .WithImageUrl(fullInfo.ImageCharMainRaw)
+                    .AddField("Класс:", fullInfo.Class, true)
+                    .AddField("Специализация:", fullInfo.Spec, true)
+                    .AddField("Гильдия:", fullInfo.Guild, true)
+                    .AddField("Ковенант:", fullInfo.Coven, true)
+                    .AddField("Медиум:", fullInfo.CovenSoul, true)
+                    .AddField("Рейд прогресс:", fullInfo.RaidProgress, true)
+                    .AddField("Счет Мифик+:", fullInfo.MythicPlus, true)
+                    .AddField("Статы:", fullInfo.Stats, true).AddField("В игре:", fullInfo.LastLogin, true);
+
+
+
+                await command.RespondAsync(embed: builder.Build(), ephemeral: true);
+
+            }
+            else
+            {
+                await command.RespondAsync(text: "**Ошибка**\nНе корректное имя: " + (string)command.Data.Options.First().Value + ".\nЛибо проблемы на сервере.", ephemeral: true);
+                
+
+            }
+
+        }
+
+        private async Task HandleAffixCommand(SocketSlashCommand command)
+        {
+            var affixs = MythicPlusAffix.GetMythicPlusAffixCurrent();
+            if (MythicPlusAffix.error == false)
+            {
+
+              var builder = new EmbedBuilder()
+                    .WithTitle($"**{affixs.title}**")
+                    .WithDescription("Мифик+ аффиксы на эту неделю.")
+                    .AddField("(+2)", $"**[{affixs.affix_details[0].name}]({affixs.affix_details[0].wowhead_url.Replace("wowhead", "ru.wowhead")}): {affixs.affix_details[0].description}**")
+                    .AddField("(+4)", $"**[{affixs.affix_details[1].name}]({affixs.affix_details[1].wowhead_url.Replace("wowhead", "ru.wowhead")}): {affixs.affix_details[1].description}**")
+                    .AddField("(+7)", $"**[{affixs.affix_details[2].name}]({affixs.affix_details[2].wowhead_url.Replace("wowhead", "ru.wowhead")}): {affixs.affix_details[2].description}**")
+                    .AddField("(+10)", $"**[{affixs.affix_details[3].name}]({affixs.affix_details[3].wowhead_url.Replace("wowhead", "ru.wowhead")}): {affixs.affix_details[3].description}**");
+                           
+                       
+                await command.RespondAsync(embed: builder.Build(), ephemeral: true);
+            }
+        }
+        private async Task Client_Ready()
+        {
+            // Let's build a guild command! We're going to need a guild so lets just put that in a variable.
+            var guild = discordClient.GetGuild(settings.DiscordMainChatId);
+
+            // Next, lets create our slash command builder. This is like the embed builder but for slash commands.
+            var affix = new SlashCommandBuilder()
+                .WithName("аффикс")
+                .WithDescription("Отображает аффиксы мифик+ подземелий(EU)");
+
+            var charcommand = new SlashCommandBuilder()
+                .WithName("чар")
+                .WithDescription("Информация о персонаже")
+                .AddOption("имя", ApplicationCommandOptionType.String, "Введите мя персонажа. Для Ревущего Фьорда просто \"имя персонажа\".Для других миров \"имя-игровой мир\"", isRequired: true)
+                ;
 
             try
             {
-                await foreach (Update update in updateReceiver.WithCancellation(cts.Token))
+
+                await guild.CreateApplicationCommandAsync(affix.Build());
+                await discordClient.Rest.CreateGuildCommand(charcommand.Build(), settings.DiscordMainChatId);
+            }
+            catch (ApplicationCommandException exception)
+            {
+                // If our command was invalid, we should catch an ApplicationCommandException. This exception contains the path of the error as well as the error message. You can serialize the Error field in the exception to get a visual of where your error is.
+                var json = JsonConvert.SerializeObject(exception.Errors, Formatting.Indented);
+
+                // You can send this error somewhere or just print it to the console, for this example we're just going to print it.
+                Console.WriteLine(json);
+            }
+        }
+
+        private async Task HandleUpdateAsync(ITelegramBotClient telegramBot, Update update, CancellationToken cancellationToken)
+        {
+            if (update.Type != UpdateType.Message)
+                return;
+            if (update.Message!.Type != Telegram.Bot.Types.Enums.MessageType.Text)
+                return;
+        }
+
+        Message telegrammessagepool;
+        IUserMessage discordmessagepool;
+        IUserMessage discordmessageresultpool;
+        bool poolready = false;
+        private async void OnTimerHandlerPoolRT(object obj)
+        {
+            if (settings.NeedPoolRT == true)
+            { 
+
+                if (DateTime.Now.DayOfWeek == DayOfWeek.Monday || DateTime.Now.DayOfWeek == DayOfWeek.Wednesday || DateTime.Now.DayOfWeek == DayOfWeek.Thursday)
                 {
-                    if (update.Message is Message message)
+                    if (DateTime.Now.Hour == 21)
                     {
-                        HandlerTelegramCommands(message);
+                        if (DateTime.Now.Minute == 00)
+                        {
+                            if (DateTime.Now.Second == 00)
+                            {
+
+                                userDiscList = new();
+
+                                await foreach (var s in discordClient.GetGuild(settings.DiscordMainChatId).GetUsersAsync())
+                                {
+                                    foreach (var l in s)
+                                    {
+                                        if (l.Nickname != null)
+                                        {
+                                            userDiscList.Add(new UserDiscord { ID = l.Id, Name = l.Nickname });
+                                            // await msg.Author.SendMessageAsync(l.Nickname);
+                                        }
+                                        else
+                                        {
+                                            userDiscList.Add(new UserDiscord { ID = l.Id, Name = l.Username });
+                                            //  await msg.Author.SendMessageAsync(l.Username);
+                                        }
+
+                                    }
+
+
+                                }
+                                go = new();
+                                nogo = new();
+                                mbgo = new();
+
+                                var buttonbuilder = new ComponentBuilder()
+                                    .WithButton("Приду", "go", style: ButtonStyle.Success)
+                                    .WithButton("Не приду", "nogo", style: ButtonStyle.Danger)
+                                    .WithButton("Опоздаю", "mbgo")
+                                    ;
+                                var textbuilder = new EmbedBuilder()
+                                      .WithTitle("**Через час идем в рейд \"Гробница Предвечных\"! Тебя ждать?**")
+                                      .WithColor(Color.DarkRed)
+                                      .WithDescription("Тактики знать **Обязательно**! \nПри себе иметь: **Фласки, Поты, Руны, Чары на предметах**! \nЕду Предоставим на +20!")
+                                      .AddField("Тактики", "Тактики можно смотреть в разделе \"**[Тактики](https://discord.com/channels/219741774556430336/938739958695489596)**\"", false)
+                                      .WithImageUrl("https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcSeDhzUwFEg6HESybW2BScFMwIMJy7pbpEcXA&usqp=CAU");
+
+                                _mainChat = discordClient.GetGuild(settings.DiscordMainChatId);
+                                var chan = _mainChat.GetChannel(821981413858607104) as IMessageChannel;
+                                discordmessagepool = chan.SendMessageAsync("@here Всем привет!", false, embed: textbuilder.Build(), components: buttonbuilder.Build()).Result;
+                                discordmessageresultpool = chan.SendMessageAsync($"Результат:\nПриду: \nНе приду: \nОпоздаю: ").Result;
+
+                                telegrammessagepool = new();
+                                Console.WriteLine($"Сработал таймер для опроса о рт: {DateTime.Now}");
+                                string[] options = new string[3];
+                                options[0] = "Да";
+                                options[1] = "Нет";
+                                options[2] = "Опоздаю";
+                                telegrammessagepool = await telegramClient.SendPollAsync(settings.TelegramMainChatID, "Через час идем в рейд \"Гробница Предвечных\"! Тебя ждать?", options, false);
+                                poolready = true;
+                            }
+
+                        }
+
+                    }
+                    if (DateTime.Now.Hour == 22)
+                    {
+                        if (DateTime.Now.Minute == 30)
+                        {
+                            if (DateTime.Now.Second == 00)
+                            {
+                                if (poolready)
+                                {
+                                    await discordmessagepool.DeleteAsync();
+                                    await discordmessageresultpool.DeleteAsync();
+                                    await telegramClient.DeleteMessageAsync(settings.TelegramMainChatID, telegrammessagepool.MessageId);
+                                    poolready = false;
+                                }
+                              
+                            }
+
+
+                        }
+
                     }
                 }
             }
-            catch (OperationCanceledException exception)
+            if(settings.AddtionalRT == true)
             {
+                if ( DateTime.Now.DayOfWeek == DayOfWeek.Tuesday)
+                {
+
+                    if (DateTime.Now.Hour == 18)
+                    {
+                        if (DateTime.Now.Minute == 52)
+                        {
+                            if (DateTime.Now.Second == 00)
+                            {
+                                userDiscList = new();
+
+                                await foreach (var s in discordClient.GetGuild(settings.DiscordTestChatId).GetUsersAsync())
+                                {
+                                    foreach (var l in s)
+                                    {
+                                        if (l.Nickname != null)
+                                        {
+                                            userDiscList.Add(new UserDiscord { ID = l.Id, Name = l.Nickname });
+                                            // await msg.Author.SendMessageAsync(l.Nickname);
+                                        }
+                                        else
+                                        {
+                                            userDiscList.Add(new UserDiscord { ID = l.Id, Name = l.Username });
+                                            //  await msg.Author.SendMessageAsync(l.Username);
+                                        }
+
+                                    }
+
+
+                                }
+                                go = new();
+                                nogo = new();
+                                mbgo = new();
+
+                                var buttonbuilder = new ComponentBuilder()
+                                    .WithButton("Приду", "go", style: ButtonStyle.Success)
+                                    .WithButton("Не приду", "nogo", style: ButtonStyle.Danger)
+                                    .WithButton("Опоздаю", "mbgo")
+                                    ;
+                                var textbuilder = new EmbedBuilder()
+                                      .WithTitle("**Через полтора часа идем в рейд \"Гробница Предвечных\"! Тебя ждать?**")
+                                      .WithColor(Color.DarkRed)
+                                      .WithDescription("Тактики знать **Обязательно**! \nПри себе иметь: **Фласки, Поты, Руны, Чары на предметах**! \nЕду Предоставим на +20!")
+                                      .AddField("Тактики", "Тактики можно смотреть в разделе \"**[Тактики](https://discord.com/channels/219741774556430336/938739958695489596)**\"", false)
+                                      .WithImageUrl("https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcSeDhzUwFEg6HESybW2BScFMwIMJy7pbpEcXA&usqp=CAU");
+
+                                _mainChat = discordClient.GetGuild(settings.DiscordTestChatId);
+                                var chan = _mainChat.GetChannel(settings.TestDiscordMainChannelId) as IMessageChannel;
+                                discordmessagepool = chan.SendMessageAsync("@here Всем привет!", false, embed: textbuilder.Build(), components: buttonbuilder.Build()).Result;
+                                discordmessageresultpool = chan.SendMessageAsync($"Результат:\nПриду: \nНе приду: \nОпоздаю: ").Result;
+
+                                telegrammessagepool = new();
+                                Console.WriteLine($"Сработал таймер для опроса о рт: {DateTime.Now}");
+                                string[] options = new string[3];
+                                options[0] = "Да";
+                                options[1] = "Нет";
+                                options[2] = "Опоздаю";
+                                telegrammessagepool = await telegramClient.SendPollAsync(settings.TelegramTestChatID, "Через полтора часа начнется РТ, ты будешь?", options, false);
+
+                            }
+
+                        }
+
+                    }
+                    if (DateTime.Now.Hour == 19)
+                    {
+                        if (DateTime.Now.Minute == 00)
+                        {
+                            if (DateTime.Now.Second == 00)
+                            {
+                                await discordmessagepool.DeleteAsync();
+                                await discordmessageresultpool.DeleteAsync();
+                                await telegramClient.DeleteMessageAsync(settings.TelegramTestChatID, telegrammessagepool.MessageId);
+                            }
+
+
+                        }
+
+                    }
+                }
             }
-            Console.ReadLine();
+            
+
+            
+
         }
-        
-      
+
         private List<string> go;
         private List<string> nogo;
         private List<string> mbgo;
         private async Task MyButtonHandler(SocketMessageComponent component)
         {
-            _mainChat = discordClient.GetGuild(settings.DiscordTestChatId);
-            var chan = _mainChat.GetChannel(settings.TestDiscordMainChannelId) as IMessageChannel;
+          //  _mainChat = discordClient.GetGuild(settings.DiscordTestChatId);
+          //  var chan = _mainChat.GetChannel(settings.TestDiscordMainChannelId) as IMessageChannel;
             switch (component.Data.CustomId)
             {
 
                 // Since we set our buttons custom id as 'custom-id', we can check for it like this:
                 case "go":
                     // Lets respond by sending a message saying they clicked the button
-                    string name = "";
-                    if (discordClient.GetGuild(settings.DiscordTestChatId).GetUser(component.User.Id).Nickname != null)
+                    try
                     {
-                        name = discordClient.GetGuild(settings.DiscordTestChatId).GetUser(component.User.Id).Nickname;
-                    }
-                    else
-                    {
-                        name = discordClient.GetGuild(settings.DiscordTestChatId).GetUser(component.User.Id).Username;
-                    }
+                        string name = userDiscList.Find(x => x.ID == component.User.Id).Name;
 
-                    var member = go.Find(x => x.ToLower() == name.ToLower());
-                    if (member == null)
-                    {
-                        go.Add(name);
-                    }
-                    nogo.RemoveAll(x => x.ToLower() == name.ToLower());
-                    mbgo.RemoveAll(x => x.ToLower() == name.ToLower());
 
-                    await messageresultpool.ModifyAsync(x => x.Content = $"Результат:\nПриду: {string.Join(",", go)}\nНе приду: {string.Join(",", nogo)}\nОпоздаю: {string.Join(",", mbgo)}");
+                        var member = go.Find(x => x.ToLower() == name.ToLower());
+                        if (member == null)
+                        {
+                            go.Add(name);
+                        }
+                        nogo.RemoveAll(x => x.ToLower() == name.ToLower());
+                        mbgo.RemoveAll(x => x.ToLower() == name.ToLower());
+
+                        await discordmessageresultpool.ModifyAsync(x => x.Content = $"Результат:\nПриду: {string.Join(",", go)}\nНе приду: {string.Join(",", nogo)}\nОпоздаю: {string.Join(",", mbgo)}");
+
+
+                        
+
+                    }
+                    catch { }
                     await component.DeferAsync();
                     break;
                 case "nogo":
-                    string namenot = "";
-                    if (discordClient.GetGuild(settings.DiscordTestChatId).GetUser(component.User.Id).Nickname != null)
+                    try
                     {
-                        namenot = discordClient.GetGuild(settings.DiscordTestChatId).GetUser(component.User.Id).Nickname;
-                    }
-                    else
-                    {
-                        namenot = discordClient.GetGuild(settings.DiscordTestChatId).GetUser(component.User.Id).Username;
-                    }
-                    var membernot = nogo.Find(x => x.ToLower() == namenot.ToLower());
-                    if (membernot == null)
-                    {
-                        nogo.Add(namenot);
+                        string namenot = userDiscList.Find(x => x.ID == component.User.Id).Name;
+                   
+                        var membernot = nogo.Find(x => x.ToLower() == namenot.ToLower());
+                        if (membernot == null)
+                        {
+                            nogo.Add(namenot);
 
-                    }
-                    go.RemoveAll(x => x.ToLower() == namenot.ToLower());
-                    mbgo.RemoveAll(x => x.ToLower() == namenot.ToLower());
+                        }
+                        go.RemoveAll(x => x.ToLower() == namenot.ToLower());
+                        mbgo.RemoveAll(x => x.ToLower() == namenot.ToLower());
 
-                    await messageresultpool.ModifyAsync(x => x.Content = $"Результат:\nПриду: {string.Join(",", go)}\nНе приду: {string.Join(",", nogo)}\nОпоздаю: {string.Join(",", mbgo)}");
+                        await discordmessageresultpool.ModifyAsync(x => x.Content = $"Результат:\nПриду: {string.Join(",", go)}\nНе приду: {string.Join(",", nogo)}\nОпоздаю: {string.Join(",", mbgo)}");
+
+                   
+                   
+                    }
+                    catch { }
                     await component.DeferAsync();
                     break;
                 case "mbgo":
-                    string namemb = "";
-                    if (discordClient.GetGuild(settings.DiscordTestChatId).GetUser(component.User.Id).Nickname != null)
+                    try
                     {
-                        namemb = discordClient.GetGuild(settings.DiscordTestChatId).GetUser(component.User.Id).Nickname;
-                    }
-                    else
-                    {
-                        namemb = discordClient.GetGuild(settings.DiscordTestChatId).GetUser(component.User.Id).Username;
-                    }
-                    var membermb = mbgo.Find(x => x.ToLower() == namemb.ToLower());
-                    if (membermb == null)
-                    {
-                        mbgo.Add(namemb);
-                    }
-                    go.RemoveAll(x => x.ToLower() == namemb.ToLower());
-                    nogo.RemoveAll(x => x.ToLower() == namemb.ToLower());
+                        string namemb = userDiscList.Find(x => x.ID == component.User.Id).Name;
+                    
+                        var membermb = mbgo.Find(x => x.ToLower() == namemb.ToLower());
+                        if (membermb == null)
+                        {
+                            mbgo.Add(namemb);
+                        }
+                        go.RemoveAll(x => x.ToLower() == namemb.ToLower());
+                        nogo.RemoveAll(x => x.ToLower() == namemb.ToLower());
 
 
-                    await messageresultpool.ModifyAsync(x => x.Content = $"Результат:\nПриду: {string.Join(",", go)}\nНе приду: {string.Join(",", nogo)}\nОпоздаю: {string.Join(",", mbgo)}");
+                        await discordmessageresultpool.ModifyAsync(x => x.Content = $"Результат:\nПриду: {string.Join(",", go)}\nНе приду: {string.Join(",", nogo)}\nОпоздаю: {string.Join(",", mbgo)}");
+
+                  
+                   
+                    }
+                    catch { }
                     await component.DeferAsync();
                     break;
             }
         }
-
         private static void OnTimerHandlerAutorizationsBattleNet(object obj)
         {
             AutorizationsBattleNet();
@@ -230,14 +533,14 @@ namespace DiscordBot
                         .AddField($"{text[0]}", $"**{text[1]}**");
                     var emb = builder.Build();
                     await chan.SendMessageAsync(null, false, emb);
+                    await telegramClient.SendTextMessageAsync(settings.TelegramMainChatID, $"{text[0]}\n{text[1]}", parseMode: ParseMode.Html);
                     string message = ("Отправленно оповещение о Тех.Работах!");
                     Functions.WriteLogs(message, "notification");
                 }
-
+                    
             }
 
         }
-
         private static async void OnTimerHandlerheckAffix(object obj)
         {
             if (DateTime.Now.DayOfWeek == DayOfWeek.Wednesday)
@@ -304,7 +607,6 @@ namespace DiscordBot
                 Functions.WriteLogs(message, "error");
             }
         }
-
         private static async void GetLeaveInvChar(List<RosterLeaveInv> list, string type)
         {
 
@@ -396,10 +698,15 @@ namespace DiscordBot
                                 var chan = _mainChat.GetChannel(settings.DiscordActivityChannelId) as IMessageChannel;
                                 var embed = builder.Build();
                                 await chan.SendMessageAsync(null, false, embed);
-                                await telegramClient.SendTextMessageAsync(
-                                    chatId: settings.TelegramMainChatID,
-                                    text: $"<b>{activ.Name}</b>\nполучил(а) достижение!\nНазвание: {activ.Mode}",
-                                    parseMode: ParseMode.Html);
+                                
+                                if (activ.Categor != "Рейды Legion" && activ.Categor != "Рейды Azeroth" && activ.Categor != "Рейды Draenor" && activ.Categor != "Рейды Pandaria")
+                                {
+
+                                    await telegramClient.SendTextMessageAsync(
+                                     chatId: settings.TelegramTestChatID,
+                                     text: $"<b>{activ.Name}</b>\nполучил(а) достижение!\nНазвание: {activ.Mode}",
+                                     parseMode: ParseMode.Html);
+                                }
                             }
                             else
                             {
@@ -416,11 +723,16 @@ namespace DiscordBot
                                     var chan = _mainChat.GetChannel(settings.DiscordActivityChannelId) as IMessageChannel;
                                     var embed = builder.Build();
                                     await chan.SendMessageAsync(null, false, embed);
-                                    await telegramClient.SendPhotoAsync(
-                                  chatId: settings.TelegramMainChatID,
-                                 photo: activ.Icon,
-                                 caption: $"<b>{activ.Name}</b>\nполучил(а) достижение!\nНазвание: {activ.Mode}\nКатегоря: {activ.Categor}",
-                                 parseMode: ParseMode.Html );
+
+                                    if (activ.Categor != "Рейды Legion" && activ.Categor != "Рейды Azeroth" && activ.Categor != "Рейды Draenor" && activ.Categor != "Рейды Pandaria")
+                                    {
+
+                                        await telegramClient.SendTextMessageAsync(
+                                   chatId: settings.TelegramMainChatID,
+                                   text: $"<b>{activ.Name}</b>\nполучил(а) достижение!\nНазвание: {activ.Mode}\nКатегоря: {activ.Categor}\nНаграда: {activ.Award}",
+                                   parseMode: ParseMode.Html);
+                                    }
+
                                 }
 
                                 else if (activ.Award != null)
@@ -437,12 +749,15 @@ namespace DiscordBot
                                     var chan = _mainChat.GetChannel(settings.DiscordActivityChannelId) as IMessageChannel;
                                     var embed = builder.Build();
                                     await chan.SendMessageAsync(null, false, embed);
-                                    await telegramClient.SendPhotoAsync(
-                                  chatId: settings.TelegramMainChatID,
-                                 photo: activ.Icon,
-                                 caption: $"<b>{activ.Name}</b>\nполучил(а) достижение!\nНазвание: {activ.Mode}\nКатегоря: {activ.Categor}\nНаграда: {activ.Award}"
-                                  , parseMode: ParseMode.Html
-                                  );
+
+                                    if (activ.Categor != "Рейды Legion" && activ.Categor != "Рейды Azeroth" && activ.Categor != "Рейды Draenor" && activ.Categor != "Рейды Pandaria" )
+                                    {
+                                       
+                                        await telegramClient.SendTextMessageAsync(
+                                   chatId: settings.TelegramMainChatID,
+                                   text: $"<b>{activ.Name}</b>\nполучил(а) достижение!\nНазвание: {activ.Mode}\nКатегоря: {activ.Categor}\nНаграда: {activ.Award}",
+                                   parseMode: ParseMode.Html);
+                                    }
                                 }
 
                             }
@@ -586,10 +901,10 @@ namespace DiscordBot
                         _mainChat = discordClient.GetGuild(settings.DiscordMainChatId);
                         var chan = _mainChat.GetChannel(settings.DiscordActivityChannelId) as IMessageChannel;
                         await chan.SendMessageAsync(null, false, embed);
-                        await telegramClient.SendPhotoAsync(
+                        await telegramClient.SendTextMessageAsync(
                                  chatId: settings.TelegramMainChatID,
-                                photo: achieve.Icon,
-                                caption: $"<b>Гильдия получила достижение!!</b>\nНазвание: {achieve.Name}\nКатегоря: {achieve.Category}"
+                                
+                                $"<b>Гильдия получила достижение!!</b>\nНазвание: {achieve.Name}\nКатегоря: {achieve.Category}"
                                  , parseMode: ParseMode.Html
                                  );
                     }
@@ -891,9 +1206,9 @@ namespace DiscordBot
 
         }
 
-        IUserMessage messagepool;
-        IUserMessage messageresultpool;
-        private Task CommandsHandler(SocketMessage msg)
+        List<UserDiscord> userDiscList;
+       
+        private async Task<Task> CommandsHandler(SocketMessage msg)
         {
 
             if (msg.Content.Contains("!"))
@@ -906,27 +1221,97 @@ namespace DiscordBot
 
                 switch (messege)
                 {
+                    case "!test1":
+                        {
+                            userDiscList = new();
+                            
+                          await foreach(var s in discordClient.GetGuild(settings.DiscordTestChatId).GetUsersAsync())
+                            {
+                                foreach(var l in s)
+                                {
+                                    if (l.Nickname != null)
+                                    {
+                                        userDiscList.Add(new UserDiscord { ID = l.Id, Name = l.Nickname });
+                                       // await msg.Author.SendMessageAsync(l.Nickname);
+                                    }
+                                    else
+                                    {
+                                        userDiscList.Add(new UserDiscord { ID = l.Id, Name = l.Username });
+                                      //  await msg.Author.SendMessageAsync(l.Username);
+                                    }
+                                    
+                                }
+                                
+                              
+                            }
+                            
+                            
+                            break;
+
+                        }
                     case "!test":
                         {
+
                             go = new();
                             nogo = new();
                             mbgo = new();
 
-                            var builder = new ComponentBuilder()
+                            var buttonbuilder = new ComponentBuilder()
                                 .WithButton("Приду", "go", style: ButtonStyle.Success)
                                 .WithButton("Не приду", "nogo", style: ButtonStyle.Danger)
                                 .WithButton("Опоздаю", "mbgo")
                                 ;
-
+                            var textbuilder = new EmbedBuilder()
+                                  .WithTitle("**Через полтора часа идем в рейд \"Гробница Предвечных\"! Тебя ждать?**")
+                                  .WithColor(Color.DarkRed)
+                                  .WithDescription("Тактики знать **Обязательно**! \nПри себе иметь: **Фласки, Поты, Руны, Чары на предметах**! \nЕду Предоставим на +20!")
+                                  .AddField("Тактики", "Тактики можно смотреть в разделе \"**[Тактики](https://discord.com/channels/219741774556430336/938739958695489596)**\"", false)
+                                  .WithImageUrl("https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcSeDhzUwFEg6HESybW2BScFMwIMJy7pbpEcXA&usqp=CAU");
+                            
 
                             _mainChat = discordClient.GetGuild(settings.DiscordTestChatId);
                             var chan = _mainChat.GetChannel(settings.TestDiscordMainChannelId) as IMessageChannel;
-                            messagepool = chan.SendMessageAsync("Роли назначаются ждите", components: builder.Build()).Result;
-                            messageresultpool = chan.SendMessageAsync("Результат:").Result;
+                            discordmessagepool =chan.SendMessageAsync("@here Всем привет!",false ,embed: textbuilder.Build(), components: buttonbuilder.Build()).Result;
+                            discordmessageresultpool = chan.SendMessageAsync($"Результат:\nПриду: \nНе приду: \nОпоздаю: ").Result;
                             break;
 
                         }
+                    case "!needpool":
+                        {
+                            
+                            if (settings.NeedPoolRT)
+                            {
+                                settings.NeedPoolRT = false;
+                              await  msg.Author.SendMessageAsync("Отключены опросы перед РТ");
+                            }
+                            else
+                            {
+                                settings.NeedPoolRT = true;
+                             await  msg.Author.SendMessageAsync("Включены опросы перед РТ");
+                            }
+                            Functions.WriteJSon(settings, "BotSettings");
 
+                            break;
+
+                        }
+                    case "!addpool":
+                        {
+
+                            if (settings.AddtionalRT)
+                            {
+                                settings.AddtionalRT = false;
+                                await msg.Author.SendMessageAsync("Отключены опросы перед допРТ во вторник");
+                            }
+                            else
+                            {
+                                settings.AddtionalRT = true;
+                                await msg.Author.SendMessageAsync("Включены опросы перед допРТ во вторник");
+                            }
+                            Functions.WriteJSon(settings, "BotSettings");
+
+                            break;
+
+                        }
                     case "!setrole":
                         {
 
@@ -1007,6 +1392,8 @@ namespace DiscordBot
                                     .AddField("(+10)", $"**[{affixs.affix_details[3].name}]({affixs.affix_details[3].wowhead_url.Replace("wowhead", "ru.wowhead")}): {affixs.affix_details[3].description}**");
                                 var emb = builder.Build();
                                 msg.Author.SendMessageAsync(null, false, emb);
+                             //   var chan = discordClient.GetChannel(settings.DiscordAffixChannelId) as IMessageChannel;
+                            //    await chan.SendMessageAsync(null, false, emb);
                             }
                             else if (MythicPlusAffix.error == false)
                             {
@@ -1324,6 +1711,11 @@ namespace DiscordBot
             public long LastGuildAchiveTime { get; set; }
             public long LastGuildActiveTime { get; set; }
             public long LastGuildLogTime { get; set; }
+        }
+        public class UserDiscord
+        {
+           public ulong ID { get; set; }
+            public  string Name { get; set; }
         }
         private static async void AutorizationsBattleNet()
         {
