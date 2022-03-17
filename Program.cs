@@ -60,8 +60,8 @@ namespace DiscordBot
                 $"TelegramMainChatID : {settings.TelegramMainChatID}\n" +
                 $"TelegramTestChatID : {settings.TelegramTestChatID}\n" +
                 $"LastGuildAchiveTime : {settings.LastGuildAchiveTime}\n" +
-                $"LastGuildActiveTime : { settings.LastGuildActiveTime}\n" +
-                $"LastGuildLogTime : { settings.LastGuildLogTime}\n");
+                $"LastGuildActiveTime : {settings.LastGuildActiveTime}\n" +
+                $"LastGuildLogTime : {settings.LastGuildLogTime}\n");
 
             Functions.WriteJSon(settings, "BotSettings");
             Thread.Sleep(5000);
@@ -101,10 +101,10 @@ namespace DiscordBot
             Timer timerRoster = new(tmroster, num, 0, 300000);
 
             TimerCallback tmsetRole = new(OnTimerHandlerSetUserRole);
-            Timer timerSetRole = new(tmsetRole, num, 10000, 60000 * 60 * 8);
+            Timer timerSetRole = new(tmsetRole, num, 10000, 60000 * 15);
 
             TimerCallback tmUpdateStatic = new(OnTimerHandlerUpdateStatic);
-            Timer timerUpdateStatic = new(tmUpdateStatic, num, 10000, 60000 * 60);
+            Timer timerUpdateStatic = new(tmUpdateStatic, num, 10000, 60000 * 20);
             telegramClient = new TelegramBotClient(settings.TelegramBotToken);
             using var cts = new CancellationTokenSource();
 
@@ -258,9 +258,97 @@ namespace DiscordBot
             if (settings.NeedPoolRT == true)
             { 
 
-                if (DateTime.Now.DayOfWeek == DayOfWeek.Monday || DateTime.Now.DayOfWeek == DayOfWeek.Wednesday || DateTime.Now.DayOfWeek == DayOfWeek.Thursday)
+                if (DateTime.Now.DayOfWeek == DayOfWeek.Monday || DateTime.Now.DayOfWeek == DayOfWeek.Wednesday || DateTime.Now.DayOfWeek == DayOfWeek.Thursday || DateTime.Now.DayOfWeek == DayOfWeek.Tuesday)
                 {
+                    if (DateTime.Now.Hour == 20)
+                    {
+                        if (DateTime.Now.Minute == 00)
+                        {
+                            if (DateTime.Now.Second == 00)
+                            {
+
+                                userDiscList = new();
+
+                                await foreach (var s in discordClient.GetGuild(settings.DiscordMainChatId).GetUsersAsync())
+                                {
+                                    foreach (var l in s)
+                                    {
+                                        if (l.Nickname != null)
+                                        {
+                                            userDiscList.Add(new UserDiscord { ID = l.Id, Name = l.Nickname });
+                                            // await msg.Author.SendMessageAsync(l.Nickname);
+                                        }
+                                        else
+                                        {
+                                            userDiscList.Add(new UserDiscord { ID = l.Id, Name = l.Username });
+                                            //  await msg.Author.SendMessageAsync(l.Username);
+                                        }
+
+                                    }
+
+
+                                }
+                                go = new();
+                                nogo = new();
+                                mbgo = new();
+
+                                var buttonbuilder = new ComponentBuilder()
+                                    .WithButton("Приду", "go", style: ButtonStyle.Success)
+                                    .WithButton("Не приду", "nogo", style: ButtonStyle.Danger)
+                                    .WithButton("Опоздаю", "mbgo")
+                                    ;
+                                var textbuilder = new EmbedBuilder()
+                                      .WithTitle("**Через час идем в рейд \"Гробница Предвечных\"! Тебя ждать?**")
+                                      .WithColor(Color.DarkRed)
+                                      .WithDescription("Тактики знать **Обязательно**! \nПри себе иметь: **Фласки, Поты, Руны, Чары на предметах**! \nЕду Предоставим на +20!")
+                                      .AddField("Тактики", "Тактики можно смотреть в разделе \"**[Тактики](https://discord.com/channels/219741774556430336/938739958695489596)**\"", false)
+                                      .WithImageUrl("https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcSeDhzUwFEg6HESybW2BScFMwIMJy7pbpEcXA&usqp=CAU");
+
+                                _mainChat = discordClient.GetGuild(settings.DiscordMainChatId);
+                                var chan = _mainChat.GetChannel(821981413858607104) as IMessageChannel;
+                                discordmessagepool = chan.SendMessageAsync("@here Всем привет!", false, embed: textbuilder.Build(), components: buttonbuilder.Build()).Result;
+                                discordmessageresultpool = chan.SendMessageAsync($"Приду: \nНе приду: \nОпоздаю: ").Result;
+
+                                telegrammessagepool = new();
+                                Console.WriteLine($"Сработал таймер для опроса о рт: {DateTime.Now}");
+                                string[] options = new string[3];
+                                options[0] = "Да";
+                                options[1] = "Нет";
+                                options[2] = "Опоздаю";
+                                telegrammessagepool = await telegramClient.SendPollAsync(settings.TelegramMainChatID, "Через час идем в рейд \"Гробница Предвечных\"! Тебя ждать?", options, false);
+                                poolready = true;
+                            }
+
+                        }
+
+                    }
                     if (DateTime.Now.Hour == 21)
+                    {
+                        if (DateTime.Now.Minute == 30)
+                        {
+                            if (DateTime.Now.Second == 00)
+                            {
+                                if (poolready)
+                                {
+                                    await discordmessagepool.DeleteAsync();
+                                    await discordmessageresultpool.DeleteAsync();
+                                    await telegramClient.DeleteMessageAsync(settings.TelegramMainChatID, telegrammessagepool.MessageId);
+                                    poolready = false;
+                                }
+                              
+                            }
+
+
+                        }
+
+                    }
+                }
+            }
+            if(settings.AddtionalRT == true)
+            {
+                if (DateTime.Now.DayOfWeek == DayOfWeek.Tuesday)
+                {
+                    if (DateTime.Now.Hour == 20)
                     {
                         if (DateTime.Now.Minute == 00)
                         {
@@ -322,7 +410,7 @@ namespace DiscordBot
                         }
 
                     }
-                    if (DateTime.Now.Hour == 22)
+                    if (DateTime.Now.Hour == 21)
                     {
                         if (DateTime.Now.Minute == 30)
                         {
@@ -335,90 +423,7 @@ namespace DiscordBot
                                     await telegramClient.DeleteMessageAsync(settings.TelegramMainChatID, telegrammessagepool.MessageId);
                                     poolready = false;
                                 }
-                              
-                            }
 
-
-                        }
-
-                    }
-                }
-            }
-            if(settings.AddtionalRT == true)
-            {
-                if ( DateTime.Now.DayOfWeek == DayOfWeek.Tuesday)
-                {
-
-                    if (DateTime.Now.Hour == 18)
-                    {
-                        if (DateTime.Now.Minute == 52)
-                        {
-                            if (DateTime.Now.Second == 00)
-                            {
-                                userDiscList = new();
-
-                                await foreach (var s in discordClient.GetGuild(settings.DiscordTestChatId).GetUsersAsync())
-                                {
-                                    foreach (var l in s)
-                                    {
-                                        if (l.Nickname != null)
-                                        {
-                                            userDiscList.Add(new UserDiscord { ID = l.Id, Name = l.Nickname });
-                                            // await msg.Author.SendMessageAsync(l.Nickname);
-                                        }
-                                        else
-                                        {
-                                            userDiscList.Add(new UserDiscord { ID = l.Id, Name = l.Username });
-                                            //  await msg.Author.SendMessageAsync(l.Username);
-                                        }
-
-                                    }
-
-
-                                }
-                                go = new();
-                                nogo = new();
-                                mbgo = new();
-
-                                var buttonbuilder = new ComponentBuilder()
-                                    .WithButton("Приду", "go", style: ButtonStyle.Success)
-                                    .WithButton("Не приду", "nogo", style: ButtonStyle.Danger)
-                                    .WithButton("Опоздаю", "mbgo")
-                                    ;
-                                var textbuilder = new EmbedBuilder()
-                                      .WithTitle("**Через полтора часа идем в рейд \"Гробница Предвечных\"! Тебя ждать?**")
-                                      .WithColor(Color.DarkRed)
-                                      .WithDescription("Тактики знать **Обязательно**! \nПри себе иметь: **Фласки, Поты, Руны, Чары на предметах**! \nЕду Предоставим на +20!")
-                                      .AddField("Тактики", "Тактики можно смотреть в разделе \"**[Тактики](https://discord.com/channels/219741774556430336/938739958695489596)**\"", false)
-                                      .WithImageUrl("https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcSeDhzUwFEg6HESybW2BScFMwIMJy7pbpEcXA&usqp=CAU");
-
-                                _mainChat = discordClient.GetGuild(settings.DiscordTestChatId);
-                                var chan = _mainChat.GetChannel(settings.TestDiscordMainChannelId) as IMessageChannel;
-                                discordmessagepool = chan.SendMessageAsync("@here Всем привет!", false, embed: textbuilder.Build(), components: buttonbuilder.Build()).Result;
-                                discordmessageresultpool = chan.SendMessageAsync($"Результат:\nПриду: \nНе приду: \nОпоздаю: ").Result;
-
-                                telegrammessagepool = new();
-                                Console.WriteLine($"Сработал таймер для опроса о рт: {DateTime.Now}");
-                                string[] options = new string[3];
-                                options[0] = "Да";
-                                options[1] = "Нет";
-                                options[2] = "Опоздаю";
-                                telegrammessagepool = await telegramClient.SendPollAsync(settings.TelegramTestChatID, "Через полтора часа начнется РТ, ты будешь?", options, false);
-
-                            }
-
-                        }
-
-                    }
-                    if (DateTime.Now.Hour == 19)
-                    {
-                        if (DateTime.Now.Minute == 00)
-                        {
-                            if (DateTime.Now.Second == 00)
-                            {
-                                await discordmessagepool.DeleteAsync();
-                                await discordmessageresultpool.DeleteAsync();
-                                await telegramClient.DeleteMessageAsync(settings.TelegramTestChatID, telegrammessagepool.MessageId);
                             }
 
 
@@ -459,7 +464,7 @@ namespace DiscordBot
                         nogo.RemoveAll(x => x.ToLower() == name.ToLower());
                         mbgo.RemoveAll(x => x.ToLower() == name.ToLower());
 
-                        await discordmessageresultpool.ModifyAsync(x => x.Content = $"Результат:\nПриду: {string.Join(",", go)}\nНе приду: {string.Join(",", nogo)}\nОпоздаю: {string.Join(",", mbgo)}");
+                        await discordmessageresultpool.ModifyAsync(x => x.Content = $"Приду: {string.Join(",", go)}\nНе приду: {string.Join(",", nogo)}\nОпоздаю: {string.Join(",", mbgo)}");
 
 
                         
@@ -482,7 +487,7 @@ namespace DiscordBot
                         go.RemoveAll(x => x.ToLower() == namenot.ToLower());
                         mbgo.RemoveAll(x => x.ToLower() == namenot.ToLower());
 
-                        await discordmessageresultpool.ModifyAsync(x => x.Content = $"Результат:\nПриду: {string.Join(",", go)}\nНе приду: {string.Join(",", nogo)}\nОпоздаю: {string.Join(",", mbgo)}");
+                        await discordmessageresultpool.ModifyAsync(x => x.Content = $"\nПриду: {string.Join(",", go)}\nНе приду: {string.Join(",", nogo)}\nОпоздаю: {string.Join(",", mbgo)}");
 
                    
                    
@@ -504,7 +509,7 @@ namespace DiscordBot
                         nogo.RemoveAll(x => x.ToLower() == namemb.ToLower());
 
 
-                        await discordmessageresultpool.ModifyAsync(x => x.Content = $"Результат:\nПриду: {string.Join(",", go)}\nНе приду: {string.Join(",", nogo)}\nОпоздаю: {string.Join(",", mbgo)}");
+                        await discordmessageresultpool.ModifyAsync(x => x.Content = $"Приду: {string.Join(",", go)}\nНе приду: {string.Join(",", nogo)}\nОпоздаю: {string.Join(",", mbgo)}");
 
                   
                    
@@ -522,17 +527,17 @@ namespace DiscordBot
         {
             if (DateTime.Now.DayOfWeek == DayOfWeek.Wednesday)
             {
-                var builder = new EmbedBuilder();
+                
                 string[] text = WowRealmInfo.GetRealmInfoForTimer();
                 if (text != null)
                 {
                     _mainChat = discordClient.GetGuild(settings.DiscordMainChatId);
                     var chan = _mainChat.GetChannel(settings.DiscordMainChannelId) as IMessageChannel;
-                    builder = new EmbedBuilder()
+                   var  builder = new EmbedBuilder()
                         .WithTitle($"**Информация о техобслуживании!**")
                         .AddField($"{text[0]}", $"**{text[1]}**");
-                    var emb = builder.Build();
-                    await chan.SendMessageAsync(null, false, emb);
+                  
+                    await chan.SendMessageAsync(null, false, builder.Build());
                     await telegramClient.SendTextMessageAsync(settings.TelegramMainChatID, $"{text[0]}\n{text[1]}", parseMode: ParseMode.Html);
                     string message = ("Отправленно оповещение о Тех.Работах!");
                     Functions.WriteLogs(message, "notification");
@@ -545,10 +550,10 @@ namespace DiscordBot
         {
             if (DateTime.Now.DayOfWeek == DayOfWeek.Wednesday)
             {
-                var builder = new EmbedBuilder();
+               
                 if (DateTime.Now.Hour == 14)
                 {
-                    if (DateTime.Now.Minute == 02)
+                    if (DateTime.Now.Minute == 00)
                     {
                         if (DateTime.Now.Second == 00)
                         {
@@ -556,7 +561,7 @@ namespace DiscordBot
                             if (MythicPlusAffix.error == false)
                             {
 
-                                builder = new EmbedBuilder()
+                              var builder = new EmbedBuilder()
                                     .WithTitle($"**{affixs.title}**")
                                     .WithDescription("Мифик+ аффиксы на эту неделю обновлены.")
                                     .AddField("(+2)", $"**[{affixs.affix_details[0].name}]({affixs.affix_details[0].wowhead_url.Replace("wowhead", "ru.wowhead")}): {affixs.affix_details[0].description}**")
@@ -569,6 +574,16 @@ namespace DiscordBot
                                 await chan.SendMessageAsync(null, false, emb);
                                 string message = ($"Описание аффиксов на неделю отправлено!");
                                 Functions.WriteLogs(message, "notification");
+                                var text = "Мифик+ аффиксы на эту неделю обновлены.\n" +
+                                  $"<b>(+2) {affixs.affix_details[0].name}</b>:\n {affixs.affix_details[0].description}\n" +
+                                    $"<b>(+4) {affixs.affix_details[1].name}</b>:\n {affixs.affix_details[1].description}\n" +
+                                   $"<b>(+7) {affixs.affix_details[2].name}</b>:\n {affixs.affix_details[2].description}\n" +
+                                   $"<b>(+10) {affixs.affix_details[3].name}</b>:\n {affixs.affix_details[3].description}\n";
+
+                                await telegramClient.SendTextMessageAsync(
+                                    chatId: settings.TelegramMainChatID,
+                                    text: text,
+                                    parseMode: ParseMode.Html);
                             }
 
 
@@ -576,6 +591,7 @@ namespace DiscordBot
                         }
                     }
                 }
+                
             }
 
         }
@@ -703,7 +719,7 @@ namespace DiscordBot
                                 {
 
                                     await telegramClient.SendTextMessageAsync(
-                                     chatId: settings.TelegramTestChatID,
+                                     chatId: settings.TelegramMainChatID,
                                      text: $"<b>{activ.Name}</b>\nполучил(а) достижение!\nНазвание: {activ.Mode}",
                                      parseMode: ParseMode.Html);
                                 }
@@ -729,7 +745,7 @@ namespace DiscordBot
 
                                         await telegramClient.SendTextMessageAsync(
                                    chatId: settings.TelegramMainChatID,
-                                   text: $"<b>{activ.Name}</b>\nполучил(а) достижение!\nНазвание: {activ.Mode}\nКатегоря: {activ.Categor}\nНаграда: {activ.Award}",
+                                   text: $"<b>{activ.Name}</b>\nполучил(а) достижение!\nНазвание: {activ.Mode}\nКатегоря: {activ.Categor}",
                                    parseMode: ParseMode.Html);
                                     }
 
@@ -938,7 +954,7 @@ namespace DiscordBot
         {
             try
             {
-                Console.WriteLine("\n Начинаю сверять роли ВОВ-ДИСКОРД \n");
+               // Console.WriteLine("\n Начинаю сверять роли ВОВ-ДИСКОРД \n");
                 var allUser = discordClient.GetGuild(settings.DiscordMainChatId).GetUsersAsync(RequestOptions.Default);
 
 
@@ -1162,7 +1178,7 @@ namespace DiscordBot
 
                 }
                 //await client.GetUser(i).SendMessageAsync("Сделанно");
-                Console.WriteLine("\n Закончил сверку ролей ВОВ-ДИСКОРД \n");
+              // Console.WriteLine("\n Закончил сверку ролей ВОВ-ДИСКОРД \n");
             }
             catch (Exception e)
             {
@@ -1317,19 +1333,11 @@ namespace DiscordBot
 
                             OnTimerHandlerSetUserRole(msg.Author.Id);
 
-                            msg.Author.SendMessageAsync("Роли назначаются ждите");
+                            await msg.Author.SendMessageAsync("Роли назначаются ждите");
                             break;
 
                         }
-                    case "!tele":
-                        {
-
-                            telegramClient.SendTextMessageAsync(
-                                chatId: settings.TelegramTestChatID,
-                                text: "Ghbdtn");
-                            break;
-
-                        }
+                 
 
                     case "!help" or "!рудз":
                         {
@@ -1345,10 +1353,10 @@ namespace DiscordBot
                             .AddField("!чар или !char", "Отображает информацию о персонаже \n пример только для рф: !чар даркил " +
                             "\n пример для разных игровых миров: /чар Eletjul-Twisting Nether", false);
                             var emb = builder.Build();
-                            msg.Author.SendMessageAsync(null, false, emb);
+                            await msg.Author.SendMessageAsync(null, false, emb);
 
 
-                            msg.DeleteAsync();
+                            await msg.DeleteAsync();
                             break;
                         }
                     case "!мир" or "!realm":
@@ -1363,7 +1371,7 @@ namespace DiscordBot
 
                                 builder = new EmbedBuilder().WithTitle("**Информация об игровом мире**").AddField("Название:", realStatus.RealmName, true).AddField("Статус:", realStatus.RealmStatus, true);
                                 var emb = builder.Build();
-                                msg.Author.SendMessageAsync(null, false, emb);
+                                await msg.Author.SendMessageAsync(null, false, emb);
 
                             }
                             else if (realStatus.Error == false)
@@ -1371,10 +1379,10 @@ namespace DiscordBot
                                 builder = new EmbedBuilder().WithTitle("**Информация об игровом мире**").AddField("Ошибка:", "Проблема на сервере.\nПопробуй позже.", true);
                                 var emb = builder.Build();
 
-                                msg.Author.SendMessageAsync(null, false, emb);
+                                await msg.Author.SendMessageAsync(null, false, emb);
 
                             }
-                            msg.DeleteAsync();
+                            await msg.DeleteAsync();
                             break;
                         }
                     case var s when s.Contains("!affix") || s.Contains("!аффикс") || s.Contains("!афикс"):
@@ -1391,19 +1399,47 @@ namespace DiscordBot
                                     .AddField("(+7)", $"**[{affixs.affix_details[2].name}]({affixs.affix_details[2].wowhead_url.Replace("wowhead", "ru.wowhead")}): {affixs.affix_details[2].description}**")
                                     .AddField("(+10)", $"**[{affixs.affix_details[3].name}]({affixs.affix_details[3].wowhead_url.Replace("wowhead", "ru.wowhead")}): {affixs.affix_details[3].description}**");
                                 var emb = builder.Build();
-                                msg.Author.SendMessageAsync(null, false, emb);
-                             //   var chan = discordClient.GetChannel(settings.DiscordAffixChannelId) as IMessageChannel;
-                            //    await chan.SendMessageAsync(null, false, emb);
+                                await msg.Author.SendMessageAsync(null, false, emb);
+                               // var chan = discordClient.GetChannel(settings.DiscordAffixChannelId) as IMessageChannel;
+                               /// await chan.SendMessageAsync(null, false, emb);
                             }
                             else if (MythicPlusAffix.error == false)
                             {
                                 builder = new EmbedBuilder().WithTitle("**Информация об аффиксах на неделю**").AddField("Ошибка:", "Проблема на сервере.\nПопробуй позже.", true);
                                 var emb = builder.Build();
 
-                                msg.Author.SendMessageAsync(null, false, emb);
+                                await msg.Author.SendMessageAsync(null, false, emb);
                             }
 
-                            msg.DeleteAsync();
+                            await msg.DeleteAsync();
+                            break;
+                        }
+                    case "!1":
+
+                        {
+                            var builder = new EmbedBuilder();
+                            var affixs = MythicPlusAffix.GetMythicPlusAffixCurrent();
+                            if (MythicPlusAffix.error == false)
+                            {
+
+                                builder = new EmbedBuilder().WithTitle($"**{affixs.title}**").WithDescription("Мифик+ аффиксы на эту неделю.")
+                                    .AddField("(+2)", $"**[{affixs.affix_details[0].name}]({affixs.affix_details[0].wowhead_url.Replace("wowhead", "ru.wowhead")}): {affixs.affix_details[0].description}**")
+                                    .AddField("(+4)", $"**[{affixs.affix_details[1].name}]({affixs.affix_details[1].wowhead_url.Replace("wowhead", "ru.wowhead")}): {affixs.affix_details[1].description}**")
+                                    .AddField("(+7)", $"**[{affixs.affix_details[2].name}]({affixs.affix_details[2].wowhead_url.Replace("wowhead", "ru.wowhead")}): {affixs.affix_details[2].description}**")
+                                    .AddField("(+10)", $"**[{affixs.affix_details[3].name}]({affixs.affix_details[3].wowhead_url.Replace("wowhead", "ru.wowhead")}): {affixs.affix_details[3].description}**");
+                               
+                                var chan = discordClient.GetChannel(settings.DiscordAffixChannelId) as IMessageChannel;
+                                 await chan.SendMessageAsync(null, false, builder.Build());
+                            }
+                            else if (MythicPlusAffix.error == false)
+                            {
+                                builder = new EmbedBuilder().WithTitle("**Информация об аффиксах на неделю**").AddField("Ошибка:", "Проблема на сервере.\nПопробуй позже.", true);
+                                var emb = builder.Build();
+
+                                await msg.Author.SendMessageAsync(null, false, emb);
+                            }
+
+                            await msg.DeleteAsync();
                             break;
                         }
                     case var s when s.Contains("!tactics") || s.Contains("!тактики"):
@@ -1427,12 +1463,12 @@ namespace DiscordBot
 
                             var embed = builder.Build();
 
-                            msg.Author.SendMessageAsync(null, false, embed);
+                            await msg.Author.SendMessageAsync(null, false, embed);
 
 
 
 
-                            msg.DeleteAsync();
+                            await msg.DeleteAsync();
                             break;
                         }
                     case var s when s.Contains("!чар ") || s.Contains("!char "):
@@ -1461,18 +1497,18 @@ namespace DiscordBot
 
                                 var embed = builder.Build();
 
-                                msg.Author.SendMessageAsync(null, false, embed);
+                                await msg.Author.SendMessageAsync(null, false, embed);
 
                             }
                             else
                             {
 
-                                msg.Author.SendMessageAsync("**Ошибка**\nНе корректное имя: " + name + ".\nЛибо проблемы на сервере.");
+                                await msg.Author.SendMessageAsync("**Ошибка**\nНе корректное имя: " + name + ".\nЛибо проблемы на сервере.");
 
                             }
 
 
-                            msg.DeleteAsync();
+                            await msg.DeleteAsync();
                             break;
                         }
                     case "!lastlog":
@@ -1495,15 +1531,15 @@ namespace DiscordBot
 
                                 var embed = builder.Build();
 
-                                msg.Author.SendMessageAsync(null, false, embed);
+                                await msg.Author.SendMessageAsync(null, false, embed);
 
 
                             }
                             else
                             {
-                                msg.Author.SendMessageAsync("**Ошибка**\nПроблема на сервере.\nПопробуй позже.");
+                                await msg.Author.SendMessageAsync("**Ошибка**\nПроблема на сервере.\nПопробуй позже.");
                             }
-                            msg.DeleteAsync();
+                            await msg.DeleteAsync();
                             break;
                         }
                     case "!guild" or "!гильдия":
@@ -1526,18 +1562,18 @@ namespace DiscordBot
 
                                 var embed = builder.Build();
 
-                                msg.Author.SendMessageAsync(null, false, embed);
+                                await msg.Author.SendMessageAsync(null, false, embed);
                             }
                             else
                             {
 
-                                msg.Author.SendMessageAsync("**Ошибка**\nПроблема на сервере.\nПопробуй позже.");
+                                await msg.Author.SendMessageAsync("**Ошибка**\nПроблема на сервере.\nПопробуй позже.");
                             }
 
 
 
 
-                            msg.DeleteAsync();
+                            await msg.DeleteAsync();
 
                             break;
                         }
@@ -1557,8 +1593,8 @@ namespace DiscordBot
                                     .AddField("Рдд:", Static.rdd, false)
                                     .AddField("Мдд", Static.mdd, false)
                                     .WithFooter(footer => footer.Text = $"Гильдия \"Сердце греха\".\nОбновлено: {DateTime.Now} (+4 Мск) ");
-                            discordClient.GetGuild(settings.DiscordMainChatId).GetTextChannel(944575829105594438).ModifyMessageAsync(944583210434719775, msg => msg.Embed = builder.Build());
-                            msg.DeleteAsync();
+                            await discordClient.GetGuild(settings.DiscordMainChatId).GetTextChannel(944575829105594438).ModifyMessageAsync(944583210434719775, msg => msg.Embed = builder.Build());
+                            await msg.DeleteAsync();
 
                             break;
                         }
@@ -1581,8 +1617,8 @@ namespace DiscordBot
                                     .AddField("Рдд:", Static.rdd, false)
                                     .AddField("Мдд", Static.mdd, false)
                                     .WithFooter(footer => footer.Text = $"Гильдия \"Сердце греха\".\nОбновлено: {DateTime.Now} (+4 Мск) ");
-                            discordClient.GetGuild(settings.DiscordMainChatId).GetTextChannel(944575829105594438).ModifyMessageAsync(944583210434719775, msg => msg.Embed = builder.Build());
-                            msg.DeleteAsync();
+                          await  discordClient.GetGuild(settings.DiscordMainChatId).GetTextChannel(944575829105594438).ModifyMessageAsync(944583210434719775, msg => msg.Embed = builder.Build());
+                            await msg.DeleteAsync();
 
                             break;
                         }
@@ -1605,8 +1641,8 @@ namespace DiscordBot
                                     .AddField("Рдд:", Static.rdd, false)
                                     .AddField("Мдд", Static.mdd, false)
                                     .WithFooter(footer => footer.Text = $"Гильдия \"Сердце греха\".\nОбновлено: {DateTime.Now} (+4 Мск) ");
-                            discordClient.GetGuild(settings.DiscordMainChatId).GetTextChannel(944575829105594438).ModifyMessageAsync(944583210434719775, msg => msg.Embed = builder.Build());
-                            msg.DeleteAsync();
+                            await discordClient.GetGuild(settings.DiscordMainChatId).GetTextChannel(944575829105594438).ModifyMessageAsync(944583210434719775, msg => msg.Embed = builder.Build());
+                            await msg.DeleteAsync();
 
                             break;
                         }

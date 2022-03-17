@@ -14,7 +14,7 @@ namespace DiscordBot
 
             try
             {
-                WebRequest request = WebRequest.Create("https://raider.io/api/v1/mythic-plus/affixes?region=eu&locale=ru");
+                WebRequest request = WebRequest.Create("https://raider.io/api/v1/mythic-plus/affixes?region=us&locale=ru");
                 WebResponse responce = request.GetResponse();
 
                 using (System.IO.Stream stream = responce.GetResponseStream())

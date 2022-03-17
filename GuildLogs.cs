@@ -168,14 +168,18 @@ namespace DiscordBot
                         int wipe = 0;
                         foreach (Fight fight in log.fights)
                         {
-                            if (fight.kill == true)
+                            if (fight.boss != 0)
                             {
-                                kills++;
+                                if (fight.kill == true)
+                                {
+                                    kills++;
+                                }
+                                else
+                                {
+                                    wipe++;
+                                }
                             }
-                            else
-                            {
-                                wipe++;
-                            }
+                            
                         }
                         TimeSpan ts = Functions.FromUnixTimeStampToDateTime(log.end.ToString()) - Functions.FromUnixTimeStampToDateTime(log.start.ToString());
                         _log.RaidTime = $"{ts.Hours} ч {ts.Minutes} м";
