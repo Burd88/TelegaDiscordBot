@@ -18,6 +18,12 @@ namespace DiscordBot
 
             return DateTimeOffset.FromUnixTimeSeconds(long.Parse(unixTimeStamp) / 1000).LocalDateTime;
         }
+
+        public static DateTime FromUnixTimeStampToDateTimeUTC(string unixTimeStamp) // конверстация времени
+        {
+
+            return DateTimeOffset.FromUnixTimeSeconds(long.Parse(unixTimeStamp) / 1000).UtcDateTime;
+        }
         public static string relative_time(DateTime date)
         {
             TimeSpan ts = DateTime.Now - date;

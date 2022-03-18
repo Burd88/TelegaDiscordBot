@@ -15,6 +15,7 @@ using Telegram.Bot.Types.ReplyMarkups;
 using Telegram.Bot.Types;
 using Telegram.Bot.Extensions.Polling;
 using Discord.Net;
+using Telegram.Bot.Exceptions;
 
 namespace DiscordBot
 {
@@ -108,16 +109,16 @@ namespace DiscordBot
             telegramClient = new TelegramBotClient(settings.TelegramBotToken);
             using var cts = new CancellationTokenSource();
 
-        //var receiverOptions = new ReceiverOptions
-         //  {
-         //       AllowedUpdates = { } // receive all update types
-        //   };
-         //   telegramClient.StartReceiving(
-         //       HandleUpdateAsync,
-        //        HandleErrorAsync,
-        //        receiverOptions,
-         //       cancellationToken: cts.Token
-        //        );
+        var receiverOptions = new ReceiverOptions
+           {
+                AllowedUpdates = { } // receive all update types
+           };
+            telegramClient.StartReceiving(
+                HandleUpdateAsync,
+                HandleErrorAsync,
+                receiverOptions,
+                cancellationToken: cts.Token
+               );
          //   updateReceiver = new QueuedUpdateReceiver(telegramClient, receiverOptions);
 
             // to cancel
@@ -247,6 +248,60 @@ namespace DiscordBot
                 return;
             if (update.Message!.Type != Telegram.Bot.Types.Enums.MessageType.Text)
                 return;
+
+            var chatId = update.Message.Chat.Id;
+            var chatName = update.Message.Chat.Title;
+            var messageText = update.Message.Text;
+            Console.WriteLine($"Received a '{messageText}' message in chat {chatName}.");
+            switch (update.Message.Text)
+            {
+                case var s when s.Contains("/guild"):
+                    var fullInfo = GuildInfo.GetGuildInfo();
+
+
+                    if (!fullInfo.Error)
+                    {
+
+
+                        await telegramClient.SendTextMessageAsync(
+                                  chatId,
+                                 text: $"Информация о Гильдии : <b>{fullInfo.Name}</b>" +
+                            $"\nФракция: <b>{fullInfo.Faction}</b>" +
+                            $"\nЛидер: <b>{fullInfo.Leader}</b>" +
+                            $"\nЧленов гильдии: <b>{fullInfo.MemberCount}</b>" +
+                            $"\nДостижения: <b>{fullInfo.Achievement}</b>" +
+                            $"\nРейд Прогресс: <b>{fullInfo.RaidProgress}</b>" +
+                            $"\nМесто: <b>{fullInfo.RaidRankRealm.Replace("**Сервер**:", "")}</b>" +
+                            $"\nОснована: <b>{fullInfo.TimeCreate}</b>"
+                            , parseMode: ParseMode.Html);
+                    }
+                    else
+                    {
+
+                        await telegramClient.SendTextMessageAsync(
+                                   chatId, "<b>Ошибка</b>\nПроблема на сервере.\nПопробуй позже.", parseMode: ParseMode.Html);
+                    }
+                    break;
+                case var s when s.Contains("/token"):
+                    var token = new token();
+                    var tokenprice = token.GetTokenPrice();
+                         await telegramClient.SendTextMessageAsync(
+                                   chatId, $"<b>\"Жетон WoW\"</b>\nЦена: <b>{tokenprice.price/10000}</b> золотых\nВремя обновления: {Functions.FromUnixTimeStampToDateTimeUTC(tokenprice.last_updated_timestamp.ToString())} (UTC)", parseMode: ParseMode.Html);
+                    break;
+            }
+        }
+
+        Task HandleErrorAsync(ITelegramBotClient botClient, Exception exception, CancellationToken cancellationToken)
+        {
+            var ErrorMessage = exception switch
+            {
+                ApiRequestException apiRequestException
+                    => $"Telegram API Error:\n[{apiRequestException.ErrorCode}]\n{apiRequestException.Message}",
+                _ => exception.ToString()
+            };
+
+            Console.WriteLine(ErrorMessage);
+            return Task.CompletedTask;
         }
 
         Message telegrammessagepool;
