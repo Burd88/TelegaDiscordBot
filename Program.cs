@@ -252,7 +252,10 @@ namespace DiscordBot
             var chatId = update.Message.Chat.Id;
             var chatName = update.Message.Chat.Title;
             var messageText = update.Message.Text;
-            Console.WriteLine($"Received a '{messageText}' message in chat {chatName}.");
+            if (update.Message.Text.Contains("/")){
+                Console.WriteLine($"Received a '{messageText}' message in chat {chatName}.");
+            }
+            
             switch (update.Message.Text)
             {
                 case var s when s.Contains("/guild"):
