@@ -1,11 +1,7 @@
 ﻿using Newtonsoft.Json;
 using System;
-using System.Collections.Generic;
 using System.IO;
-using System.Linq;
 using System.Net;
-using System.Text;
-using System.Threading.Tasks;
 
 namespace DiscordBot
 {
@@ -27,21 +23,21 @@ namespace DiscordBot
                         string line = "";
                         while ((line = reader.ReadLine()) != null)
                         {
-                             
-                            
+
+
 
                             return JsonConvert.DeserializeObject<Token>(line);
                         }
                     }
                 }
                 responce.Close();
-               
+
             }
             catch (WebException e)
             {
                 if (e.Status == WebExceptionStatus.ProtocolError)
                 {
-                    
+
                     string message = $"GetTokenPrice Error: {e.Message}";
                     Functions.WriteLogs(message, "error");
                     return null;
@@ -49,7 +45,7 @@ namespace DiscordBot
             }
             catch (Exception e)
             {
-                
+
                 string message = $"GetTokenPrice Error: {e.Message}";
                 Functions.WriteLogs(message, "error");
                 return null;

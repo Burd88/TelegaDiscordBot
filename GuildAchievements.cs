@@ -111,7 +111,7 @@ namespace DiscordBot
                                 for (int i = 0; i < achievementsAll.recent_events.Count; i++)
                                 {
 
-                                    GetGuildAchievementsRU(achievementsAll.recent_events[i].achievement.id.ToString(), achievementsAll.recent_events[i].timestamp);
+                                    GetGuildAchievementsRU(achievementsAll.recent_events[i].achievement.key.href, achievementsAll.recent_events[i].timestamp.ToString());
 
 
                                 }
@@ -143,13 +143,13 @@ namespace DiscordBot
             }
 
         }
-        public static void GetGuildAchievementsRU(string id, string time)
+        public static void GetGuildAchievementsRU(string link, string time)
         {
 
             try
             {
                 //Console.WriteLine("https://eu.api.blizzard.com/data/wow/achievement/" + id + "?namespace=static-9.1.5_40764-eu&locale=ru_RU&access_token=" + tokenWow);
-                WebRequest requesta = WebRequest.Create("https://eu.api.blizzard.com/data/wow/achievement/" + id + "?namespace=static-9.1.5_40764-eu&locale=ru_RU&access_token=" + tokenWow);
+                WebRequest requesta = WebRequest.Create(link + "&locale=ru_RU&access_token=" + tokenWow);
                 WebResponse responcea = requesta.GetResponse();
 
                 using (Stream stream = responcea.GetResponseStream())
@@ -267,103 +267,82 @@ namespace DiscordBot
         public string Icon { get; set; }
     }
 
-    public class SelfAchiev
-    {
-        public string href { get; set; }
-    }
 
-    public class LinksAchiev
-    {
-        public SelfAchiev self { get; set; }
-    }
 
-    public class KeyAchiev
-    {
-        public string href { get; set; }
-    }
-
-    public class RealmAchiev
-    {
-        public KeyAchiev key { get; set; }
-        public string name { get; set; }
-        public int id { get; set; }
-        public string slug { get; set; }
-    }
-
-    public class FactionAchiev
+    public class Faction
     {
         public string type { get; set; }
         public string name { get; set; }
     }
 
-    public class GuildAchiev
+    public class Guild1
     {
-        public KeyAchiev key { get; set; }
+        public Key key { get; set; }
         public string name { get; set; }
         public int id { get; set; }
-        public RealmAchiev realm { get; set; }
-        public FactionAchiev faction { get; set; }
+        public Realm realm { get; set; }
+        public Faction faction { get; set; }
     }
 
-    public class Achievement2Achiev
+    public class Achievement2
     {
-        public KeyAchiev key { get; set; }
+        public Key key { get; set; }
         public string name { get; set; }
         public int id { get; set; }
     }
 
-    public class ChildCriteriaAchiev
+    public class ChildCriteria1
     {
         public int id { get; set; }
         public object amount { get; set; }
         public bool is_completed { get; set; }
     }
 
-    public class CriteriaAchiev
+    public class Criteria1
     {
         public int id { get; set; }
         public bool is_completed { get; set; }
-        public List<ChildCriteriaAchiev> child_criteria { get; set; }
+        public List<ChildCriteria1> child_criteria { get; set; }
         public int? amount { get; set; }
     }
 
-    public class AchievementAchiev
+    public class Achievement1
     {
         public int id { get; set; }
-        public Achievement2Achiev achievement { get; set; }
-        public CriteriaAchiev criteria { get; set; }
+        public Achievement2 achievement { get; set; }
+        public Criteria1 criteria { get; set; }
         public object completed_timestamp { get; set; }
     }
 
-    public class CategoryAchiev
+    public class Category1
     {
-        public KeyAchiev key { get; set; }
+        public Key key { get; set; }
         public string name { get; set; }
         public int id { get; set; }
     }
 
-    public class CategoryProgressAchiev
+    public class CategoryProgress
     {
-        public CategoryAchiev category { get; set; }
+        public Category1 category { get; set; }
         public int quantity { get; set; }
         public int points { get; set; }
     }
 
-    public class RecentEventAchiev
+    public class RecentEvent
     {
-        public AchievementAchiev achievement { get; set; }
-        public string timestamp { get; set; }
+        public Achievement2 achievement { get; set; }
+        public object timestamp { get; set; }
     }
 
     public class GuildAchievement
     {
-        public LinksAchiev _links { get; set; }
-        public GuildAchiev guild { get; set; }
+        public Links _links { get; set; }
+        public Guild1 guild { get; set; }
         public int total_quantity { get; set; }
         public int total_points { get; set; }
-        public List<AchievementAchiev> achievements { get; set; }
-        public List<CategoryProgressAchiev> category_progress { get; set; }
-        public List<RecentEventAchiev> recent_events { get; set; }
+        public List<Achievement1> achievements { get; set; }
+        public List<CategoryProgress> category_progress { get; set; }
+        public List<RecentEvent> recent_events { get; set; }
     }
     public class SelfAchievMedia
     {

@@ -3,6 +3,7 @@ using System;
 using System.Collections.Generic;
 using System.IO;
 using System.Net;
+using System.Threading;
 using System.Threading.Tasks;
 using static DiscordBot.Program;
 namespace DiscordBot
@@ -34,9 +35,9 @@ namespace DiscordBot
 
     class GuildLogs
     {
-        private static Log _log;
+        private Log _log;
 
-        public static Log GetLogsInfo()
+        public Log GetLogsInfo()
         {
             _log = new();
 
@@ -51,7 +52,7 @@ namespace DiscordBot
             }
         }
 
-        public static Log GetGuildLogChange()
+        public Log GetGuildLogChange()
         {
             try
             {
@@ -60,29 +61,34 @@ namespace DiscordBot
                 Task<BotSettings> set = Functions.ReadJson<BotSettings>("BotSettings");
                 settings = set.Result;
 
-                Update_warcraftlogs_data();
+             //   var newlog = CheckNewWowLog();
 
-                if (settings.LastGuildLogTime != 0)
-                {
-                    if (!_log.Error)
-                    {
-                        if (_log.StartTime > settings.LastGuildLogTime)
+               // if (settings.LastGuildLogTime != 0)
+              //  {
+
+                  //  if (newlog > settings.LastGuildLogTime)
+                   // {
+                      //  Console.WriteLine($"\nПоявился новый лог!\nLastGuildLogTime write : {newlog}\n");
+                      //  settings.LastGuildLogTime = newlog;
+                        //Functions.WriteJSon(settings, "BotSettings");
+
+                       // Thread.Sleep(60000 * 3);
+                        Update_warcraftlogs_data();
+                        if (!_log.Error)
                         {
-
-                            Console.WriteLine($"LastGuildLogTime write : {_log.StartTime}\n");
-                            settings.LastGuildLogTime = _log.StartTime;
-                            Functions.WriteJSon(settings, "BotSettings");
                             return _log;
                         }
-                    }
-                }
-                else
-                {
-                    Console.WriteLine($"LastGuildLogTime write : {_log.StartTime}\n");
-                    settings.LastGuildLogTime = _log.StartTime;
-                    Functions.WriteJSon(settings, "BotSettings");
-                    return null;
-                }
+                       
+                        
+                   // }
+             //   }
+              //  else
+             //   {
+              //      Console.WriteLine($"LastGuildLogTime write : {_log.StartTime}\n");
+              //      settings.LastGuildLogTime = newlog;
+               //     Functions.WriteJSon(settings, "BotSettings");
+                //    return null;
+              //  }
                 return null;
             }
 
@@ -95,7 +101,8 @@ namespace DiscordBot
             }
 
         }
-        private static void Update_warcraftlogs_data()
+
+        private long CheckNewWowLog()
         {
 
             try
@@ -114,8 +121,56 @@ namespace DiscordBot
                         line = "{ \"logs\": " + line + "}";
 
                         Warcraftlogs logs = JsonConvert.DeserializeObject<Warcraftlogs>(line);
-                        if (logs.logs[0].zone != -1)
+                        return Convert.ToInt64(logs.logs[0].start);
+
+                    }
+                }
+
+                
+            }
+            catch (WebException e)
+            {
+                if (e.Status == WebExceptionStatus.ProtocolError)
+                {
+
+                    string message = $"\nUpdate_warcraftlogs_data Error: {e.Message}";
+                    Functions.WriteLogs(message, "error");
+                    return 0;
+                }
+            }
+            catch (Exception e)
+            {
+
+                string message = $"Update_warcraftlogs_data Error: {e.Message}";
+                Functions.WriteLogs(message, "error");
+                return 0;
+            }
+            return 0;
+
+        }
+
+        private void Update_warcraftlogs_data()
+        {
+
+            try
+            {
+
+                WebRequest request = WebRequest.Create($"https://www.warcraftlogs.com/v1/reports/guild/{Program.settings.Guild.ToLower()}/{Functions.GetRealmSlug(Program.settings.Realm)}/eu?api_key=c2c9093c70e642ac6ec003d4b0904c33");
+                WebResponse responce = request.GetResponse();
+
+                using (Stream stream = responce.GetResponseStream())
+
+                {
+                    using (StreamReader reader = new(stream))
+                    {
+                        string line = reader.ReadToEnd();
+
+                        line = "{ \"logs\": " + line + "}";
+
+                        Warcraftlogs logs = JsonConvert.DeserializeObject<Warcraftlogs>(line);
+                        if (logs.logs[0].zone == 29)
                         {
+                            Thread.Sleep(5000);
                             GetLogInfo(logs.logs[0].id, logs.logs[0].title, Functions.FromUnixTimeStampToDateTime(logs.logs[0].start).ToString(), $"https://ru.warcraftlogs.com/reports/{logs.logs[0].id}");
                         }
                         else
@@ -146,7 +201,7 @@ namespace DiscordBot
             }
         }
 
-        private static void GetLogInfo(string id, string dungeon, string date, string link)
+        private void GetLogInfo(string id, string dungeon, string date, string link)
         {
 
             try
@@ -166,35 +221,45 @@ namespace DiscordBot
 
                         int kills = 0;
                         int wipe = 0;
-                        foreach (Fight fight in log.fights)
+                        if (log.fights != null)
                         {
-                            if (fight.boss != 0)
+                            foreach (Fight fight in log.fights)
                             {
-                                if (fight.kill == true)
+                                if (fight.boss > 0)
                                 {
-                                    kills++;
+                                    if (fight.kill == true)
+                                    {
+                                        kills++;
+                                    }
+                                    else
+                                    {
+                                        wipe++;
+                                    }
                                 }
-                                else
-                                {
-                                    wipe++;
-                                }
+
                             }
-                            
+                            TimeSpan ts = Functions.FromUnixTimeStampToDateTime(log.end.ToString()) - Functions.FromUnixTimeStampToDateTime(log.start.ToString());
+                            _log.RaidTime = $"{ts.Hours} ч {ts.Minutes} м";
+                            _log.Date = date;
+                            _log.Dungeon = dungeon;
+                            _log.KillBoss = kills.ToString();
+                            _log.WipeBoss = wipe.ToString();
+                            _log.Link = link;
+                            _log.StartTime = log.start;
+                            _log.ID = id;
+                            _log.Error = false;
                         }
-                        TimeSpan ts = Functions.FromUnixTimeStampToDateTime(log.end.ToString()) - Functions.FromUnixTimeStampToDateTime(log.start.ToString());
-                        _log.RaidTime = $"{ts.Hours} ч {ts.Minutes} м";
-                        _log.Date = date;
-                        _log.Dungeon = dungeon;
-                        _log.KillBoss = kills.ToString();
-                        _log.WipeBoss = wipe.ToString();
-                        _log.Link = link;
-                        _log.StartTime = log.start;
-                        _log.ID = id;
+                        else
+                        {
+                            _log.Error = true;
+
+                        }
+
 
                     }
                 }
                 responce.Close();
-                _log.Error = false;
+
             }
             catch (WebException e)
             {
@@ -264,16 +329,18 @@ namespace DiscordBot
         public int zoneID { get; set; }
         public string zoneName { get; set; }
         public int zoneDifficulty { get; set; }
-        public int size { get; set; }
-        public int difficulty { get; set; }
-        public bool kill { get; set; }
-        public int partial { get; set; }
-        public int bossPercentage { get; set; }
-        public int fightPercentage { get; set; }
-        public int lastPhaseForPercentageDisplay { get; set; }
+        public int? size { get; set; }
+        public int? difficulty { get; set; }
+        public bool? kill { get; set; }
+        public int? partial { get; set; }
+        public bool? inProgress { get; set; }
+        public int? bossPercentage { get; set; }
+        public int? fightPercentage { get; set; }
+        public int? lastPhaseAsAbsoluteIndex { get; set; }
+        public int? lastPhaseForPercentageDisplay { get; set; }
         public List<int> maps { get; set; }
-        public int instances { get; set; }
-        public int groups { get; set; }
+        public int? instances { get; set; }
+        public int? groups { get; set; }
     }
 
     public class Friendly
@@ -308,6 +375,17 @@ namespace DiscordBot
         public List<Fight> fights { get; set; }
     }
 
+    public class EnemyPet
+    {
+        public string name { get; set; }
+        public int id { get; set; }
+        public int guid { get; set; }
+        public string type { get; set; }
+        public string icon { get; set; }
+        public int petOwner { get; set; }
+        public List<Fight> fights { get; set; }
+    }
+
     public class Phase
     {
         public int boss { get; set; }
@@ -329,7 +407,7 @@ namespace DiscordBot
         public List<Friendly> friendlies { get; set; }
         public List<Enemy> enemies { get; set; }
         public List<FriendlyPet> friendlyPets { get; set; }
-        public List<object> enemyPets { get; set; }
+        public List<EnemyPet> enemyPets { get; set; }
         public List<Phase> phases { get; set; }
         public int logVersion { get; set; }
         public int gameVersion { get; set; }

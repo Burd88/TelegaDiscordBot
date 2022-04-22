@@ -68,32 +68,32 @@ namespace DiscordBot
             {
                 CharInfo pers = new();
                 var persinfo = pers.GetCharInfo(member.Name);
-                if(persinfo != null)
+                if (persinfo != null)
                 {
                     if (member.Role == "танк")
                     {
                         tankid++;
-                        tank += $"{tankid}) [{persinfo.Name}](https://worldofwarcraft.com/ru-ru/character/eu/howling-fjord/{persinfo.Name.ToLower()})-**{persinfo.Class}** (**{persinfo.ILvl}**) Рейд: **{persinfo.RaidProgress}** Миф+: **{persinfo.MythicPlus}**\n";
+                        tank += $"**{tankid})** [{persinfo.Name}](https://worldofwarcraft.com/ru-ru/character/eu/howling-fjord/{persinfo.Name.ToLower()})-**{persinfo.Class}** (**{persinfo.ILvl}**)\n__Рейд: **{persinfo.RaidProgress}** Миф+: **{persinfo.MythicPlus}** {persinfo.SetcountItem}__\n";
                     }
                     else if (member.Role == "хил")
                     {
                         healid++;
-                        heal += $"{healid}) [{persinfo.Name}](https://worldofwarcraft.com/ru-ru/character/eu/howling-fjord/{persinfo.Name.ToLower()})-**{persinfo.Class}** (**{persinfo.ILvl}**) Рейд: **{persinfo.RaidProgress}** Миф+: **{persinfo.MythicPlus}**\n";
+                        heal += $"**{healid})** [{persinfo.Name}](https://worldofwarcraft.com/ru-ru/character/eu/howling-fjord/{persinfo.Name.ToLower()})-**{persinfo.Class}** (**{persinfo.ILvl}**)\n__Рейд: **{persinfo.RaidProgress}** Миф+: **{persinfo.MythicPlus}** {persinfo.SetcountItem}__\n";
                     }
                     else if (member.Role == "мдд")
                     {
                         mddid++;
-                        mdd += $"{mddid}) [{persinfo.Name}](https://worldofwarcraft.com/ru-ru/character/eu/howling-fjord/{persinfo.Name.ToLower()})-**{persinfo.Class}** (**{persinfo.ILvl}**) Рейд: **{persinfo.RaidProgress}** Миф+: **{persinfo.MythicPlus}**\n";
+                        mdd += $"**{mddid})** [{persinfo.Name}](https://worldofwarcraft.com/ru-ru/character/eu/howling-fjord/{persinfo.Name.ToLower()})-**{persinfo.Class}** (**{persinfo.ILvl}**)\n__Рейд: **{persinfo.RaidProgress}** Миф+: **{persinfo.MythicPlus}** {persinfo.SetcountItem}__\n";
                     }
                     else if (member.Role == "рдд")
                     {
                         rddid++;
-                        rdd += $"{rddid}) [{persinfo.Name}](https://worldofwarcraft.com/ru-ru/character/eu/howling-fjord/{persinfo.Name.ToLower()})-**{persinfo.Class}** (**{persinfo.ILvl}**) Рейд: **{persinfo.RaidProgress}** Миф+: **{persinfo.MythicPlus}**\n";
+                        rdd += $"**{rddid})** [{persinfo.Name}](https://worldofwarcraft.com/ru-ru/character/eu/howling-fjord/{persinfo.Name.ToLower()})-**{persinfo.Class}** (**{persinfo.ILvl}**)\n__Рейд: **{persinfo.RaidProgress}** Миф+: **{persinfo.MythicPlus}** {persinfo.SetcountItem}__\n";
                     }
                     everage += Convert.ToInt32(persinfo.ILvl);
                     newroster.Add(new StaticChar { Name = persinfo.Name.Replace("**", ""), Role = member.Role, Class = persinfo.Class, Ilvl = persinfo.ILvl, Raid = persinfo.RaidProgress });
                 }
-               
+
             }
             middleIlvl = (everage / newroster.Count).ToString();
             StaticRoster newstaticroster = new();

@@ -267,7 +267,7 @@ namespace DiscordBot
         public string href { get; set; }
     }
 
-    public class Type
+    public class Type1
     {
         public string type { get; set; }
         public string name { get; set; }
@@ -282,7 +282,7 @@ namespace DiscordBot
         public string category { get; set; }
         public string locale { get; set; }
         public string timezone { get; set; }
-        public Type type { get; set; }
+        public Type1 type { get; set; }
         public bool is_tournament { get; set; }
         public string slug { get; set; }
     }

@@ -1,4 +1,5 @@
 ﻿using Discord;
+using Discord.Net;
 using Discord.WebSocket;
 using Newtonsoft.Json;
 using System;
@@ -10,12 +11,11 @@ using System.Net.Http.Headers;
 using System.Threading;
 using System.Threading.Tasks;
 using Telegram.Bot;
+using Telegram.Bot.Exceptions;
+using Telegram.Bot.Extensions.Polling;
+using Telegram.Bot.Types;
 using Telegram.Bot.Types.Enums;
 using Telegram.Bot.Types.ReplyMarkups;
-using Telegram.Bot.Types;
-using Telegram.Bot.Extensions.Polling;
-using Discord.Net;
-using Telegram.Bot.Exceptions;
 
 namespace DiscordBot
 {
@@ -27,7 +27,7 @@ namespace DiscordBot
         // private static string _MessageText = null;
         //  private static string _MessageSender = null;
         public static SocketGuild _mainChat;
-        private QueuedUpdateReceiver updateReceiver;
+        // private QueuedUpdateReceiver updateReceiver;
         static void Main(string[] args)
             => new Program().MainAsync().GetAwaiter().GetResult();
 
@@ -76,7 +76,7 @@ namespace DiscordBot
             await discordClient.LoginAsync(TokenType.Bot, settings.DiscordBotToken);
             await discordClient.StartAsync();
 
-            
+
             TimerCallback tmAutoriz = new(OnTimerHandlerAutorizationsBattleNet);
             Timer timerAutoriz = new(tmAutoriz, num, 0, 1000 * 60 * 60);
 
@@ -90,13 +90,13 @@ namespace DiscordBot
             Timer timerheckAffix = new(tmCheckAffix, num, 0, 1000);
 
             TimerCallback tmactivity = new(OnTimerHandlerActivity);
-            Timer timerActivity = new(tmactivity, num, 0, 60000);
+            Timer timerActivity = new(tmactivity, num, 0, 30000);
 
             TimerCallback tmlog = new(OnTimerHandlerLog);
-            Timer timerlog = new(tmlog, num, 0, 10000);
+            Timer timerlog = new(tmlog, num, 0, 30000);
 
             TimerCallback tmachieve = new(OnTimerHandlerAchievements);
-            Timer timerAchievements = new(tmachieve, num, 0, 60000);
+            Timer timerAchievements = new(tmachieve, num, 0, 30000);
 
             TimerCallback tmroster = new(OnTimerHandlerRoster);
             Timer timerRoster = new(tmroster, num, 0, 300000);
@@ -109,34 +109,37 @@ namespace DiscordBot
             telegramClient = new TelegramBotClient(settings.TelegramBotToken);
             using var cts = new CancellationTokenSource();
 
-        var receiverOptions = new ReceiverOptions
-           {
+            var receiverOptions = new ReceiverOptions
+            {
                 AllowedUpdates = { } // receive all update types
-           };
+            };
             telegramClient.StartReceiving(
                 HandleUpdateAsync,
                 HandleErrorAsync,
                 receiverOptions,
                 cancellationToken: cts.Token
                );
-         //   updateReceiver = new QueuedUpdateReceiver(telegramClient, receiverOptions);
+
+            var telebot = await telegramClient.GetMeAsync();
+            Console.WriteLine($"\nTelegram Bot started @{telebot.Username}\n");
+            //   updateReceiver = new QueuedUpdateReceiver(telegramClient, receiverOptions);
 
             // to cancel
-          //  var cts = new CancellationTokenSource();
+            //  var cts = new CancellationTokenSource();
 
-      //      try
-        //    {
-        //        await foreach (Update update in updateReceiver.WithCancellation(cts.Token))
-        //        {
-         //           if (update.Message is Message message)
-        //            {
-          //              HandlerTelegramCommands(message);
-          //          }
-        //        }
-       //     }
-   //         catch (OperationCanceledException exception)
-    //        {
-     //       }
+            //      try
+            //    {
+            //        await foreach (Update update in updateReceiver.WithCancellation(cts.Token))
+            //        {
+            //           if (update.Message is Message message)
+            //            {
+            //              HandlerTelegramCommands(message);
+            //          }
+            //        }
+            //     }
+            //         catch (OperationCanceledException exception)
+            //        {
+            //       }
             Console.ReadLine();
             cts.Cancel();
         }
@@ -158,7 +161,7 @@ namespace DiscordBot
         {
             CharInfo pers = new();
 
-           
+
             var builder = new EmbedBuilder();
             var fullInfo = pers.GetCharInfo((string)command.Data.Options.First().Value);
 
@@ -167,7 +170,7 @@ namespace DiscordBot
                 builder = new EmbedBuilder()
                     .WithTitle($"{fullInfo.Name}({fullInfo.Lvl} уровень) {fullInfo.Race}")
                     .WithUrl(fullInfo.LinkBnet).WithDescription($"Информация о персонаже  :")
-                    .WithColor(Color.DarkRed).AddField("Уровень\nпредметов:", fullInfo.ILvl, true)
+                    .WithColor(Discord.Color.DarkRed).AddField("Уровень\nпредметов:", fullInfo.ILvl, true)
                     .WithImageUrl(fullInfo.ImageCharMainRaw)
                     .AddField("Класс:", fullInfo.Class, true)
                     .AddField("Специализация:", fullInfo.Spec, true)
@@ -186,7 +189,7 @@ namespace DiscordBot
             else
             {
                 await command.RespondAsync(text: "**Ошибка**\nНе корректное имя: " + (string)command.Data.Options.First().Value + ".\nЛибо проблемы на сервере.", ephemeral: true);
-                
+
 
             }
 
@@ -198,18 +201,20 @@ namespace DiscordBot
             if (MythicPlusAffix.error == false)
             {
 
-              var builder = new EmbedBuilder()
-                    .WithTitle($"**{affixs.title}**")
-                    .WithDescription("Мифик+ аффиксы на эту неделю.")
-                    .AddField("(+2)", $"**[{affixs.affix_details[0].name}]({affixs.affix_details[0].wowhead_url.Replace("wowhead", "ru.wowhead")}): {affixs.affix_details[0].description}**")
-                    .AddField("(+4)", $"**[{affixs.affix_details[1].name}]({affixs.affix_details[1].wowhead_url.Replace("wowhead", "ru.wowhead")}): {affixs.affix_details[1].description}**")
-                    .AddField("(+7)", $"**[{affixs.affix_details[2].name}]({affixs.affix_details[2].wowhead_url.Replace("wowhead", "ru.wowhead")}): {affixs.affix_details[2].description}**")
-                    .AddField("(+10)", $"**[{affixs.affix_details[3].name}]({affixs.affix_details[3].wowhead_url.Replace("wowhead", "ru.wowhead")}): {affixs.affix_details[3].description}**");
-                           
-                       
+                var builder = new EmbedBuilder()
+                      .WithTitle($"**{affixs.title}**")
+                      .WithDescription("Мифик+ аффиксы на эту неделю.")
+                      .AddField("(+2)", $"**[{affixs.affix_details[0].name}]({affixs.affix_details[0].wowhead_url.Replace("wowhead", "ru.wowhead")}): {affixs.affix_details[0].description}**")
+                      .AddField("(+4)", $"**[{affixs.affix_details[1].name}]({affixs.affix_details[1].wowhead_url.Replace("wowhead", "ru.wowhead")}): {affixs.affix_details[1].description}**")
+                      .AddField("(+7)", $"**[{affixs.affix_details[2].name}]({affixs.affix_details[2].wowhead_url.Replace("wowhead", "ru.wowhead")}): {affixs.affix_details[2].description}**")
+                      .AddField("(+10)", $"**[{affixs.affix_details[3].name}]({affixs.affix_details[3].wowhead_url.Replace("wowhead", "ru.wowhead")}): {affixs.affix_details[3].description}**");
+
+
                 await command.RespondAsync(embed: builder.Build(), ephemeral: true);
             }
         }
+
+        [Obsolete]
         private async Task Client_Ready()
         {
             // Let's build a guild command! We're going to need a guild so lets just put that in a variable.
@@ -252,10 +257,11 @@ namespace DiscordBot
             var chatId = update.Message.Chat.Id;
             var chatName = update.Message.Chat.Title;
             var messageText = update.Message.Text;
-            if (update.Message.Text.Contains("/")){
+            if (update.Message.Text.Contains("/"))
+            {
                 Console.WriteLine($"Received a '{messageText}' message in chat {chatName}.");
             }
-            
+
             switch (update.Message.Text)
             {
                 case var s when s.Contains("/guild"):
@@ -288,8 +294,44 @@ namespace DiscordBot
                 case var s when s.Contains("/token"):
                     var token = new token();
                     var tokenprice = token.GetTokenPrice();
-                         await telegramClient.SendTextMessageAsync(
-                                   chatId, $"<b>\"Жетон WoW\"</b>\nЦена: <b>{tokenprice.price/10000}</b> золотых\nВремя обновления: {Functions.FromUnixTimeStampToDateTimeUTC(tokenprice.last_updated_timestamp.ToString())} (UTC)", parseMode: ParseMode.Html);
+                    await telegramClient.SendTextMessageAsync(
+                              chatId, $"<b>\"Жетон WoW\"</b>\nЦена: <b>{tokenprice.price / 10000}</b> золотых\nВремя обновления: {Functions.FromUnixTimeStampToDateTimeUTC(tokenprice.last_updated_timestamp.ToString())} (UTC)", parseMode: ParseMode.Html);
+                    break;
+
+                case var s when s.Contains("/lastlog"):
+                    try
+                    {
+                        GuildLogs checklogs = new();
+                        var newLog = checklogs.GetGuildLogChange();
+                        if (newLog != null)
+                        {                  
+                            string text = $"Лог от {newLog.Date}" +
+                                       $"\nИнформация о сражении в <b>{newLog.Dungeon}</b>" +
+                                       $"\nБоссов убито: {newLog.KillBoss}" +
+                                       $"\nВайпов: {newLog.WipeBoss}" +
+                                       $"\nПродолжительность: {newLog.RaidTime}" +
+                                       $"\n<b><a href =\"https://www.wipefest.gg/report/{newLog.ID}\">WipeFest</a></b>" +
+                                       $"\n<b><a href =\"https://wowanalyzer.com/report/{newLog.ID}\">WoWAnalyzer</a></b>" +
+                                       $"\n<b><a href =\"https://ru.warcraftlogs.com/guild/reports-list/47723/\">Все логи</a></b>";
+                                 var keyboard = new InlineKeyboardMarkup(InlineKeyboardButton.WithUrl("Просмотр", newLog.Link));
+                                 await telegramClient.SendTextMessageAsync(chatId, text, replyMarkup: keyboard, parseMode: ParseMode.Html);
+                                 string message = ("Отправленно оповещение о новых загруженных логах гильдии!");
+                                 Functions.WriteLogs(message, "notification");
+                        }
+                    }
+                    catch (WebException e)
+                    {
+                        if (e.Status == WebExceptionStatus.ProtocolError)
+                        {
+                            string message = $"\nOnTimerHandlerLog Error: {e.Message}";
+                            Functions.WriteLogs(message, "error");
+                        }
+                    }
+                    catch (Exception e)
+                    {
+                        string message = $"OnTimerHandlerLog Error: {e.Message}";
+                        Functions.WriteLogs(message, "error");
+                    }
                     break;
             }
         }
@@ -314,11 +356,11 @@ namespace DiscordBot
         private async void OnTimerHandlerPoolRT(object obj)
         {
             if (settings.NeedPoolRT == true)
-            { 
+            {
 
-                if (DateTime.Now.DayOfWeek == DayOfWeek.Monday || DateTime.Now.DayOfWeek == DayOfWeek.Wednesday || DateTime.Now.DayOfWeek == DayOfWeek.Thursday || DateTime.Now.DayOfWeek == DayOfWeek.Tuesday)
+                if (DateTime.Now.DayOfWeek == DayOfWeek.Monday || DateTime.Now.DayOfWeek == DayOfWeek.Wednesday || DateTime.Now.DayOfWeek == DayOfWeek.Thursday)// || DateTime.Now.DayOfWeek == DayOfWeek.Tuesday)
                 {
-                    if (DateTime.Now.Hour == 20)
+                    if (DateTime.Now.Hour == 21)
                     {
                         if (DateTime.Now.Minute == 00)
                         {
@@ -357,7 +399,7 @@ namespace DiscordBot
                                     ;
                                 var textbuilder = new EmbedBuilder()
                                       .WithTitle("**Через час идем в рейд \"Гробница Предвечных\"! Тебя ждать?**")
-                                      .WithColor(Color.DarkRed)
+                                      .WithColor(Discord.Color.DarkRed)
                                       .WithDescription("Тактики знать **Обязательно**! \nПри себе иметь: **Фласки, Поты, Руны, Чары на предметах**! \nЕду Предоставим на +20!")
                                       .AddField("Тактики", "Тактики можно смотреть в разделе \"**[Тактики](https://discord.com/channels/219741774556430336/938739958695489596)**\"", false)
                                       .WithImageUrl("https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcSeDhzUwFEg6HESybW2BScFMwIMJy7pbpEcXA&usqp=CAU");
@@ -380,7 +422,7 @@ namespace DiscordBot
                         }
 
                     }
-                    if (DateTime.Now.Hour == 21)
+                    if (DateTime.Now.Hour == 22)
                     {
                         if (DateTime.Now.Minute == 30)
                         {
@@ -393,7 +435,7 @@ namespace DiscordBot
                                     await telegramClient.DeleteMessageAsync(settings.TelegramMainChatID, telegrammessagepool.MessageId);
                                     poolready = false;
                                 }
-                              
+
                             }
 
 
@@ -402,7 +444,7 @@ namespace DiscordBot
                     }
                 }
             }
-            if(settings.AddtionalRT == true)
+            if (settings.AddtionalRT == true)
             {
                 if (DateTime.Now.DayOfWeek == DayOfWeek.Tuesday)
                 {
@@ -445,7 +487,7 @@ namespace DiscordBot
                                     ;
                                 var textbuilder = new EmbedBuilder()
                                       .WithTitle("**Через час идем в рейд \"Гробница Предвечных\"! Тебя ждать?**")
-                                      .WithColor(Color.DarkRed)
+                                      .WithColor(Discord.Color.DarkRed)
                                       .WithDescription("Тактики знать **Обязательно**! \nПри себе иметь: **Фласки, Поты, Руны, Чары на предметах**! \nЕду Предоставим на +20!")
                                       .AddField("Тактики", "Тактики можно смотреть в разделе \"**[Тактики](https://discord.com/channels/219741774556430336/938739958695489596)**\"", false)
                                       .WithImageUrl("https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcSeDhzUwFEg6HESybW2BScFMwIMJy7pbpEcXA&usqp=CAU");
@@ -490,9 +532,9 @@ namespace DiscordBot
                     }
                 }
             }
-            
 
-            
+
+
 
         }
 
@@ -501,8 +543,8 @@ namespace DiscordBot
         private List<string> mbgo;
         private async Task MyButtonHandler(SocketMessageComponent component)
         {
-          //  _mainChat = discordClient.GetGuild(settings.DiscordTestChatId);
-          //  var chan = _mainChat.GetChannel(settings.TestDiscordMainChannelId) as IMessageChannel;
+            //  _mainChat = discordClient.GetGuild(settings.DiscordTestChatId);
+            //  var chan = _mainChat.GetChannel(settings.TestDiscordMainChannelId) as IMessageChannel;
             switch (component.Data.CustomId)
             {
 
@@ -525,7 +567,7 @@ namespace DiscordBot
                         await discordmessageresultpool.ModifyAsync(x => x.Content = $"Приду: {string.Join(",", go)}\nНе приду: {string.Join(",", nogo)}\nОпоздаю: {string.Join(",", mbgo)}");
 
 
-                        
+
 
                     }
                     catch { }
@@ -535,7 +577,7 @@ namespace DiscordBot
                     try
                     {
                         string namenot = userDiscList.Find(x => x.ID == component.User.Id).Name;
-                   
+
                         var membernot = nogo.Find(x => x.ToLower() == namenot.ToLower());
                         if (membernot == null)
                         {
@@ -547,8 +589,8 @@ namespace DiscordBot
 
                         await discordmessageresultpool.ModifyAsync(x => x.Content = $"\nПриду: {string.Join(",", go)}\nНе приду: {string.Join(",", nogo)}\nОпоздаю: {string.Join(",", mbgo)}");
 
-                   
-                   
+
+
                     }
                     catch { }
                     await component.DeferAsync();
@@ -557,7 +599,7 @@ namespace DiscordBot
                     try
                     {
                         string namemb = userDiscList.Find(x => x.ID == component.User.Id).Name;
-                    
+
                         var membermb = mbgo.Find(x => x.ToLower() == namemb.ToLower());
                         if (membermb == null)
                         {
@@ -569,8 +611,8 @@ namespace DiscordBot
 
                         await discordmessageresultpool.ModifyAsync(x => x.Content = $"Приду: {string.Join(",", go)}\nНе приду: {string.Join(",", nogo)}\nОпоздаю: {string.Join(",", mbgo)}");
 
-                  
-                   
+
+
                     }
                     catch { }
                     await component.DeferAsync();
@@ -585,22 +627,22 @@ namespace DiscordBot
         {
             if (DateTime.Now.DayOfWeek == DayOfWeek.Wednesday)
             {
-                
+
                 string[] text = WowRealmInfo.GetRealmInfoForTimer();
                 if (text != null)
                 {
                     _mainChat = discordClient.GetGuild(settings.DiscordMainChatId);
                     var chan = _mainChat.GetChannel(settings.DiscordMainChannelId) as IMessageChannel;
-                   var  builder = new EmbedBuilder()
-                        .WithTitle($"**Информация о техобслуживании!**")
-                        .AddField($"{text[0]}", $"**{text[1]}**");
-                  
+                    var builder = new EmbedBuilder()
+                         .WithTitle($"**Информация о техобслуживании!**")
+                         .AddField($"{text[0]}", $"**{text[1]}**");
+
                     await chan.SendMessageAsync(null, false, builder.Build());
                     await telegramClient.SendTextMessageAsync(settings.TelegramMainChatID, $"{text[0]}\n{text[1]}", parseMode: ParseMode.Html);
                     string message = ("Отправленно оповещение о Тех.Работах!");
                     Functions.WriteLogs(message, "notification");
                 }
-                    
+
             }
 
         }
@@ -608,7 +650,7 @@ namespace DiscordBot
         {
             if (DateTime.Now.DayOfWeek == DayOfWeek.Wednesday)
             {
-               
+
                 if (DateTime.Now.Hour == 14)
                 {
                     if (DateTime.Now.Minute == 00)
@@ -619,13 +661,13 @@ namespace DiscordBot
                             if (MythicPlusAffix.error == false)
                             {
 
-                              var builder = new EmbedBuilder()
-                                    .WithTitle($"**{affixs.title}**")
-                                    .WithDescription("Мифик+ аффиксы на эту неделю обновлены.")
-                                    .AddField("(+2)", $"**[{affixs.affix_details[0].name}]({affixs.affix_details[0].wowhead_url.Replace("wowhead", "ru.wowhead")}): {affixs.affix_details[0].description}**")
-                                    .AddField("(+4)", $"**[{affixs.affix_details[1].name}]({affixs.affix_details[1].wowhead_url.Replace("wowhead", "ru.wowhead")}): {affixs.affix_details[1].description}**")
-                                    .AddField("(+7)", $"**[{affixs.affix_details[2].name}]({affixs.affix_details[2].wowhead_url.Replace("wowhead", "ru.wowhead")}): {affixs.affix_details[2].description}**")
-                                    .AddField("(+10)", $"**[{affixs.affix_details[3].name}]({affixs.affix_details[3].wowhead_url.Replace("wowhead", "ru.wowhead")}): {affixs.affix_details[3].description}**");
+                                var builder = new EmbedBuilder()
+                                      .WithTitle($"**{affixs.title}**")
+                                      .WithDescription("Мифик+ аффиксы на эту неделю обновлены.")
+                                      .AddField("(+2)", $"**[{affixs.affix_details[0].name}]({affixs.affix_details[0].wowhead_url.Replace("wowhead", "ru.wowhead")}): {affixs.affix_details[0].description}**")
+                                      .AddField("(+4)", $"**[{affixs.affix_details[1].name}]({affixs.affix_details[1].wowhead_url.Replace("wowhead", "ru.wowhead")}): {affixs.affix_details[1].description}**")
+                                      .AddField("(+7)", $"**[{affixs.affix_details[2].name}]({affixs.affix_details[2].wowhead_url.Replace("wowhead", "ru.wowhead")}): {affixs.affix_details[2].description}**")
+                                      .AddField("(+10)", $"**[{affixs.affix_details[3].name}]({affixs.affix_details[3].wowhead_url.Replace("wowhead", "ru.wowhead")}): {affixs.affix_details[3].description}**");
                                 var emb = builder.Build();
                                 _mainChat = discordClient.GetGuild(settings.DiscordMainChatId);
                                 var chan = _mainChat.GetChannel(settings.DiscordAffixChannelId) as IMessageChannel;
@@ -649,7 +691,7 @@ namespace DiscordBot
                         }
                     }
                 }
-                
+
             }
 
         }
@@ -711,7 +753,7 @@ namespace DiscordBot
                             .WithTitle($"**{fullInfo.Name}**({inv.LVL} уровень) {fullInfo.Race}")
                             .WithUrl(fullInfo.LinkBnet)
                             .WithDescription($"**{text}**")
-                            .WithColor(Color.DarkRed)
+                            .WithColor(Discord.Color.DarkRed)
                             .AddField("Уровень\nпредметов:", fullInfo.ILvl, true)
                             .WithImageUrl(fullInfo.ImageCharInset)
                             .AddField("Класс:", fullInfo.Class, true).AddField("Специализация:", fullInfo.Spec, true)
@@ -727,7 +769,7 @@ namespace DiscordBot
                     }
                     else if (Convert.ToInt32(inv.LVL) < 60)
                     {
-                        builder = new EmbedBuilder().WithTitle($"**{fullInfo.Name}**({inv.LVL} уровень) {fullInfo.Race}").WithUrl(fullInfo.LinkBnet).WithDescription($"**{text}**").WithColor(Color.DarkRed).AddField("Уровень\nпредметов:", fullInfo.ILvl, true).WithImageUrl(fullInfo.ImageCharInset)
+                        builder = new EmbedBuilder().WithTitle($"**{fullInfo.Name}**({inv.LVL} уровень) {fullInfo.Race}").WithUrl(fullInfo.LinkBnet).WithDescription($"**{text}**").WithColor(Discord.Color.DarkRed).AddField("Уровень\nпредметов:", fullInfo.ILvl, true).WithImageUrl(fullInfo.ImageCharInset)
                           .AddField("Класс:", fullInfo.Class, true).AddField("Специализация:", fullInfo.Spec, true);
                         await telegramClient.SendPhotoAsync(
                             photo: fullInfo.ImageCharInset,
@@ -766,13 +808,13 @@ namespace DiscordBot
                                 builder = new EmbedBuilder()
                                     .WithTitle($"**{activ.Name}**")
                                     .WithDescription($"получил(а) достижение!")
-                                    .WithColor(Color.DarkRed)
+                                    .WithColor(Discord.Color.DarkRed)
                                     .AddField("Название:", activ.Mode, false);
                                 _mainChat = discordClient.GetGuild(settings.DiscordMainChatId);
                                 var chan = _mainChat.GetChannel(settings.DiscordActivityChannelId) as IMessageChannel;
                                 var embed = builder.Build();
                                 await chan.SendMessageAsync(null, false, embed);
-                                
+
                                 if (activ.Categor != "Рейды Legion" && activ.Categor != "Рейды Azeroth" && activ.Categor != "Рейды Draenor" && activ.Categor != "Рейды Pandaria")
                                 {
 
@@ -790,7 +832,7 @@ namespace DiscordBot
                                         .WithTitle($"**{activ.Name}**")
                                         .WithThumbnailUrl(activ.Icon)
                                         .WithDescription($"получил(а) достижение!")
-                                        .WithColor(Color.DarkRed)
+                                        .WithColor(Discord.Color.DarkRed)
                                         .AddField("Название:", activ.Mode, false)
                                         .AddField("Категоря:", activ.Categor, false);
                                     _mainChat = discordClient.GetGuild(settings.DiscordMainChatId);
@@ -815,7 +857,7 @@ namespace DiscordBot
                                         .WithTitle($"**{activ.Name}**")
                                         .WithThumbnailUrl(activ.Icon)
                                         .WithDescription($"получил(а) достижение!")
-                                        .WithColor(Color.DarkRed)
+                                        .WithColor(Discord.Color.DarkRed)
                                         .AddField("Название:", activ.Mode, false)
                                         .AddField("Категоря:", activ.Categor, false)
                                         .AddField("Награда:", activ.Award, false);
@@ -824,9 +866,9 @@ namespace DiscordBot
                                     var embed = builder.Build();
                                     await chan.SendMessageAsync(null, false, embed);
 
-                                    if (activ.Categor != "Рейды Legion" && activ.Categor != "Рейды Azeroth" && activ.Categor != "Рейды Draenor" && activ.Categor != "Рейды Pandaria" )
+                                    if (activ.Categor != "Рейды Legion" && activ.Categor != "Рейды Azeroth" && activ.Categor != "Рейды Draenor" && activ.Categor != "Рейды Pandaria")
                                     {
-                                       
+
                                         await telegramClient.SendTextMessageAsync(
                                    chatId: settings.TelegramMainChatID,
                                    text: $"<b>{activ.Name}</b>\nполучил(а) достижение!\nНазвание: {activ.Mode}\nКатегоря: {activ.Categor}\nНаграда: {activ.Award}",
@@ -842,7 +884,7 @@ namespace DiscordBot
                             {
                                 builder = new EmbedBuilder()
                                     .WithTitle($"**Гильдия одержала победу!**")
-                                    .WithColor(Color.DarkRed)
+                                    .WithColor(Discord.Color.DarkRed)
                                     .AddField("Босс:", activ.Mode, false)
                                     .AddField("Режим:", activ.Categor, false);
 
@@ -861,7 +903,7 @@ namespace DiscordBot
                             {
                                 builder = new EmbedBuilder()
                                     .WithTitle($"**Гильдия одержала победу!**")
-                                    .WithColor(Color.DarkRed)
+                                    .WithColor(Discord.Color.DarkRed)
                                     .AddField("Рейд/Подземелье:", activ.Categor, false)
                                     .AddField("Босс:", activ.Name, false)
                                     .AddField("Режим:", activ.Mode, false).WithImageUrl(activ.Icon);
@@ -905,40 +947,58 @@ namespace DiscordBot
         {
             try
             {
-                var builder = new EmbedBuilder();
-                var newLog = GuildLogs.GetGuildLogChange();
+                GuildLogs checklogs = new();
+                var newLog = checklogs.GetGuildLogChange();
                 if (newLog != null)
                 {
-                    builder = new EmbedBuilder()
-                        .WithTitle($"Загружен новый лог от {newLog.Date}")
-                        .WithDescription($"[Просмотр]({newLog.Link})\n\nИнформация о сражении в **{newLog.Dungeon}** :")
-                        .WithColor(Color.DarkRed)
-                        .AddField("Боссов убито:", newLog.KillBoss, true)
-                        .AddField("Вайпов:", newLog.WipeBoss, true)
-                        .AddField("Продолжительность:", newLog.RaidTime, true)
-                        .AddField("WipeFest", $"[Просмотр](https://www.wipefest.gg/report/{newLog.ID})", true)
-                        .AddField("WoWAnalyzer", $"[Просмотр](https://wowanalyzer.com/report/{newLog.ID})", true)
-                        .AddField("Ссылка на все логи:", $"[Просмотр](https://ru.warcraftlogs.com/guild/reports-list/47723/)", true).WithFooter(footer => footer.Text = "Гильдия \"Сердце греха\".");
+                    var builder = new EmbedBuilder()
+                        .WithThumbnailUrl("https://render.worldofwarcraft.com/eu/guild/crest/102/emblem-102-dfa55a-b1002e.jpg")
+                         .WithTitle($"Крайний рейд-лог Гильдии \"Сердце Греха\"\n{newLog.Date}")
+                         .WithDescription($"[Просмотр]({newLog.Link})\n\nИнформация о сражении в **{newLog.Dungeon}** :")
+                         .WithColor(Discord.Color.DarkRed)
+                         .AddField("Боссов убито:", newLog.KillBoss, true)
+                         .AddField("Вайпов:", newLog.WipeBoss, true)
+                         .AddField("Продолжительность:", newLog.RaidTime, true)
+                         .AddField("WipeFest", $"[Просмотр](https://www.wipefest.gg/report/{newLog.ID})", true)
+                         .AddField("WoWAnalyzer", $"[Просмотр](https://wowanalyzer.com/report/{newLog.ID})", true)
+                         .AddField("Ссылка на все логи:", $"[Просмотр](https://ru.warcraftlogs.com/guild/reports-list/47723/)", true)
+                         .WithFooter(footer => footer.Text = $"Гильдия \"Сердце греха\".\nОбновлено: {DateTime.Now} (+4 Мск) ");
+                    await discordClient.GetGuild(settings.DiscordMainChatId).GetTextChannel(settings.DiscordLogChannelId).ModifyMessageAsync(958994640487481396, msg => msg.Embed = builder.Build());
+                    /*
+                     GuildLogs checklogs = new();
+                     var newLog = checklogs.GetGuildLogChange();
+                     if (newLog != null)
+                     {
+                         var builder = new EmbedBuilder()
+                              .WithTitle($"Загружен новый лог от {newLog.Date}")
+                              .WithDescription($"[Просмотр]({newLog.Link})\n\nИнформация о сражении в **{newLog.Dungeon}** :")
+                              .WithColor(Color.DarkRed)
+                              .AddField("Боссов убито:", newLog.KillBoss, true)
+                              .AddField("Вайпов:", newLog.WipeBoss, true)
+                              .AddField("Продолжительность:", newLog.RaidTime, true)
+                              .AddField("WipeFest", $"[Просмотр](https://www.wipefest.gg/report/{newLog.ID})", true)
+                              .AddField("WoWAnalyzer", $"[Просмотр](https://wowanalyzer.com/report/{newLog.ID})", true)
+                              .AddField("Ссылка на все логи:", $"[Просмотр](https://ru.warcraftlogs.com/guild/reports-list/47723/)", true).WithFooter(footer => footer.Text = "Гильдия \"Сердце греха\".");
 
-                    _mainChat = discordClient.GetGuild(settings.DiscordMainChatId);
+                         _mainChat = discordClient.GetGuild(settings.DiscordMainChatId);
 
-                    var chan = _mainChat.GetChannel(settings.DiscordLogChannelId) as IMessageChannel;
-                    var embed = builder.Build();
-                    await chan.SendMessageAsync(null, false, embed);
+                         var chan = _mainChat.GetChannel(settings.DiscordLogChannelId) as IMessageChannel;
+                         var embed = builder.Build();
+                         await chan.SendMessageAsync(null, false, embed);
 
-
-                  string  text = $"Загружен новый лог от {newLog.Date}" +
-                        $"\nИнформация о сражении в <b>{newLog.Dungeon}</b>" +
-                        $"\nБоссов убито: {newLog.KillBoss}" +
-                        $"\nВайпов: {newLog.WipeBoss}" +
-                        $"\nПродолжительность: {newLog.RaidTime}" +
-                        $"\n<b><a href =\"https://www.wipefest.gg/report/{newLog.ID}\">WipeFest</a></b>" +
-                        $"\n<b><a href =\"https://wowanalyzer.com/report/{newLog.ID}\">WoWAnalyzer</a></b>" +
-                        $"\n<b><a href =\"https://ru.warcraftlogs.com/guild/reports-list/47723/\">Все логи</a></b>";
-                    var keyboard = new InlineKeyboardMarkup(InlineKeyboardButton.WithUrl("Просмотр", newLog.Link));
-                    await telegramClient.SendTextMessageAsync(settings.TelegramMainChatID, text, replyMarkup: keyboard, parseMode: ParseMode.Html);
-                    string message = ("Отправленно оповещение об активности гильдии!");
-                    Functions.WriteLogs(message, "notification");
+     /*
+                         string text = $"Загружен новый лог от {newLog.Date}" +
+                               $"\nИнформация о сражении в <b>{newLog.Dungeon}</b>" +
+                               $"\nБоссов убито: {newLog.KillBoss}" +
+                               $"\nВайпов: {newLog.WipeBoss}" +
+                               $"\nПродолжительность: {newLog.RaidTime}" +
+                               $"\n<b><a href =\"https://www.wipefest.gg/report/{newLog.ID}\">WipeFest</a></b>" +
+                               $"\n<b><a href =\"https://wowanalyzer.com/report/{newLog.ID}\">WoWAnalyzer</a></b>" +
+                               $"\n<b><a href =\"https://ru.warcraftlogs.com/guild/reports-list/47723/\">Все логи</a></b>";
+                         var keyboard = new InlineKeyboardMarkup(InlineKeyboardButton.WithUrl("Просмотр", newLog.Link));
+                         await telegramClient.SendTextMessageAsync(settings.TelegramMainChatID, text, replyMarkup: keyboard, parseMode: ParseMode.Html);
+                         string message = ("Отправленно оповещение о новых загруженных логах гильдии!");
+                         Functions.WriteLogs(message, "notification"); */
                 }
             }
             catch (WebException e)
@@ -968,7 +1028,7 @@ namespace DiscordBot
 
                         builder = new EmbedBuilder()
                             .WithTitle($"Гильдия получила достижение!")
-                            .WithThumbnailUrl(achieve.Icon).WithColor(Color.DarkRed)
+                            .WithThumbnailUrl(achieve.Icon).WithColor(Discord.Color.DarkRed)
                             .AddField("Название:", achieve.Name, false)
                             .AddField("Категоря:", achieve.Category, false);
                         var embed = builder.Build();
@@ -977,7 +1037,7 @@ namespace DiscordBot
                         await chan.SendMessageAsync(null, false, embed);
                         await telegramClient.SendTextMessageAsync(
                                  chatId: settings.TelegramMainChatID,
-                                
+
                                 $"<b>Гильдия получила достижение!!</b>\nНазвание: {achieve.Name}\nКатегоря: {achieve.Category}"
                                  , parseMode: ParseMode.Html
                                  );
@@ -1012,7 +1072,7 @@ namespace DiscordBot
         {
             try
             {
-               // Console.WriteLine("\n Начинаю сверять роли ВОВ-ДИСКОРД \n");
+                // Console.WriteLine("\n Начинаю сверять роли ВОВ-ДИСКОРД \n");
                 var allUser = discordClient.GetGuild(settings.DiscordMainChatId).GetUsersAsync(RequestOptions.Default);
 
 
@@ -1236,7 +1296,7 @@ namespace DiscordBot
 
                 }
                 //await client.GetUser(i).SendMessageAsync("Сделанно");
-              // Console.WriteLine("\n Закончил сверку ролей ВОВ-ДИСКОРД \n");
+                // Console.WriteLine("\n Закончил сверку ролей ВОВ-ДИСКОРД \n");
             }
             catch (Exception e)
             {
@@ -1259,7 +1319,7 @@ namespace DiscordBot
                         .WithThumbnailUrl("https://render.worldofwarcraft.com/eu/guild/crest/102/emblem-102-dfa55a-b1002e.jpg")
                         .WithTitle("Состав рейд-статика")
                         .WithDescription(Static.description)
-                        .WithColor(Color.DarkRed)
+                        .WithColor(Discord.Color.DarkRed)
                         .AddField("Средний Илвл статика:", Static.middleIlvl, false)
                         .AddField("Танки:", Static.tank, false)
                         .AddField("Хилы:", Static.heal, false)
@@ -1281,7 +1341,7 @@ namespace DiscordBot
         }
 
         List<UserDiscord> userDiscList;
-       
+
         private async Task<Task> CommandsHandler(SocketMessage msg)
         {
 
@@ -1298,28 +1358,28 @@ namespace DiscordBot
                     case "!test1":
                         {
                             userDiscList = new();
-                            
-                          await foreach(var s in discordClient.GetGuild(settings.DiscordTestChatId).GetUsersAsync())
+
+                            await foreach (var s in discordClient.GetGuild(settings.DiscordTestChatId).GetUsersAsync())
                             {
-                                foreach(var l in s)
+                                foreach (var l in s)
                                 {
                                     if (l.Nickname != null)
                                     {
                                         userDiscList.Add(new UserDiscord { ID = l.Id, Name = l.Nickname });
-                                       // await msg.Author.SendMessageAsync(l.Nickname);
+                                        // await msg.Author.SendMessageAsync(l.Nickname);
                                     }
                                     else
                                     {
                                         userDiscList.Add(new UserDiscord { ID = l.Id, Name = l.Username });
-                                      //  await msg.Author.SendMessageAsync(l.Username);
+                                        //  await msg.Author.SendMessageAsync(l.Username);
                                     }
-                                    
+
                                 }
-                                
-                              
+
+
                             }
-                            
-                            
+
+
                             break;
 
                         }
@@ -1337,31 +1397,31 @@ namespace DiscordBot
                                 ;
                             var textbuilder = new EmbedBuilder()
                                   .WithTitle("**Через полтора часа идем в рейд \"Гробница Предвечных\"! Тебя ждать?**")
-                                  .WithColor(Color.DarkRed)
+                                  .WithColor(Discord.Color.DarkRed)
                                   .WithDescription("Тактики знать **Обязательно**! \nПри себе иметь: **Фласки, Поты, Руны, Чары на предметах**! \nЕду Предоставим на +20!")
                                   .AddField("Тактики", "Тактики можно смотреть в разделе \"**[Тактики](https://discord.com/channels/219741774556430336/938739958695489596)**\"", false)
                                   .WithImageUrl("https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcSeDhzUwFEg6HESybW2BScFMwIMJy7pbpEcXA&usqp=CAU");
-                            
+
 
                             _mainChat = discordClient.GetGuild(settings.DiscordTestChatId);
                             var chan = _mainChat.GetChannel(settings.TestDiscordMainChannelId) as IMessageChannel;
-                            discordmessagepool =chan.SendMessageAsync("@here Всем привет!",false ,embed: textbuilder.Build(), components: buttonbuilder.Build()).Result;
+                            discordmessagepool = chan.SendMessageAsync("@here Всем привет!", false, embed: textbuilder.Build(), components: buttonbuilder.Build()).Result;
                             discordmessageresultpool = chan.SendMessageAsync($"Результат:\nПриду: \nНе приду: \nОпоздаю: ").Result;
                             break;
 
                         }
                     case "!needpool":
                         {
-                            
+
                             if (settings.NeedPoolRT)
                             {
                                 settings.NeedPoolRT = false;
-                              await  msg.Author.SendMessageAsync("Отключены опросы перед РТ");
+                                await msg.Author.SendMessageAsync("Отключены опросы перед РТ");
                             }
                             else
                             {
                                 settings.NeedPoolRT = true;
-                             await  msg.Author.SendMessageAsync("Включены опросы перед РТ");
+                                await msg.Author.SendMessageAsync("Включены опросы перед РТ");
                             }
                             Functions.WriteJSon(settings, "BotSettings");
 
@@ -1395,7 +1455,7 @@ namespace DiscordBot
                             break;
 
                         }
-                 
+
 
                     case "!help" or "!рудз":
                         {
@@ -1458,8 +1518,8 @@ namespace DiscordBot
                                     .AddField("(+10)", $"**[{affixs.affix_details[3].name}]({affixs.affix_details[3].wowhead_url.Replace("wowhead", "ru.wowhead")}): {affixs.affix_details[3].description}**");
                                 var emb = builder.Build();
                                 await msg.Author.SendMessageAsync(null, false, emb);
-                               // var chan = discordClient.GetChannel(settings.DiscordAffixChannelId) as IMessageChannel;
-                               /// await chan.SendMessageAsync(null, false, emb);
+                                // var chan = discordClient.GetChannel(settings.DiscordAffixChannelId) as IMessageChannel;
+                                /// await chan.SendMessageAsync(null, false, emb);
                             }
                             else if (MythicPlusAffix.error == false)
                             {
@@ -1485,9 +1545,9 @@ namespace DiscordBot
                                     .AddField("(+4)", $"**[{affixs.affix_details[1].name}]({affixs.affix_details[1].wowhead_url.Replace("wowhead", "ru.wowhead")}): {affixs.affix_details[1].description}**")
                                     .AddField("(+7)", $"**[{affixs.affix_details[2].name}]({affixs.affix_details[2].wowhead_url.Replace("wowhead", "ru.wowhead")}): {affixs.affix_details[2].description}**")
                                     .AddField("(+10)", $"**[{affixs.affix_details[3].name}]({affixs.affix_details[3].wowhead_url.Replace("wowhead", "ru.wowhead")}): {affixs.affix_details[3].description}**");
-                               
+
                                 var chan = discordClient.GetChannel(settings.DiscordAffixChannelId) as IMessageChannel;
-                                 await chan.SendMessageAsync(null, false, builder.Build());
+                                await chan.SendMessageAsync(null, false, builder.Build());
                             }
                             else if (MythicPlusAffix.error == false)
                             {
@@ -1508,7 +1568,7 @@ namespace DiscordBot
 
 
                             builder = new EmbedBuilder().WithTitle($"Тактики для рейда \"Гробница Предвечных\"").WithDescription($"Тактики основанны на данных ПТР серверов")
-                            .WithColor(Color.DarkRed)
+                            .WithColor(Discord.Color.DarkRed)
                             .AddField("Даусинь", $"**[Смотреть](https://youtu.be/8HrWXL6HJsY)**", true)
                             .AddField("Сколекс", $"**[Смотреть](https://youtu.be/XPb6mdIBFuE)**", true)
                             .AddField("Зи'мокс", $"**[Смотреть](https://youtu.be/feouDVYbUdI)**", true)
@@ -1542,7 +1602,7 @@ namespace DiscordBot
                                 builder = new EmbedBuilder()
                                     .WithTitle($"{fullInfo.Name}({fullInfo.Lvl} уровень) {fullInfo.Race}")
                                     .WithUrl(fullInfo.LinkBnet).WithDescription($"Информация о персонаже  :")
-                                    .WithColor(Color.DarkRed).AddField("Уровень\nпредметов:", fullInfo.ILvl, true)
+                                    .WithColor(Discord.Color.DarkRed).AddField("Уровень\nпредметов:", fullInfo.ILvl, true)
                                     .WithImageUrl(fullInfo.ImageCharMainRaw)
                                     .AddField("Класс:", fullInfo.Class, true)
                                     .AddField("Специализация:", fullInfo.Spec, true)
@@ -1571,14 +1631,14 @@ namespace DiscordBot
                         }
                     case "!lastlog":
                         {
-                            var builder = new EmbedBuilder();
-                            var newLog = GuildLogs.GetLogsInfo();
+                            GuildLogs checklogs = new();
+                            var newLog = checklogs.GetLogsInfo();
 
                             if (!newLog.Error)
                             {
 
 
-                                builder = new EmbedBuilder().WithTitle($"Последний загруженный лог от {newLog.Date}").WithDescription($"[Просмотр]({newLog.Link})\n\nИнформация о сражении в **{newLog.Dungeon}** :").WithColor(Color.DarkRed)
+                                var builder = new EmbedBuilder().WithTitle($"Последний загруженный лог от {newLog.Date}").WithDescription($"[Просмотр]({newLog.Link})\n\nИнформация о сражении в **{newLog.Dungeon}** :").WithColor(Discord.Color.DarkRed)
 
                                    .AddField("Боссов убито:", newLog.KillBoss, true)
                                    .AddField("Вайпов:", newLog.WipeBoss, true)
@@ -1605,14 +1665,14 @@ namespace DiscordBot
                             var builder = new EmbedBuilder();
                             var fullInfo = GuildInfo.GetGuildInfo();
 
-                            
+
                             if (!fullInfo.Error)
                             {
-                                
+
                                 builder = new EmbedBuilder()
                                     .WithThumbnailUrl("https://render.worldofwarcraft.com/eu/guild/crest/102/emblem-102-dfa55a-b1002e.jpg")
                                     .WithDescription($"Информация о Гильдии : **{fullInfo.Name}**")
-                                    .WithColor(Color.DarkRed).AddField("Лидер:", fullInfo.Leader, true)
+                                    .WithColor(Discord.Color.DarkRed).AddField("Лидер:", fullInfo.Leader, true)
                                     .AddField("Членов гильдии:", fullInfo.MemberCount, true)
                                     .AddField("Достижения:", fullInfo.Achievement, true)
                                     .AddField("Рейд Прогресс:", fullInfo.RAidFull, true)
@@ -1644,12 +1704,12 @@ namespace DiscordBot
                                     .WithThumbnailUrl("https://render.worldofwarcraft.com/eu/guild/crest/102/emblem-102-dfa55a-b1002e.jpg")
                                     .WithTitle("Состав рейд-статика")
                                     .WithDescription(Static.description)
-                                    .WithColor(Color.DarkRed)
+                                    .WithColor(Discord.Color.DarkRed)
                                     .AddField("Средний Илвл статика:", Static.middleIlvl, false)
                                     .AddField("Танки:", Static.tank, false)
                                     .AddField("Хилы:", Static.heal, false)
                                     .AddField("Рдд:", Static.rdd, false)
-                                    .AddField("Мдд", Static.mdd, false)
+                                    .AddField("Мдд:", Static.mdd, false)
                                     .WithFooter(footer => footer.Text = $"Гильдия \"Сердце греха\".\nОбновлено: {DateTime.Now} (+4 Мск) ");
                             await discordClient.GetGuild(settings.DiscordMainChatId).GetTextChannel(944575829105594438).ModifyMessageAsync(944583210434719775, msg => msg.Embed = builder.Build());
                             await msg.DeleteAsync();
@@ -1668,14 +1728,14 @@ namespace DiscordBot
                                     .WithThumbnailUrl("https://render.worldofwarcraft.com/eu/guild/crest/102/emblem-102-dfa55a-b1002e.jpg")
                                     .WithTitle("Состав рейд-статика")
                                     .WithDescription(Static.description)
-                                    .WithColor(Color.DarkRed)
+                                    .WithColor(Discord.Color.DarkRed)
                                     .AddField("Средний Илвл статика:", Static.middleIlvl, false)
                                     .AddField("Танки:", Static.tank, false)
                                     .AddField("Хилы:", Static.heal, false)
                                     .AddField("Рдд:", Static.rdd, false)
-                                    .AddField("Мдд", Static.mdd, false)
+                                    .AddField("Мдд:", Static.mdd, false)
                                     .WithFooter(footer => footer.Text = $"Гильдия \"Сердце греха\".\nОбновлено: {DateTime.Now} (+4 Мск) ");
-                          await  discordClient.GetGuild(settings.DiscordMainChatId).GetTextChannel(944575829105594438).ModifyMessageAsync(944583210434719775, msg => msg.Embed = builder.Build());
+                            await discordClient.GetGuild(settings.DiscordMainChatId).GetTextChannel(944575829105594438).ModifyMessageAsync(944583210434719775, msg => msg.Embed = builder.Build());
                             await msg.DeleteAsync();
 
                             break;
@@ -1692,12 +1752,12 @@ namespace DiscordBot
                                     .WithThumbnailUrl("https://render.worldofwarcraft.com/eu/guild/crest/102/emblem-102-dfa55a-b1002e.jpg")
                                     .WithTitle("Состав рейд-статика")
                                     .WithDescription(Static.description)
-                                    .WithColor(Color.DarkRed)
+                                    .WithColor(Discord.Color.DarkRed)
                                     .AddField("Средний Илвл статика:", Static.middleIlvl, false)
                                     .AddField("Танки:", Static.tank, false)
                                     .AddField("Хилы:", Static.heal, false)
                                     .AddField("Рдд:", Static.rdd, false)
-                                    .AddField("Мдд", Static.mdd, false)
+                                    .AddField("Мдд:", Static.mdd, false)
                                     .WithFooter(footer => footer.Text = $"Гильдия \"Сердце греха\".\nОбновлено: {DateTime.Now} (+4 Мск) ");
                             await discordClient.GetGuild(settings.DiscordMainChatId).GetTextChannel(944575829105594438).ModifyMessageAsync(944583210434719775, msg => msg.Embed = builder.Build());
                             await msg.DeleteAsync();
@@ -1707,58 +1767,58 @@ namespace DiscordBot
                 }
             return Task.CompletedTask;
         }
-        private async void HandlerTelegramCommands(Message message)
-        {
-            switch (message.Text)
-            {
-                case "/test":
-                    {
-                        await telegramClient.SendTextMessageAsync(
-               message.Chat,
-               $"Still have to process {updateReceiver.PendingUpdates} updates {message.AuthorSignature}"
-           );
-                        break;
-                    }
-                case var s when s.Contains("/guild") || s.Contains("/гильдия"):
-                    {
-                      
-                        var fullInfo = GuildInfo.GetGuildInfo();
+        /*   private async void HandlerTelegramCommands(Message message)
+           {
+               switch (message.Text)
+               {
+                   case "/test":
+                       {
+                           await telegramClient.SendTextMessageAsync(
+                  message.Chat,
+                  $"Still have to process {updateReceiver.PendingUpdates} updates {message.AuthorSignature}"
+              );
+                           break;
+                       }
+                   case var s when s.Contains("/guild") || s.Contains("/гильдия"):
+                       {
 
-                        
-                        if (!fullInfo.Error)
-                        {
-                            
-                           
-                            await telegramClient.SendPhotoAsync(
-                                      message.Chat,
-                                      photo: "https://render.worldofwarcraft.com/eu/guild/crest/102/emblem-102-dfa55a-b1002e.jpg",
-                                      caption: $"Информация о Гильдии : <b>{fullInfo.Name}</b>" +
-                                $"\nФракция: <b>{fullInfo.Faction}</b>" +
-                                $"\nЛидер: <b>{fullInfo.Leader}</b>" +
-                                $"\nЧленов гильдии: <b>{fullInfo.MemberCount}</b>" +
-                                $"\nДостижения: <b>{fullInfo.Achievement}</b>" +
-                                $"\nРейд Прогресс: <b>{fullInfo.RaidProgress}</b>" +
-                                $"\nМесто: <b>{fullInfo.RaidRankRealm.Replace("**Сервер**:","")}</b>" +
-                                $"\nОснована: <b>{fullInfo.TimeCreate}</b>"
-                                , parseMode: ParseMode.Html);
-                        }
-                        else
-                        {
-
-                            await telegramClient.SendTextMessageAsync(
-                                       message.Chat, "<b>Ошибка</b>\nПроблема на сервере.\nПопробуй позже.", parseMode: ParseMode.Html);
-                        }
+                           var fullInfo = GuildInfo.GetGuildInfo();
 
 
+                           if (!fullInfo.Error)
+                           {
 
-                        
-                                
 
-                        break;
-                    }
-            }
+                               await telegramClient.SendPhotoAsync(
+                                         message.Chat,
+                                         photo: "https://render.worldofwarcraft.com/eu/guild/crest/102/emblem-102-dfa55a-b1002e.jpg",
+                                         caption: $"Информация о Гильдии : <b>{fullInfo.Name}</b>" +
+                                   $"\nФракция: <b>{fullInfo.Faction}</b>" +
+                                   $"\nЛидер: <b>{fullInfo.Leader}</b>" +
+                                   $"\nЧленов гильдии: <b>{fullInfo.MemberCount}</b>" +
+                                   $"\nДостижения: <b>{fullInfo.Achievement}</b>" +
+                                   $"\nРейд Прогресс: <b>{fullInfo.RaidProgress}</b>" +
+                                   $"\nМесто: <b>{fullInfo.RaidRankRealm.Replace("**Сервер**:","")}</b>" +
+                                   $"\nОснована: <b>{fullInfo.TimeCreate}</b>"
+                                   , parseMode: ParseMode.Html);
+                           }
+                           else
+                           {
 
-        }
+                               await telegramClient.SendTextMessageAsync(
+                                          message.Chat, "<b>Ошибка</b>\nПроблема на сервере.\nПопробуй позже.", parseMode: ParseMode.Html);
+                           }
+
+
+
+
+
+
+                           break;
+                       }
+               }
+
+          }*/
         public static string tokenWow;
 
         class Token_for_api
@@ -1808,8 +1868,8 @@ namespace DiscordBot
         }
         public class UserDiscord
         {
-           public ulong ID { get; set; }
-            public  string Name { get; set; }
+            public ulong ID { get; set; }
+            public string Name { get; set; }
         }
         private static async void AutorizationsBattleNet()
         {
