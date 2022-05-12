@@ -201,17 +201,29 @@ namespace DiscordBot
             if (type == "error")
             {
                 Console.ForegroundColor = ConsoleColor.Red;
-                Console.WriteLine($"{DateTime.Now} :: {type}\n      {message}\n");
+                Console.WriteLine("----------------------------");
+                Console.WriteLine($"{DateTime.Now} :: {type}");
+                Console.WriteLine($"{message}");
+                Console.WriteLine("----------------------------");
+                Console.ForegroundColor = ConsoleColor.Green;
             }
             else if (type == "notification")
             {
                 Console.ForegroundColor = ConsoleColor.Green;
-                Console.WriteLine($"{DateTime.Now} :: {type}\n      {message}\n");
+                Console.WriteLine("----------------------------");
+                Console.WriteLine($"{DateTime.Now} :: {type}");
+                Console.WriteLine($"{message}");
+                Console.WriteLine("----------------------------");
+                Console.ForegroundColor = ConsoleColor.Green;
             }
             else if (type == "command")
             {
                 Console.ForegroundColor = ConsoleColor.White;
-                Console.WriteLine($"{DateTime.Now} :: {type}\n      {message}\n");
+                Console.WriteLine("----------------------------");
+                Console.WriteLine($"{DateTime.Now} :: {type}");
+                Console.WriteLine($"{message}");
+                Console.WriteLine("----------------------------");
+                Console.ForegroundColor = ConsoleColor.Green;
             }
         }
 
@@ -236,7 +248,7 @@ namespace DiscordBot
                     };
 
                     await System.Text.Json.JsonSerializer.SerializeAsync(fs, data, options);
-                    WriteLogs($"Запись {filename} прошла успешно", "notification");
+                 //   WriteLogs($"Запись {filename} прошла успешно", "notification");
 
                     fs.Close();
 

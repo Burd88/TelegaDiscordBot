@@ -113,17 +113,20 @@ namespace DiscordBot
 
                                 for (int i = 0; i < activity.activities.Count; i++)
                                 {
-
-                                    if (activity.activities[i].activity.type == "CHARACTER_ACHIEVEMENT")
+                                    if (Convert.ToInt64(activity.activities[i].timestamp) > settings.LastGuildActiveTime)
                                     {
-                                        GetGuildActivityInfo(activity.activities[i].character_achievement.character.name, activity.activities[i].character_achievement.achievement.name, Convert.ToInt64(activity.activities[i].timestamp), activity.activities[i].character_achievement.achievement.key.href, "CHARACTER_ACHIEVEMENT");
 
-                                    }
-                                    else if (activity.activities[i].activity.type == "ENCOUNTER")
-                                    {
-                                        GetGuildActivityInfo(activity.activities[i].encounter_completed.encounter.name, activity.activities[i].encounter_completed.mode.name, Convert.ToInt64(activity.activities[i].timestamp), activity.activities[i].encounter_completed.encounter.key.href, "ENCOUNTER");
+                                        if (activity.activities[i].activity.type == "CHARACTER_ACHIEVEMENT")
+                                        {
+                                            GetGuildActivityInfo(activity.activities[i].character_achievement.character.name, activity.activities[i].character_achievement.achievement.name, Convert.ToInt64(activity.activities[i].timestamp), activity.activities[i].character_achievement.achievement.key.href, "CHARACTER_ACHIEVEMENT");
+
+                                        }
+                                        else if (activity.activities[i].activity.type == "ENCOUNTER")
+                                        {
+                                            GetGuildActivityInfo(activity.activities[i].encounter_completed.encounter.name, activity.activities[i].encounter_completed.mode.name, Convert.ToInt64(activity.activities[i].timestamp), activity.activities[i].encounter_completed.encounter.key.href, "ENCOUNTER");
 
 
+                                        }
                                     }
 
                                 }

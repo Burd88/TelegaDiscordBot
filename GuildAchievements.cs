@@ -110,8 +110,11 @@ namespace DiscordBot
 
                                 for (int i = 0; i < achievementsAll.recent_events.Count; i++)
                                 {
-
-                                    GetGuildAchievementsRU(achievementsAll.recent_events[i].achievement.key.href, achievementsAll.recent_events[i].timestamp.ToString());
+                                    if (Convert.ToInt64(achievementsAll.recent_events[i].timestamp) > settings.LastGuildAchiveTime)
+                                    {
+                                        GetGuildAchievementsRU(achievementsAll.recent_events[i].achievement.key.href, achievementsAll.recent_events[i].timestamp.ToString());
+                                    }
+                                   
 
 
                                 }

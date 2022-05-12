@@ -1091,7 +1091,7 @@ namespace DiscordBot
                     var roleNewbie = discordClient.GetGuild(settings.DiscordMainChatId).Roles.FirstOrDefault(x => x.Name == "Новичок").Id;
                     var roleAdmin = discordClient.GetGuild(settings.DiscordMainChatId).Roles.FirstOrDefault(x => x.Name == "Админ").Id;
                     var roleTest = discordClient.GetGuild(settings.DiscordMainChatId).Roles.FirstOrDefault(x => x.Name == "Тест").Id;
-                    List<ulong> roleList = new() { roleGuildMaster, roleLieutenant, roleOfficer, roleRaider, roleVeteran, roleWarrior, roleNewbie, roleTwink };
+                    List<ulong> roleList = new() { roleGuildMaster, roleLieutenant, roleOfficer, roleRaider, roleVeteran, roleWarrior, roleTwink, roleNewbie};
 
                     foreach (IGuildUser us in user)
                     {
@@ -1105,7 +1105,7 @@ namespace DiscordBot
 
                                     if (us.Nickname != null)
                                     {
-                                        var nick = rosterGuild.Find(x => us.Nickname.Contains(x.Name));
+                                        var nick = rosterGuild.Find(x => us.Nickname.ToLower().Contains(x.Name.ToLower()));
 
                                         if (nick != null)
                                         {
@@ -1192,7 +1192,7 @@ namespace DiscordBot
                                     }
                                     else
                                     {
-                                        var name = rosterGuild.Find(x => us.Username.Contains(x.Name));
+                                        var name = rosterGuild.Find(x => us.Username.ToLower().Contains(x.Name.ToLower()));
 
                                         if (name != null)
                                         {
@@ -1895,8 +1895,8 @@ namespace DiscordBot
 
                         tokenWow = my_token.access_token;
 
-                        Console.ForegroundColor = ConsoleColor.Green;
-                        Console.WriteLine($"Battle.net Token success : {tokenWow}");
+                       // Console.ForegroundColor = ConsoleColor.Green;
+                   //     Console.WriteLine($"Battle.net Token success : {tokenWow}");
                         Functions.LoadRealmAll();
 
 
