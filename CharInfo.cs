@@ -93,7 +93,7 @@ namespace DiscordBot
                             {
                                 _charInfo.ILvl = character.equipped_item_level.ToString();
                             }
-                            _charInfo.Name = "**" + character.name + "**";
+                            _charInfo.Name =character.name;
                             if (character.active_spec != null)
                             {
                                 _charInfo.Spec = character.active_spec.name;

@@ -195,7 +195,35 @@ namespace DiscordBot
 
 
         }
+        public static string GetEncounterRu(string text)
+        {
+            try
+            {
+                List<EncounterLang> enconterAll = ReadJson<List<EncounterLang>>("EncounterList").Result;
+                    foreach (EncounterLang enc in enconterAll)
+                {
+                    if (enc.EncounterEN.ToLower() == text.Trim().ToLower())
+                    {
+                        //Console.WriteLine("slug :" + rlm.Slug);
+                        return enc.EncounterRU;
 
+
+
+                    }
+                }
+            }
+            catch (Exception e)
+            {
+
+                string message = $"{e.TargetSite} Error: {e.Message}";
+                WriteLogs(message, "error");
+                return null;
+            }
+            return null;
+
+
+
+        }
         public static void WriteLogs(string message, string type)
         {
             if (type == "error")

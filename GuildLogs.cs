@@ -19,6 +19,9 @@ namespace DiscordBot
         public bool Error { get; set; }
         public long StartTime { get; set; }
         public string ID { get; set; }
+        public List<string> BossKilling { get; set; }
+        public double BestWipeTryPer { get; set; }
+        public string BestWipeTryName { get; set; }
 
         public Log()
         {
@@ -30,6 +33,9 @@ namespace DiscordBot
             RaidTime = "";
             StartTime = 0;
             Error = false;
+            BossKilling = new();
+            BestWipeTryPer = 0.0;
+            BestWipeTryName = "";
         }
     }
 
@@ -59,7 +65,7 @@ namespace DiscordBot
                 _log = new();
 
                 Task<BotSettings> set = Functions.ReadJson<BotSettings>("BotSettings");
-                settings = set.Result;
+                settings =  set.Result;
 
              //   var newlog = CheckNewWowLog();
 
@@ -170,7 +176,7 @@ namespace DiscordBot
                         Warcraftlogs logs = JsonConvert.DeserializeObject<Warcraftlogs>(line);
                         if (logs.logs[0].zone == 29)
                         {
-                            Thread.Sleep(5000);
+                           // Thread.Sleep(5000);
                             GetLogInfo(logs.logs[0].id, logs.logs[0].title, Functions.FromUnixTimeStampToDateTime(logs.logs[0].start).ToString(), $"https://ru.warcraftlogs.com/reports/{logs.logs[0].id}");
                         }
                         else
@@ -207,7 +213,7 @@ namespace DiscordBot
             try
             {
 
-                WebRequest request = WebRequest.Create("https://www.warcraftlogs.com/v1/report/fights/" + id + "?translate=false&api_key=c2c9093c70e642ac6ec003d4b0904c33");
+                WebRequest request = WebRequest.Create("https://www.warcraftlogs.com/v1/report/fights/" + id + "?translate=true&api_key=c2c9093c70e642ac6ec003d4b0904c33");
                 WebResponse responce = request.GetResponse();
 
                 using (Stream stream = responce.GetResponseStream())
@@ -220,9 +226,11 @@ namespace DiscordBot
                         LogInfo log = JsonConvert.DeserializeObject<LogInfo>(line);
 
                         int kills = 0;
+                        
                         int wipe = 0;
                         if (log.fights != null)
                         {
+                           
                             foreach (Fight fight in log.fights)
                             {
                                 if (fight.boss > 0)
@@ -230,10 +238,31 @@ namespace DiscordBot
                                     if (fight.kill == true)
                                     {
                                         kills++;
+                                        _log.BossKilling.Add(Functions.GetEncounterRu(fight.name) + GetModeInst(fight.difficulty));
+                                        _log.BestWipeTryPer = 0.0;
                                     }
                                     else
                                     {
                                         wipe++;
+                                        if (!_log.BossKilling.Contains(fight.name))
+                                        {
+                                            if( _log.BestWipeTryPer == 0.0)
+                                            {
+                                                _log.BestWipeTryPer = Convert.ToDouble(fight.bossPercentage)/100;
+                                                _log.BestWipeTryName =Functions.GetEncounterRu(fight.name)+GetModeInst(fight.difficulty);
+                                            }
+                                            else
+                                            {
+                                                if (Convert.ToDouble(fight.bossPercentage)/100 < _log.BestWipeTryPer)
+                                                {
+                                                    _log.BestWipeTryPer = Convert.ToDouble(fight.bossPercentage)/100;
+                                                    _log.BestWipeTryName = Functions.GetEncounterRu(fight.name) + GetModeInst(fight.difficulty);
+                                                }
+                                            }
+
+
+                                        }
+                                        
                                     }
                                 }
 
@@ -248,6 +277,7 @@ namespace DiscordBot
                             _log.StartTime = log.start;
                             _log.ID = id;
                             _log.Error = false;
+                            
                         }
                         else
                         {
@@ -275,6 +305,24 @@ namespace DiscordBot
                 _log.Error = true;
                 string message = $"GetLogInfo Error: {e.Message}";
                 Functions.WriteLogs(message, "error");
+            }
+        }
+        private string GetModeInst(int? difficulty)
+        {
+            if (difficulty == 3)
+            {
+                return "(Нормал)";
+            }else if (difficulty == 4)
+            {
+                return "(Гер)";
+            }
+            else if (difficulty == 5)
+            {
+                return "(Миф)";
+            }
+            else
+            {
+                return "";
             }
         }
     }

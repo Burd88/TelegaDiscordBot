@@ -5,7 +5,7 @@ using System.Net;
 
 namespace DiscordBot
 {
-    class token
+    class GetToken
     {
         public Token GetTokenPrice()
         {
