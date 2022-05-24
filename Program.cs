@@ -41,7 +41,7 @@ namespace DiscordBot
             int num = 0;
             AutorizationsBattleNet();
             Thread.Sleep(10000);
-            GetEncounter.LoadEncounterAll();
+          //  GetEncounter.LoadEncounterAll();
             settings.RealmSlug = Functions.GetRealmSlug(settings.Realm);
             Console.WriteLine(
                 $"DiscordBotToken : {settings.DiscordBotToken}\n" +
@@ -82,8 +82,8 @@ namespace DiscordBot
             TimerCallback tmAutoriz = new(OnTimerHandlerAutorizationsBattleNet);
             Timer timerAutoriz = new(tmAutoriz, num, 0, 1000 * 60 * 60);
 
-            TimerCallback tmPoolRT = new(OnTimerHandlerPoolRT);
-            Timer timerPoolRT = new(tmPoolRT, num, 0, 1000);
+          //  TimerCallback tmPoolRT = new(OnTimerHandlerPoolRT);
+          //  Timer timerPoolRT = new(tmPoolRT, num, 0, 1000);
 
             TimerCallback tmCheckReboot = new(OnTimerHandlerheckReboot);
             Timer timerheckReboot = new(tmCheckReboot, num, 0, 10000);
@@ -284,7 +284,7 @@ namespace DiscordBot
                             $"\nРейд Прогресс: <b>{fullInfo.RaidProgress}</b>" +
                             $"\nМесто: <b>{fullInfo.RaidRankRealm.Replace("**Сервер**:", "")}</b>" +
                             $"\nОснована: <b>{fullInfo.TimeCreate}</b>"
-                            , parseMode: ParseMode.Html);
+                            , parseMode: ParseMode.Html,disableWebPagePreview:true);
                     }
                     else
                     {
@@ -322,7 +322,7 @@ namespace DiscordBot
                                        $"\n<b><a href =\"https://wowanalyzer.com/report/{newLog.ID}\">WoWAnalyzer</a></b>" +
                                        $"\n<b><a href =\"https://ru.warcraftlogs.com/guild/reports-list/47723/\">Все логи</a></b>";
                                  var keyboard = new InlineKeyboardMarkup(InlineKeyboardButton.WithUrl("Просмотр", newLog.Link));
-                                 await telegramClient.SendTextMessageAsync(chatId, text, replyMarkup: keyboard, parseMode: ParseMode.Html);
+                                 await telegramClient.SendTextMessageAsync(chatId, text, replyMarkup: keyboard, parseMode: ParseMode.Html, disableWebPagePreview: true);
                                  string message = ("Отправленно оповещение о новых загруженных логах гильдии!");
                                  Functions.WriteLogs(message, "notification");
                         }
@@ -691,7 +691,7 @@ namespace DiscordBot
                                 await telegramClient.SendTextMessageAsync(
                                     chatId: settings.TelegramMainChatID,
                                     text: text,
-                                    parseMode: ParseMode.Html);
+                                    parseMode: ParseMode.Html, disableWebPagePreview: true);
                             }
 
 
@@ -829,7 +829,7 @@ namespace DiscordBot
                                     await telegramClient.SendTextMessageAsync(
                                      chatId: settings.TelegramMainChatID,
                                      text: $"Всё збс, это <b>Достижение</b>!\nКальпа <a href =\"https://www.youtube.com/watch?v=d-diB65scQU&ab_channel=BobbyMcFerrinVEVO\">Don't Worry Be Happy</a>\nПолучил: <b>{activ.Name}</b>\nНазвание: {activ.Mode}",
-                                     parseMode: ParseMode.Html);
+                                     parseMode: ParseMode.Html, disableWebPagePreview: true);
                                 }
                             }
                             else
@@ -854,7 +854,7 @@ namespace DiscordBot
                                         await telegramClient.SendTextMessageAsync(
                                    chatId: settings.TelegramMainChatID,
                                    text: $"Всё збс, это <b>Достижение</b>!\nКальпа <a href =\"https://www.youtube.com/watch?v=d-diB65scQU&ab_channel=BobbyMcFerrinVEVO\">Don't Worry Be Happy</a>\nПолучил: <b>{activ.Name}</b>\nНазвание: {activ.Mode}\nКатегоря: {activ.Categor}",
-                                   parseMode: ParseMode.Html);
+                                   parseMode: ParseMode.Html, disableWebPagePreview: true);
                                     }
 
                                 }
@@ -880,7 +880,7 @@ namespace DiscordBot
                                         await telegramClient.SendTextMessageAsync(
                                    chatId: settings.TelegramMainChatID,
                                    text: $"Всё збс, это <b>Достижение</b>!\nКальпа <a href =\"https://www.youtube.com/watch?v=d-diB65scQU&ab_channel=BobbyMcFerrinVEVO\">Don't Worry Be Happy</a>\nПолучил: <b>{activ.Name}</b>\nНазвание: {activ.Mode}\nКатегоря: {activ.Categor}\nНаграда: {activ.Award}",
-                                   parseMode: ParseMode.Html);
+                                   parseMode: ParseMode.Html, disableWebPagePreview: true);
                                     }
                                 }
 
@@ -904,7 +904,7 @@ namespace DiscordBot
                                 await telegramClient.SendTextMessageAsync(
                                    chatId: settings.TelegramMainChatID,
                                    text: $"<b>Гильдия одержала победу!</b>\nБосс: {activ.Mode}\nРежим: {activ.Categor}"
-                                   , parseMode: ParseMode.Html
+                                   , parseMode: ParseMode.Html, disableWebPagePreview: true
                                    );
                             }
                             else if (activ.Icon != null)
@@ -980,7 +980,7 @@ namespace DiscordBot
                       //   .AddField("Ссылка на все логи:", $"[Просмотр](https://ru.warcraftlogs.com/guild/reports-list/47723/)", true)
                          .WithFooter(footer => footer.Text = $"Гильдия \"Сердце греха\".\nОбновлено: {DateTime.Now} (+4 Мск) ");
                     await discordClient.GetGuild(settings.DiscordMainChatId).GetTextChannel(settings.DiscordLogChannelId).ModifyMessageAsync(958994640487481396, msg => msg.Embed = builder.Build());
-                    /*
+                    /*958994640487481396
                      GuildLogs checklogs = new();
                      var newLog = checklogs.GetGuildLogChange();
                      if (newLog != null)
