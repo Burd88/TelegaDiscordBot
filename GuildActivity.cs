@@ -52,7 +52,7 @@ namespace DiscordBot
                         if (newActivity.Count != 0)
                         {
                             var last = newActivity.Max(after => after.Time);
-                            Console.WriteLine($"LastGuildActiveTime write new : {last}\n");
+                           // Console.WriteLine($"LastGuildActiveTime write new : {last}\n");
                             Functions.WriteJSon<List<Activity>>(afterActivity, "BeforeGuildActivity");
                             settings.LastGuildActiveTime = last;
                             Functions.WriteJSon(settings, "BotSettings");
@@ -64,7 +64,7 @@ namespace DiscordBot
                 else
                 {
                     var last = afterActivity.Max(after => after.Time);
-                    Console.WriteLine($"LastGuildActiveTime write : {last}\n");
+                    //Console.WriteLine($"LastGuildActiveTime write : {last}\n");
                     settings.LastGuildActiveTime = last;
                     Functions.WriteJSon<List<Activity>>(afterActivity, "BeforeGuildActivity");
                     Functions.WriteJSon(settings, "BotSettings");
