@@ -114,7 +114,7 @@ namespace DiscordBot
                                     {
                                         GetGuildAchievementsRU(achievementsAll.recent_events[i].achievement.key.href, achievementsAll.recent_events[i].timestamp.ToString());
                                     }
-                                   
+
 
 
                                 }
@@ -309,7 +309,7 @@ namespace DiscordBot
         public int? amount { get; set; }
     }
 
-    public class Achievement1
+    public class AchievementBN
     {
         public int id { get; set; }
         public Achievement2 achievement { get; set; }
@@ -317,16 +317,11 @@ namespace DiscordBot
         public object completed_timestamp { get; set; }
     }
 
-    public class Category1
-    {
-        public Key key { get; set; }
-        public string name { get; set; }
-        public int id { get; set; }
-    }
+
 
     public class CategoryProgress
     {
-        public Category1 category { get; set; }
+        public Category category { get; set; }
         public int quantity { get; set; }
         public int points { get; set; }
     }
@@ -343,7 +338,7 @@ namespace DiscordBot
         public Guild1 guild { get; set; }
         public int total_quantity { get; set; }
         public int total_points { get; set; }
-        public List<Achievement1> achievements { get; set; }
+        public List<AchievementBN> achievements { get; set; }
         public List<CategoryProgress> category_progress { get; set; }
         public List<RecentEvent> recent_events { get; set; }
     }

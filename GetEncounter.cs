@@ -2,10 +2,7 @@
 using System;
 using System.Collections.Generic;
 using System.IO;
-using System.Linq;
 using System.Net;
-using System.Text;
-using System.Threading.Tasks;
 
 namespace DiscordBot
 {
@@ -65,9 +62,9 @@ namespace DiscordBot
 
             try
             {
-               
 
-                WebRequest requestchar = WebRequest.Create(link+ "&access_token=" + Program.tokenWow);
+
+                WebRequest requestchar = WebRequest.Create(link + "&access_token=" + Program.tokenWow);
 
                 WebResponse responcechar = requestchar.GetResponse();
 
@@ -92,7 +89,7 @@ namespace DiscordBot
                         }
                     }
                 }
-                
+
             }
             catch (Exception e)
             {
@@ -100,7 +97,7 @@ namespace DiscordBot
             }
         }
     }
- 
+
     public class EncounterAll
     {
         public Links _links { get; set; }
@@ -130,23 +127,19 @@ namespace DiscordBot
         public string zh_CN { get; set; }
     }
 
-    public class CategoryEn
+    public class CategoryLow
     {
         public string type { get; set; }
     }
 
-    public class CreatureEn
+    public class CreatureNameLocals
     {
         public int id { get; set; }
         public Name name { get; set; }
         public CreatureDisplay creature_display { get; set; }
     }
 
-    public class CreatureDisplayEn
-    {
-        public Key key { get; set; }
-        public int id { get; set; }
-    }
+
 
     public class Description
     {
@@ -164,28 +157,28 @@ namespace DiscordBot
         public string zh_CN { get; set; }
     }
 
-    public class InstanceEn
+    public class InstanceNameLocals
     {
         public Key key { get; set; }
         public Name name { get; set; }
         public int id { get; set; }
     }
 
-    public class ItemEn
+    public class ItemLocals
     {
         public int id { get; set; }
-        public ItemEn2 item { get; set; }
+        public ItemNameLocals item { get; set; }
     }
 
-    public class ItemEn2
+    public class ItemNameLocals
     {
         public Key key { get; set; }
         public Name name { get; set; }
         public int id { get; set; }
     }
 
-   
-    public class ModeEn
+
+    public class ModeNameLocals
     {
         public string type { get; set; }
         public Name name { get; set; }
@@ -213,27 +206,27 @@ namespace DiscordBot
         public int id { get; set; }
         public Name name { get; set; }
         public Description description { get; set; }
-        public List<CreatureEn> creatures { get; set; }
-        public List<ItemEn> items { get; set; }
-        public List<SectionEn> sections { get; set; }
-        public InstanceEn instance { get; set; }
-        public CategoryEn category { get; set; }
-        public List<ModeEn> modes { get; set; }
+        public List<CreatureNameLocals> creatures { get; set; }
+        public List<ItemLocals> items { get; set; }
+        public List<SectionLocals> sections { get; set; }
+        public InstanceNameLocals instance { get; set; }
+        public CategoryLow category { get; set; }
+        public List<ModeNameLocals> modes { get; set; }
     }
 
-    public class SectionEn
+    public class SectionLocals
     {
         public int id { get; set; }
         public Title title { get; set; }
         public BodyText body_text { get; set; }
-        public List<SectionEn> sections { get; set; }
-        public CreatureDisplayEn creature_display { get; set; }
-        public SpellEn spell { get; set; }
+        public List<SectionLocals> sections { get; set; }
+        public CreatureDisplay creature_display { get; set; }
+        public SpellLocals spell { get; set; }
     }
 
-    
 
-    public class SpellEn
+
+    public class SpellLocals
     {
         public Key key { get; set; }
         public Name name { get; set; }

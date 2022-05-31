@@ -1,8 +1,6 @@
 ﻿using Newtonsoft.Json;
 using System;
 using System.Collections.Generic;
-using System.IO;
-using System.Net;
 using static DiscordBot.Functions;
 using static DiscordBot.Program;
 
@@ -12,8 +10,7 @@ namespace DiscordBot
     {
 
         private CharInfoAll _charInfo;
-        // private static string name = "";
-        // private static string realm ="";
+
         public CharInfoAll GetCharInfo(string name)
         {
             _charInfo = new();
@@ -21,126 +18,81 @@ namespace DiscordBot
             if (!_charInfo.Error)
             {
                 return _charInfo;
-
-
             }
             else
             {
                 return null;
             }
         }
-
-
         private void GetLinkForChar(string text)
         {
-
             if (text.Contains("-"))
             {
-
                 string[] str = text.Split("-");
                 foreach (RealmList rlm in Functions.Realms)
                 {
                     if (rlm.Name.ToLower() == str[1].ToLower())
                     {
-
-                        Character_info(str[0], rlm.Slug);
-
-
+                        GetCharacterMainInfo(str[0], rlm.Slug);
                     }
                 }
-
             }
             else
             {
-
-                Character_info(text, settings.RealmSlug);
-
-
-
-
-
-
-
-
+                GetCharacterMainInfo(text, settings.RealmSlug);
             }
         }
-        private void Character_info(string name, string realm)
+        private void GetCharacterMainInfo(string name, string realm)
         {
-
-            try
+            string mainLink = $"https://eu.api.blizzard.com/profile/wow/character/{realm}/{name.ToLower()}?namespace=profile-eu&locale=ru_RU&access_token={tokenWow}";
+            Root_charackter_full_info character = GetWebJson<Root_charackter_full_info>(mainLink);
+            if (character != null)
             {
-
-                WebRequest requestchar = WebRequest.Create($"https://eu.api.blizzard.com/profile/wow/character/{realm}/{name.ToLower()}?namespace=profile-eu&locale=ru_RU&access_token={tokenWow}");
-
-                WebResponse responcechar = requestchar.GetResponse();
-
-                using (Stream stream1 = responcechar.GetResponseStream())
-
+                if (character.equipped_item_level.ToString() == "error")
                 {
-                    using (StreamReader reader1 = new StreamReader(stream1))
-                    {
-                        string line = "";
-                        while ((line = reader1.ReadLine()) != null)
-                        {
-                            Root_charackter_full_info character = JsonConvert.DeserializeObject<Root_charackter_full_info>(line);
-
-
-                            if (character.equipped_item_level.ToString() == "error")
-                            {
-                                _charInfo.ILvl = "0";
-                            }
-                            else
-                            {
-                                _charInfo.ILvl = character.equipped_item_level.ToString();
-                            }
-                            _charInfo.Name =character.name;
-                            if (character.active_spec != null)
-                            {
-                                _charInfo.Spec = character.active_spec.name;
-
-                            }
-                            if (character.character_class != null)
-                            {
-                                _charInfo.Class = character.character_class.name;
-                            }
-                            if (character.guild != null)
-                            {
-                                _charInfo.Guild = character.guild.name;
-                            }
-                            _charInfo.Race = character.race.name;
-                            _charInfo.Lvl = character.level.ToString();
-
-                            _charInfo.LastLogin = relative_time(FromUnixTimeStampToDateTime(character.last_login_timestamp.ToString()));
-                            if (line.Contains("\"covenant_progress\":"))
-                            {
-                                _charInfo.Coven = GetCoven(character.covenant_progress.chosen_covenant.id.ToString()) + " (" + character.covenant_progress.renown_level.ToString() + ")";
-                            }
-
-                            GetSoulbindsCharacter(character.name, realm);
-                            Character_raid_progress(character.name, realm);
-                            GetCharMedia(character.name, realm);
-                            GetCharSet(character.name, realm);
-                            GetCharStats(character.name, realm);
-                        }
-                    }
+                    _charInfo.ILvl = "0";
                 }
-                responcechar.Close();
-                _charInfo.Error = false;
-            }
-            catch (WebException e)
-            {
-                if (e.Status == WebExceptionStatus.ProtocolError)
+                else
                 {
-                    _charInfo.Error = true;
-                    string message = $"\nGetCharInvLeave Error: {e.Message}";
-                    Functions.WriteLogs(message, "error");
+                    _charInfo.ILvl = character.equipped_item_level.ToString();
                 }
+                _charInfo.Name = character.name;
+                if (character.active_spec != null)
+                {
+                    _charInfo.Spec = character.active_spec.name;
+
+                }
+                if (character.character_class != null)
+                {
+                    _charInfo.Class = character.character_class.name;
+                }
+                if (character.guild != null)
+                {
+                    _charInfo.Guild = character.guild.name;
+                }
+                _charInfo.Race = character.race.name;
+                _charInfo.Lvl = character.level.ToString();
+
+                _charInfo.LastLogin = relative_time(FromUnixTimeStampToDateTime(character.last_login_timestamp.ToString()));
+                if (character.covenant_progress != null)
+                {
+                    _charInfo.Coven = GetCoven(character.covenant_progress.chosen_covenant.id.ToString()) + " (" + character.covenant_progress.renown_level.ToString() + ")";
+                }
+
+                string soulbindsLink = $"https://eu.api.blizzard.com/profile/wow/character/{realm}/{name.ToLower()}/soulbinds?namespace=profile-eu&locale=ru_RU&access_token={tokenWow}";
+                string raidLink = $"https://raider.io/api/v1/characters/profile?region=eu&realm={realm}&name={Char.ToUpper(name[0]) + name.Substring(1).ToLower()}&fields=mythic_plus_scores%2Craid_progression";
+                string mediaLink = $"https://eu.api.blizzard.com/profile/wow/character/{realm}/{name.ToLower()}/character-media?namespace=profile-eu&locale=ru_RU&access_token={tokenWow}";
+                string setLink = $"https://eu.api.blizzard.com/profile/wow/character/{realm}/{name.ToLower()}/equipment?namespace=profile-eu&locale=ru_RU&access_token={tokenWow}";
+                string statsLink = $"https://eu.api.blizzard.com/profile/wow/character/{realm}/{name.ToLower()}/statistics?namespace=profile-eu&locale=ru_RU&access_token={tokenWow}";
+                GetSoulbindsCharacter(soulbindsLink);
+                Character_raid_progress(raidLink);
+                GetCharMedia(mediaLink, realm, name);
+                GetCharSet(setLink);
+                GetCharStats(statsLink);
             }
-            catch (Exception e)
+            else
             {
                 _charInfo.Error = true;
-                string message = $"GetCharInvLeave Error: {e.Message}";
-                Functions.WriteLogs(message, "error");
             }
         }
         private string GetCoven(string id)
@@ -163,295 +115,91 @@ namespace DiscordBot
             }
             return "";
         }
-
-        private void GetSoulbindsCharacter(string name, string realm)
+        private void GetSoulbindsCharacter(string link)
         {
-
-            try
+            CharacterSoulbindsAll allSoulbinds = GetWebJson<CharacterSoulbindsAll>(link);
+            if (allSoulbinds != null)
             {
-                WebRequest request = WebRequest.Create($"https://eu.api.blizzard.com/profile/wow/character/{realm}/{name.ToLower()}/soulbinds?namespace=profile-eu&locale=ru_RU&access_token={tokenWow}");
-                WebResponse responce = request.GetResponse();
-
-                using (Stream stream = responce.GetResponseStream())
-
+                if (allSoulbinds.soulbinds != null)
                 {
-                    using (StreamReader reader = new StreamReader(stream))
+                    foreach (SoulbindSoulbinds soulbinds in allSoulbinds.soulbinds)
                     {
-                        string line = "";
-                        while ((line = reader.ReadLine()) != null)
+                        if (soulbinds.is_active == true)
                         {
-
-                            CharacterSoulbindsAll allSoulbinds = JsonConvert.DeserializeObject<CharacterSoulbindsAll>(line);
-                            if (allSoulbinds.soulbinds != null)
-                            {
-                                foreach (SoulbindSoulbinds soulbinds in allSoulbinds.soulbinds)
-                                {
-
-                                    if (soulbinds.is_active == true)
-                                    {
-                                        _charInfo.CovenSoul = soulbinds.soulbind.name;
-
-
-
-
-
-                                    }
-
-                                }
-                            }
-
+                            _charInfo.CovenSoul = soulbinds.soulbind.name;
                         }
                     }
                 }
-                responce.Close();
-                _charInfo.Error = false;
-            }
-            catch (WebException e)
-            {
-                if (e.Status == WebExceptionStatus.ProtocolError)
-                {
-                    _charInfo.Error = true;
-                    string message = $"\nGetSoulbindsCharacter Error: {e.Message}";
-                    Functions.WriteLogs(message, "error");
-                }
-            }
-            catch (Exception e)
-            {
-                _charInfo.Error = true;
-                string message = $"GetSoulbindsCharacter Error: {e.Message}";
-                Functions.WriteLogs(message, "error");
-            }
-
-
-        }
-        private void Character_raid_progress(string name, string realm)
-        {
-
-            try
-            {
-                WebRequest requestchar = WebRequest.Create($"https://raider.io/api/v1/characters/profile?region=eu&realm={realm}&name={name}&fields=mythic_plus_scores%2Craid_progression");
-
-                WebResponse responcechar = requestchar.GetResponse();
-
-                using (Stream stream1 = responcechar.GetResponseStream())
-
-                {
-                    using (StreamReader reader1 = new StreamReader(stream1))
-                    {
-                        string line = "";
-                        while ((line = reader1.ReadLine()) != null)
-                        {
-                            RaiderIO_info character = JsonConvert.DeserializeObject<RaiderIO_info>(line);
-
-                            _charInfo.RaidProgress = character.raid_progression.SepulcherOfTheFirstOnes.summary;
-                            _charInfo.MythicPlus = character.mythic_plus_scores.all;
-                        }
-                    }
-                }
-                responcechar.Close();
-                _charInfo.Error = false;
-            }
-            catch (WebException e)
-            {
-                if (e.Status == WebExceptionStatus.ProtocolError)
-                {
-                    _charInfo.Error = true;
-                    string message = $"\nCharacter_raid_progress Error: {e.Message}";
-                    Functions.WriteLogs(message, "error");
-                }
-            }
-            catch (Exception e)
-            {
-                _charInfo.Error = true;
-                string message = $"Character_raid_progress Error: {e.Message}";
-                Functions.WriteLogs(message, "error");
             }
         }
-        private void GetCharMedia(string name, string realm)
+        private void Character_raid_progress(string link)
         {
 
-
-            try
+            RaiderIO_info character = GetWebJson<RaiderIO_info>(link);
+            if (character != null)
             {
-                WebRequest request = WebRequest.Create($"https://eu.api.blizzard.com/profile/wow/character/{realm}/{name.ToLower()}/character-media?namespace=profile-eu&locale=ru_RU&access_token={tokenWow}");
-                WebResponse responce = request.GetResponse();
-
-                using (Stream stream = responce.GetResponseStream())
-
-                {
-                    using (StreamReader reader = new StreamReader(stream))
-                    {
-                        string line = "";
-                        while ((line = reader.ReadLine()) != null)
-                        {
-
-
-                            CharMedia charMedia = JsonConvert.DeserializeObject<CharMedia>(line);
-
-
-                            foreach (AssetCM media in charMedia.assets)
-                            {
-                                // Console.WriteLine(media.key);
-                                if (media.key == "main-raw")
-                                    _charInfo.ImageCharMainRaw = media.value;
-                                else if (media.key == "main")
-                                    _charInfo.ImageCharMain = media.value;
-                                else if (media.key == "avatar")
-                                    _charInfo.ImageCharAvatar = media.value;
-                                else if (media.key == "inset")
-                                    _charInfo.ImageCharInset = media.value;
-                            }
-
-
-                            string lnk = $"https://worldofwarcraft.com/ru-ru/character/eu/{realm}/{name.ToLower()}";
-                            _charInfo.LinkBnet = lnk;
-
-                        }
-                    }
-                }
-                responce.Close();
-                _charInfo.Error = false;
+                _charInfo.RaidProgress = character.raid_progression.SepulcherOfTheFirstOnes.summary;
+                _charInfo.MythicPlus = character.mythic_plus_scores.all;
             }
-            catch (WebException e)
-            {
-                if (e.Status == WebExceptionStatus.ProtocolError)
-                {
-                    _charInfo.Error = true;
-                    string message = $"\nGetCharMedia Error: {e.Message}";
-                    Functions.WriteLogs(message, "error");
-                }
-            }
-            catch (Exception e)
-            {
-                _charInfo.Error = true;
-                string message = $"GetCharMedia Error: {e.Message}";
-                Functions.WriteLogs(message, "error");
-            }
-
 
         }
-
-        private void GetCharSet(string name, string realm)
+        private void GetCharMedia(string link, string realm, string name)
         {
-
-
-            try
+            CharMedia charMedia = GetWebJson<CharMedia>(link);
+            if (charMedia != null)
             {
-                WebRequest request = WebRequest.Create($"https://eu.api.blizzard.com/profile/wow/character/{realm}/{name.ToLower()}/equipment?namespace=profile-eu&locale=ru_RU&access_token={tokenWow}");
-                WebResponse responce = request.GetResponse();
-
-                using (Stream stream = responce.GetResponseStream())
-
+                foreach (AssetCM media in charMedia.assets)
                 {
-                    using (StreamReader reader = new StreamReader(stream))
-                    {
-                        string line = "";
-                        while ((line = reader.ReadLine()) != null)
-                        {
-
-
-                            CharEquipAll charEquip = JsonConvert.DeserializeObject<CharEquipAll>(line);
-
-                            if (charEquip.equipped_item_sets != null)
-                            {
-                                foreach (EquippedItemSet setequip in charEquip.equipped_item_sets)
-                                {
-                                    if (setequip.display_string.Contains("/5)"))
-                                    {
-                                        _charInfo.SetcountItem = "Set:**" + setequip.display_string.Replace(setequip.item_set.name, "") + "**" ;
-                                    }
-                                }
-                            }
-                            
-                           
-
-
-                           
-
-                        }
-                    }
+                    // Console.WriteLine(media.key);
+                    if (media.key == "main-raw")
+                        _charInfo.ImageCharMainRaw = media.value;
+                    else if (media.key == "main")
+                        _charInfo.ImageCharMain = media.value;
+                    else if (media.key == "avatar")
+                        _charInfo.ImageCharAvatar = media.value;
+                    else if (media.key == "inset")
+                        _charInfo.ImageCharInset = media.value;
                 }
-                responce.Close();
-                _charInfo.Error = false;
+                string lnk = $"https://worldofwarcraft.com/ru-ru/character/eu/{realm}/{name.ToLower()}";
+                _charInfo.LinkBnet = lnk;
             }
-            catch (WebException e)
-            {
-                if (e.Status == WebExceptionStatus.ProtocolError)
-                {
-                    _charInfo.Error = true;
-                    string message = $"\nGetCharMedia Error: {e.Message}";
-                    Functions.WriteLogs(message, "error");
-                }
-            }
-            catch (Exception e)
-            {
-                _charInfo.Error = true;
-                string message = $"GetCharMedia Error: {e.Message}";
-                Functions.WriteLogs(message, "error");
-            }
-
-
         }
-        private void GetCharStats(string name, string realm)
+        private void GetCharSet(string link)
         {
-
-
-            try
+            CharEquipAll charEquip = GetWebJson<CharEquipAll>(link);
+            if (charEquip != null)
             {
-                WebRequest request = WebRequest.Create($"https://eu.api.blizzard.com/profile/wow/character/{realm}/{name.ToLower()}/statistics?namespace=profile-eu&locale=ru_RU&access_token={tokenWow}");
-                WebResponse responce = request.GetResponse();
-
-                using (Stream stream = responce.GetResponseStream())
-
+                if (charEquip.equipped_item_sets != null)
                 {
-                    using (StreamReader reader = new StreamReader(stream))
+                    foreach (EquippedItemSet setequip in charEquip.equipped_item_sets)
                     {
-                        string line = "";
-                        while ((line = reader.ReadLine()) != null)
+                        if (setequip.display_string.Contains("/5)"))
                         {
-
-
-                            CharStats charStats = JsonConvert.DeserializeObject<CharStats>(line);
-                            double crit = charStats.melee_crit.value;
-                            crit = Math.Round(crit, 1);
-                            double haste = charStats.melee_haste.value;
-                            haste = Math.Round(haste, 1);
-                            double mastery = charStats.mastery.value;
-                            mastery = Math.Round(mastery, 1);
-                            double versality_damage = charStats.versatility_damage_done_bonus;
-                            versality_damage = Math.Round(versality_damage, 1);
-                            double versality_healing = charStats.versatility_damage_taken_bonus;
-                            versality_healing = Math.Round(versality_healing, 1);
-                            _charInfo.Stats = _charInfo.Stats + "\n" + "  **Критический удар**:  " + crit.ToString() + "%\n  **Скорость**:  " + haste.ToString() + "%\n"
-                                + "  **Искусность**:  " + mastery.ToString() + "%\n  **Универсальность**:  " + versality_damage.ToString() + "% / " + versality_healing.ToString() + "%";
-
-
-
-
-
+                            _charInfo.SetcountItem = "Set:**" + setequip.display_string.Replace(setequip.item_set.name, "") + "**";
                         }
                     }
                 }
-                responce.Close();
-                _charInfo.Error = false;
             }
-            catch (WebException e)
+        }
+        private void GetCharStats(string link)
+        {
+            CharStats charStats = GetWebJson<CharStats>(link);
+            if (charStats != null)
             {
-                if (e.Status == WebExceptionStatus.ProtocolError)
-                {
-                    _charInfo.Error = true;
-                    string message = $"\nGetCharStats Error: {e.Message}";
-                    Functions.WriteLogs(message, "error");
-                }
-            }
-            catch (Exception e)
-            {
-                _charInfo.Error = true;
-                string message = $"GetCharStats Error: {e.Message}";
-                Functions.WriteLogs(message, "error");
-            }
+                double crit = charStats.melee_crit.value;
+                crit = Math.Round(crit, 1);
+                double haste = charStats.melee_haste.value;
+                haste = Math.Round(haste, 1);
+                double mastery = charStats.mastery.value;
+                mastery = Math.Round(mastery, 1);
+                double versality_damage = charStats.versatility_damage_done_bonus;
+                versality_damage = Math.Round(versality_damage, 1);
+                double versality_healing = charStats.versatility_damage_taken_bonus;
+                versality_healing = Math.Round(versality_healing, 1);
+                _charInfo.Stats = _charInfo.Stats + "\n" + "  **Критический удар**:  " + crit.ToString() + "%\n  **Скорость**:  " + haste.ToString() + "%\n"
+                    + "  **Искусность**:  " + mastery.ToString() + "%\n  **Универсальность**:  " + versality_damage.ToString() + "% / " + versality_healing.ToString() + "%";
 
-
+            }
         }
     }
     public class CharInfoAll
@@ -1120,8 +868,8 @@ namespace DiscordBot
     }
 
     // Root myDeserializedClass = JsonConvert.DeserializeObject<Root>(myJsonResponse);
-    
-    
+
+
 
     public class Item1
     {

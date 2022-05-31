@@ -130,7 +130,7 @@ namespace DiscordBot
 
                             Allrealm_ realms = JsonConvert.DeserializeObject<Allrealm_>(line);
 
-                            foreach (Allrealm_Result realm in realms.results)
+                            foreach (Result realm in realms.results)
                             {
 
                                 Dictionary<string, string> name = new Dictionary<string, string>();
@@ -200,7 +200,7 @@ namespace DiscordBot
             try
             {
                 List<EncounterLang> enconterAll = ReadJson<List<EncounterLang>>("EncounterList").Result;
-                    foreach (EncounterLang enc in enconterAll)
+                foreach (EncounterLang enc in enconterAll)
                 {
                     if (enc.EncounterEN.ToLower() == text.Trim().ToLower())
                     {
@@ -276,7 +276,7 @@ namespace DiscordBot
                     };
 
                     await System.Text.Json.JsonSerializer.SerializeAsync(fs, data, options);
-                 //   WriteLogs($"Запись {filename} прошла успешно", "notification");
+                    //   WriteLogs($"Запись {filename} прошла успешно", "notification");
 
                     fs.Close();
 
@@ -323,6 +323,40 @@ namespace DiscordBot
                 return default;
             }
         }
+        public static T GetWebJson<T>(string link)
+        {
+            try
+            {
+
+
+                WebRequest requesta = WebRequest.Create(link);
+                WebResponse responcea = requesta.GetResponse();
+
+                using Stream stream = responcea.GetResponseStream();
+                using StreamReader reader = new StreamReader(stream);
+
+                string line = reader.ReadToEnd();
+
+
+                return JsonConvert.DeserializeObject<T>(line);
+            }
+            catch (WebException e)
+            {
+                if (e.Status == WebExceptionStatus.ProtocolError)
+                {
+                    return default;
+
+                }
+            }
+            catch (Exception)
+            {
+                return default;
+
+            }
+            return default;
+        }
+
+
 
         public static T GetWebJson<T>(string link, string nameMethod)
         {
@@ -598,33 +632,12 @@ namespace DiscordBot
     }
 
     #region Classes
-    public class Root_RealmSelf
-    {
-        public string href { get; set; }
-    }
 
-    public class Root_RealmLinks
-    {
-        public Root_RealmSelf self { get; set; }
-    }
-
-    public class Root_RealmKey
-    {
-        public string href { get; set; }
-    }
-
-    public class Root_RealmRealm
-    {
-        public Root_RealmKey key { get; set; }
-        public string name { get; set; }
-        public int id { get; set; }
-        public string slug { get; set; }
-    }
 
     public class Root_Realm
     {
-        public Root_RealmLinks _links { get; set; }
-        public List<Root_RealmRealm> realms { get; set; }
+        public Links _links { get; set; }
+        public List<Realm> realms { get; set; }
     }
 
     public class RealmList
@@ -633,82 +646,36 @@ namespace DiscordBot
         public string Slug { get; set; }
     }
 
-    public class RootRealmlocalSelf
-    {
-        public string href { get; set; }
-    }
 
-    public class RootRealmlocalLinks
-    {
-        public RootRealmlocalSelf self { get; set; }
-    }
 
-    public class RootRealmlocalKey
-    {
-        public string href { get; set; }
-    }
 
-    public class RootRealmlocalRegion
-    {
-        public RootRealmlocalKey key { get; set; }
-        public string name { get; set; }
-        public int id { get; set; }
-    }
-
-    public class RootRealmlocalConnectedRealm
-    {
-        public string href { get; set; }
-    }
-
-    public class RootRealmlocalType
-    {
-        public string type { get; set; }
-        public string name { get; set; }
-    }
 
     public class RootRealmlocal
     {
-        public RootRealmlocalLinks _links { get; set; }
+        public Links _links { get; set; }
         public int id { get; set; }
-        public RootRealmlocalRegion region { get; set; }
-        public RootRealmlocalConnectedRealm connected_realm { get; set; }
+        public Region region { get; set; }
+        public ConnectedRealm connected_realm { get; set; }
         public string name { get; set; }
         public string category { get; set; }
         public string locale { get; set; }
         public string timezone { get; set; }
-        public RootRealmlocalType type { get; set; }
+        public Type type { get; set; }
         public bool is_tournament { get; set; }
         public string slug { get; set; }
     }
 
-    public class Allrealm_Key
-    {
-        public string href { get; set; }
-    }
 
-    public class Allrealm_Name
-    {
-        public string it_IT { get; set; }
-        public string ru_RU { get; set; }
-        public string en_GB { get; set; }
-        public string zh_TW { get; set; }
-        public string ko_KR { get; set; }
-        public string en_US { get; set; }
-        public string es_MX { get; set; }
-        public string pt_BR { get; set; }
-        public string es_ES { get; set; }
-        public string zh_CN { get; set; }
-        public string fr_FR { get; set; }
-        public string de_DE { get; set; }
-    }
 
-    public class Allrealm_Region
+
+
+    public class RegionNameLocals
     {
-        public Allrealm_Name name { get; set; }
+        public Name name { get; set; }
         public int id { get; set; }
     }
 
-    public class Allrealm_Category
+    public class CategoryLocals
     {
         public string it_IT { get; set; }
         public string ru_RU { get; set; }
@@ -724,29 +691,29 @@ namespace DiscordBot
         public string de_DE { get; set; }
     }
 
-    public class Allrealm_Type
+    public class TypeNameLocals
     {
-        public Allrealm_Name name { get; set; }
+        public Name name { get; set; }
         public string type { get; set; }
     }
 
-    public class Allrealm_Data
+    public class Data
     {
         public bool is_tournament { get; set; }
         public string timezone { get; set; }
-        public Allrealm_Name name { get; set; }
+        public Name name { get; set; }
         public int id { get; set; }
-        public Allrealm_Region region { get; set; }
-        public Allrealm_Category category { get; set; }
+        public RegionNameLocals region { get; set; }
+        public CategoryLocals category { get; set; }
         public string locale { get; set; }
-        public Allrealm_Type type { get; set; }
+        public TypeNameLocals type { get; set; }
         public string slug { get; set; }
     }
 
-    public class Allrealm_Result
+    public class Result
     {
-        public Allrealm_Key key { get; set; }
-        public Allrealm_Data data { get; set; }
+        public Key key { get; set; }
+        public Data data { get; set; }
     }
 
     public class Allrealm_
@@ -755,7 +722,7 @@ namespace DiscordBot
         public int pageSize { get; set; }
         public int maxPageSize { get; set; }
         public int pageCount { get; set; }
-        public List<Allrealm_Result> results { get; set; }
+        public List<Result> results { get; set; }
     }
     #endregion
 

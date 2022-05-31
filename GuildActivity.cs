@@ -29,7 +29,7 @@ namespace DiscordBot
                 Task<BotSettings> set = Functions.ReadJson<BotSettings>("BotSettings");
                 settings = set.Result;
 
-                GetGuildActivity();
+                GetGuildActivityNew();
 
 
                 if (settings.LastGuildActiveTime != 0)
@@ -52,7 +52,7 @@ namespace DiscordBot
                         if (newActivity.Count != 0)
                         {
                             var last = newActivity.Max(after => after.Time);
-                           // Console.WriteLine($"LastGuildActiveTime write new : {last}\n");
+                            // Console.WriteLine($"LastGuildActiveTime write new : {last}\n");
                             Functions.WriteJSon<List<Activity>>(afterActivity, "BeforeGuildActivity");
                             settings.LastGuildActiveTime = last;
                             Functions.WriteJSon(settings, "BotSettings");
@@ -83,7 +83,43 @@ namespace DiscordBot
         }
 
 
+        private static void GetGuildActivityNew()
+        {
+            ActivityAll activity = Functions.GetWebJson<ActivityAll>($"https://eu.api.blizzard.com/data/wow/guild/{settings.RealmSlug}/{settings.Guild.ToLower().Replace(" ", "-")}/activity?namespace=profile-eu&locale=ru_RU&access_token=" + tokenWow);
 
+            if (activity != null)
+            {
+                if (activity.activities != null)
+                {
+
+                    for (int i = 0; i < activity.activities.Count; i++)
+                    {
+                        if (Convert.ToInt64(activity.activities[i].timestamp) > settings.LastGuildActiveTime)
+                        {
+
+                            if (activity.activities[i].activity.type == "CHARACTER_ACHIEVEMENT")
+                            {
+                                GetGuildActivityInfo(activity.activities[i].character_achievement.character.name, activity.activities[i].character_achievement.achievement.name, Convert.ToInt64(activity.activities[i].timestamp), activity.activities[i].character_achievement.achievement.key.href, "CHARACTER_ACHIEVEMENT");
+
+                            }
+                            else if (activity.activities[i].activity.type == "ENCOUNTER")
+                            {
+                                GetGuildActivityInfo(activity.activities[i].encounter_completed.encounter.name, activity.activities[i].encounter_completed.mode.name, Convert.ToInt64(activity.activities[i].timestamp), activity.activities[i].encounter_completed.encounter.key.href, "ENCOUNTER");
+
+
+                            }
+                        }
+
+                    }
+
+                }
+            }
+            else
+            {
+                error = "false";
+            }
+
+        }
         public static void GetGuildActivity()
         {
 
@@ -503,7 +539,7 @@ namespace DiscordBot
     public class Item
     {
         public int id { get; set; }
-        public Item item { get; set; }
+        public Item2 item { get; set; }
     }
 
     public class Spell
@@ -529,7 +565,7 @@ namespace DiscordBot
         public string type { get; set; }
     }
 
-    public class ModeBossKill
+    public class ModeBN
     {
         public string type { get; set; }
         public string name { get; set; }
@@ -546,7 +582,7 @@ namespace DiscordBot
         public List<Section> sections { get; set; }
         public Instance instance { get; set; }
         public CategoryBossKill category { get; set; }
-        public List<ModeBossKill> modes { get; set; }
+        public List<ModeBN> modes { get; set; }
     }
 
 }

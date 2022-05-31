@@ -1,11 +1,5 @@
-﻿using Newtonsoft.Json;
-using System;
+﻿using System;
 using System.Collections.Generic;
-using System.IO;
-using System.Net;
-using System.Threading;
-using System.Threading.Tasks;
-using static DiscordBot.Program;
 namespace DiscordBot
 {
     public class Log
@@ -64,37 +58,11 @@ namespace DiscordBot
             {
                 _log = new();
 
-                Task<BotSettings> set = Functions.ReadJson<BotSettings>("BotSettings");
-                settings =  set.Result;
-
-             //   var newlog = CheckNewWowLog();
-
-               // if (settings.LastGuildLogTime != 0)
-              //  {
-
-                  //  if (newlog > settings.LastGuildLogTime)
-                   // {
-                      //  Console.WriteLine($"\nПоявился новый лог!\nLastGuildLogTime write : {newlog}\n");
-                      //  settings.LastGuildLogTime = newlog;
-                        //Functions.WriteJSon(settings, "BotSettings");
-
-                       // Thread.Sleep(60000 * 3);
-                        Update_warcraftlogs_data();
-                        if (!_log.Error)
-                        {
-                            return _log;
-                        }
-                       
-                        
-                   // }
-             //   }
-              //  else
-             //   {
-              //      Console.WriteLine($"LastGuildLogTime write : {_log.StartTime}\n");
-              //      settings.LastGuildLogTime = newlog;
-               //     Functions.WriteJSon(settings, "BotSettings");
-                //    return null;
-              //  }
+                Update_warcraftlogs_data();
+                if (!_log.Error)
+                {
+                    return _log;
+                }
                 return null;
             }
 
@@ -108,211 +76,117 @@ namespace DiscordBot
 
         }
 
-        private long CheckNewWowLog()
-        {
 
-            try
-            {
-
-                WebRequest request = WebRequest.Create($"https://www.warcraftlogs.com/v1/reports/guild/{Program.settings.Guild.ToLower()}/{Functions.GetRealmSlug(Program.settings.Realm)}/eu?api_key=c2c9093c70e642ac6ec003d4b0904c33");
-                WebResponse responce = request.GetResponse();
-
-                using (Stream stream = responce.GetResponseStream())
-
-                {
-                    using (StreamReader reader = new(stream))
-                    {
-                        string line = reader.ReadToEnd();
-
-                        line = "{ \"logs\": " + line + "}";
-
-                        Warcraftlogs logs = JsonConvert.DeserializeObject<Warcraftlogs>(line);
-                        return Convert.ToInt64(logs.logs[0].start);
-
-                    }
-                }
-
-                
-            }
-            catch (WebException e)
-            {
-                if (e.Status == WebExceptionStatus.ProtocolError)
-                {
-
-                    string message = $"\nUpdate_warcraftlogs_data Error: {e.Message}";
-                    Functions.WriteLogs(message, "error");
-                    return 0;
-                }
-            }
-            catch (Exception e)
-            {
-
-                string message = $"Update_warcraftlogs_data Error: {e.Message}";
-                Functions.WriteLogs(message, "error");
-                return 0;
-            }
-            return 0;
-
-        }
 
         private void Update_warcraftlogs_data()
         {
-
-            try
+            List<Logs_all> logs = Functions.GetWebJson<List<Logs_all>>($"https://www.warcraftlogs.com/v1/reports/guild/{Program.settings.Guild.ToLower()}/{Functions.GetRealmSlug(Program.settings.Realm)}/eu?api_key=c2c9093c70e642ac6ec003d4b0904c33");
+            if (logs != null)
             {
-
-                WebRequest request = WebRequest.Create($"https://www.warcraftlogs.com/v1/reports/guild/{Program.settings.Guild.ToLower()}/{Functions.GetRealmSlug(Program.settings.Realm)}/eu?api_key=c2c9093c70e642ac6ec003d4b0904c33");
-                WebResponse responce = request.GetResponse();
-
-                using (Stream stream = responce.GetResponseStream())
-
+                if (logs[0].zone == 29)
                 {
-                    using (StreamReader reader = new(stream))
-                    {
-                        string line = reader.ReadToEnd();
 
-                        line = "{ \"logs\": " + line + "}";
-
-                        Warcraftlogs logs = JsonConvert.DeserializeObject<Warcraftlogs>(line);
-                        if (logs.logs[0].zone == 29)
-                        {
-                           // Thread.Sleep(5000);
-                            GetLogInfo(logs.logs[0].id, logs.logs[0].title, Functions.FromUnixTimeStampToDateTime(logs.logs[0].start).ToString(), $"https://ru.warcraftlogs.com/reports/{logs.logs[0].id}");
-                        }
-                        else
-                        {
-                            _log.Error = true;
-                            return;
-                        }
-
-                    }
+                    GetLogInfo(logs[0].id, logs[0].title, Functions.FromUnixTimeStampToDateTime(logs[0].start).ToString(), $"https://ru.warcraftlogs.com/reports/{logs[0].id}");
                 }
-                responce.Close();
-                _log.Error = false;
-            }
-            catch (WebException e)
-            {
-                if (e.Status == WebExceptionStatus.ProtocolError)
+                else
                 {
                     _log.Error = true;
-                    string message = $"\nUpdate_warcraftlogs_data Error: {e.Message}";
-                    Functions.WriteLogs(message, "error");
+                    return;
                 }
+
+
             }
-            catch (Exception e)
+            else
             {
                 _log.Error = true;
-                string message = $"Update_warcraftlogs_data Error: {e.Message}";
-                Functions.WriteLogs(message, "error");
+                return;
             }
+
+
+
         }
 
         private void GetLogInfo(string id, string dungeon, string date, string link)
         {
-
-            try
+            LogInfo log = Functions.GetWebJson<LogInfo>("https://www.warcraftlogs.com/v1/report/fights/" + id + "?translate=true&api_key=c2c9093c70e642ac6ec003d4b0904c33");
+            if (log != null)
             {
+                int kills = 0;
 
-                WebRequest request = WebRequest.Create("https://www.warcraftlogs.com/v1/report/fights/" + id + "?translate=true&api_key=c2c9093c70e642ac6ec003d4b0904c33");
-                WebResponse responce = request.GetResponse();
-
-                using (Stream stream = responce.GetResponseStream())
-
+                int wipe = 0;
+                if (log.fights != null)
                 {
-                    using (StreamReader reader = new StreamReader(stream))
+
+                    foreach (Fight fight in log.fights)
                     {
-                        string line = reader.ReadToEnd();
-
-                        LogInfo log = JsonConvert.DeserializeObject<LogInfo>(line);
-
-                        int kills = 0;
-                        
-                        int wipe = 0;
-                        if (log.fights != null)
+                        if (fight.boss > 0)
                         {
-                           
-                            foreach (Fight fight in log.fights)
+                            if (fight.kill == true)
                             {
-                                if (fight.boss > 0)
+                                kills++;
+                                _log.BossKilling.Add(Functions.GetEncounterRu(fight.name) + GetModeInst(fight.difficulty));
+                                _log.BestWipeTryPer = 0.0;
+                            }
+                            else
+                            {
+                                wipe++;
+                                if (!_log.BossKilling.Contains(fight.name))
                                 {
-                                    if (fight.kill == true)
+                                    if (_log.BestWipeTryPer == 0.0)
                                     {
-                                        kills++;
-                                        _log.BossKilling.Add(Functions.GetEncounterRu(fight.name) + GetModeInst(fight.difficulty));
-                                        _log.BestWipeTryPer = 0.0;
+                                        _log.BestWipeTryPer = Convert.ToDouble(fight.bossPercentage) / 100;
+                                        _log.BestWipeTryName = Functions.GetEncounterRu(fight.name) + GetModeInst(fight.difficulty);
                                     }
                                     else
                                     {
-                                        wipe++;
-                                        if (!_log.BossKilling.Contains(fight.name))
+                                        if (Convert.ToDouble(fight.bossPercentage) / 100 < _log.BestWipeTryPer)
                                         {
-                                            if( _log.BestWipeTryPer == 0.0)
-                                            {
-                                                _log.BestWipeTryPer = Convert.ToDouble(fight.bossPercentage)/100;
-                                                _log.BestWipeTryName =Functions.GetEncounterRu(fight.name)+GetModeInst(fight.difficulty);
-                                            }
-                                            else
-                                            {
-                                                if (Convert.ToDouble(fight.bossPercentage)/100 < _log.BestWipeTryPer)
-                                                {
-                                                    _log.BestWipeTryPer = Convert.ToDouble(fight.bossPercentage)/100;
-                                                    _log.BestWipeTryName = Functions.GetEncounterRu(fight.name) + GetModeInst(fight.difficulty);
-                                                }
-                                            }
-
-
+                                            _log.BestWipeTryPer = Convert.ToDouble(fight.bossPercentage) / 100;
+                                            _log.BestWipeTryName = Functions.GetEncounterRu(fight.name) + GetModeInst(fight.difficulty);
                                         }
-                                        
                                     }
+
+
                                 }
 
                             }
-                            TimeSpan ts = Functions.FromUnixTimeStampToDateTime(log.end.ToString()) - Functions.FromUnixTimeStampToDateTime(log.start.ToString());
-                            _log.RaidTime = $"{ts.Hours} ч {ts.Minutes} м";
-                            _log.Date = date;
-                            _log.Dungeon = dungeon;
-                            _log.KillBoss = kills.ToString();
-                            _log.WipeBoss = wipe.ToString();
-                            _log.Link = link;
-                            _log.StartTime = log.start;
-                            _log.ID = id;
-                            _log.Error = false;
-                            
                         }
-                        else
-                        {
-                            _log.Error = true;
-
-                        }
-
 
                     }
-                }
-                responce.Close();
+                    TimeSpan ts = Functions.FromUnixTimeStampToDateTime(log.end.ToString()) - Functions.FromUnixTimeStampToDateTime(log.start.ToString());
+                    _log.RaidTime = $"{ts.Hours} ч {ts.Minutes} м";
+                    _log.Date = date;
+                    _log.Dungeon = dungeon;
+                    _log.KillBoss = kills.ToString();
+                    _log.WipeBoss = wipe.ToString();
+                    _log.Link = link;
+                    _log.StartTime = log.start;
+                    _log.ID = id;
+                    _log.Error = false;
 
-            }
-            catch (WebException e)
-            {
-                if (e.Status == WebExceptionStatus.ProtocolError)
+                }
+                else
                 {
                     _log.Error = true;
-                    string message = $"\nGetLogInfo Error: {e.Message}";
-                    Functions.WriteLogs(message, "error");
+
                 }
+
             }
-            catch (Exception e)
+            else
             {
                 _log.Error = true;
-                string message = $"GetLogInfo Error: {e.Message}";
-                Functions.WriteLogs(message, "error");
             }
+
+
+
         }
         private string GetModeInst(int? difficulty)
         {
             if (difficulty == 3)
             {
                 return "(Нормал)";
-            }else if (difficulty == 4)
+            }
+            else if (difficulty == 4)
             {
                 return "(Гер)";
             }
@@ -336,11 +210,7 @@ namespace DiscordBot
         public string ID { get; set; }
 
     }
-    public class Warcraftlogs
-    {
-        public List<Logs_all> logs { get; set; }
 
-    }
     public class Logs_all
     {
 

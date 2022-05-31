@@ -1,9 +1,5 @@
-﻿using Newtonsoft.Json;
-using System;
+﻿using System;
 using System.Collections.Generic;
-using System.IO;
-using System.Net;
-using System.Threading.Tasks;
 using static DiscordBot.Program;
 
 namespace DiscordBot
@@ -19,9 +15,9 @@ namespace DiscordBot
     }
     class WowRealmInfo
     {
-        private static WoWRealStatus wowRealmStatus;
-        public static string realmstatustype = "";
-        public static WoWRealStatus GetRealmInfo()
+        private WoWRealStatus wowRealmStatus;
+        private string realmstatustype = "";
+        public WoWRealStatus GetRealmInfo()
         {
             wowRealmStatus = new();
             GetRealmConnectedLink();
@@ -30,20 +26,20 @@ namespace DiscordBot
         }
 
 
-        public static string[] GetRealmInfoForTimer()
+        public string[] GetRealmInfoForTimer()
         {
-            Task<BotSettings> set = Functions.ReadJson<BotSettings>("BotSettings");
-            Program.settings = set.Result;
+            settings = Functions.ReadJson<BotSettings>("BotSettings").Result;
+
             wowRealmStatus = new();
             GetRealmConnectedLink();
             if (!wowRealmStatus.Error)
             {
-                string str = CheckRealmStatus(Program.settings.RealmStatusType);
+                string str = CheckRealmStatus(settings.RealmStatusType);
 
                 if (str == "Up")
                 {
-                    Program.settings.RealmStatusType = wowRealmStatus.RealnStatusType;
-                    Functions.WriteJSon(Program.settings, "BotSettings");
+                    settings.RealmStatusType = wowRealmStatus.RealnStatusType;
+                    Functions.WriteJSon(settings, "BotSettings");
                     string[] str1 = new string[2];
                     str1[0] = "**Тех. Обслуживание закончилось!**";
                     str1[1] = $"Игровой мир: **{wowRealmStatus.RealmName}** работает!\u2705";
@@ -52,11 +48,12 @@ namespace DiscordBot
                 }
                 else if (str == "Down")
                 {
+                    settings.RealmStatusType = wowRealmStatus.RealnStatusType;
+                    Functions.WriteJSon(settings, "BotSettings");
                     string[] str1 = new string[2];
                     str1[0] = "**Тех. Обслуживание началось!**";
                     str1[1] = $"Игровой мир: **{wowRealmStatus.RealmName}** не работает!\u274c";
-                    Program.settings.RealmStatusType = wowRealmStatus.RealnStatusType;
-                    Functions.WriteJSon(Program.settings, "BotSettings");
+
                     return str1;
 
                 }
@@ -73,127 +70,61 @@ namespace DiscordBot
 
             return null;
         }
-        static void GetRealmConnectedLink()
+        private void GetRealmConnectedLink()
         {
-            try
+
+            RealmInfo realm = Functions.GetWebJson<RealmInfo>($"https://eu.api.blizzard.com/data/wow/realm/{settings.RealmSlug}?namespace=dynamic-eu&locale=ru_RU&access_token={tokenWow}");
+            if (realm != null)
             {
-
-                WebRequest request = WebRequest.Create($"https://eu.api.blizzard.com/data/wow/realm/{settings.RealmSlug}?namespace=dynamic-eu&locale=ru_RU&access_token={tokenWow}");
-
-                WebResponse responce = request.GetResponse();
-
-                using (System.IO.Stream stream = responce.GetResponseStream())
-
-                {
-                    using (StreamReader reader = new StreamReader(stream))
-                    {
-                        string line = "";
-                        while ((line = reader.ReadLine()) != null)
-                        {
-
-
-                            RealmInfo realm = JsonConvert.DeserializeObject<RealmInfo>(line);
-                            RealmUpdateFunction(realm.id.ToString());
-
-
-                        }
-                    }
-                }
-                responce.Close();
                 wowRealmStatus.Error = false;
+                RealmUpdateFunction(realm.id.ToString());
 
             }
-            catch (WebException e)
-            {
-                if (e.Status == WebExceptionStatus.ProtocolError)
-                {
-                    wowRealmStatus.Error = true;
-
-                    string message = $"\nGetRealmConnectedLink Error: {e.Message}";
-                    Functions.WriteLogs(message, "error");
-                }
-            }
-            catch (Exception e)
+            else
             {
                 wowRealmStatus.Error = true;
-
-                string message = $"GetRealmConnectedLink Error: {e.Message}";
-                Functions.WriteLogs(message, "error");
             }
+
+
 
 
         }
 
-        static void RealmUpdateFunction(string id)
+        private void RealmUpdateFunction(string id)
         {
-            try
+
+
+            ConnectRealm realm = Functions.GetWebJson<ConnectRealm>($"https://eu.api.blizzard.com/data/wow/connected-realm/{id}?namespace=dynamic-eu&locale=ru_RU&access_token={tokenWow}");
+            if (realm != null)
             {
-
-                WebRequest request = WebRequest.Create($"https://eu.api.blizzard.com/data/wow/connected-realm/{id}?namespace=dynamic-eu&locale=ru_RU&access_token={tokenWow}");
-
-                WebResponse responce = request.GetResponse();
-
-                using (System.IO.Stream stream = responce.GetResponseStream())
-
+                if (realm.status.type == "UP")
                 {
-                    using (StreamReader reader = new StreamReader(stream))
-                    {
-                        string line = "";
-                        while ((line = reader.ReadLine()) != null)
-                        {
 
-
-                            ConnectRealm realm = JsonConvert.DeserializeObject<ConnectRealm>(line);
-                            if (realm.status.type == "UP")
-                            {
-
-                                wowRealmStatus.RealnStatusType = realm.status.type;
-                                wowRealmStatus.RealmStatus = "\u2705" + realm.status.name;
-                            }
-                            else
-                            {
-                                wowRealmStatus.RealnStatusType = realm.status.type;
-                                wowRealmStatus.RealmStatus = "\u274c" + realm.status.name;
-
-                            }
-
-                            foreach (ConectRealm realms in realm.realms)
-                            {
-                                wowRealmStatus.RealmName = realms.name;
-
-                            }
-
-
-
-                        }
-                    }
+                    wowRealmStatus.RealnStatusType = realm.status.type;
+                    wowRealmStatus.RealmStatus = "\u2705" + realm.status.name;
                 }
-                responce.Close();
+                else
+                {
+                    wowRealmStatus.RealnStatusType = realm.status.type;
+                    wowRealmStatus.RealmStatus = "\u274c" + realm.status.name;
+
+                }
+
+                foreach (ConectRealm realms in realm.realms)
+                {
+                    wowRealmStatus.RealmName = realms.name;
+
+                }
                 wowRealmStatus.Error = false;
-
             }
-            catch (WebException e)
-            {
-                if (e.Status == WebExceptionStatus.ProtocolError)
-                {
-                    wowRealmStatus.Error = true;
-
-                    string message = $"\nRealmUpdateFunction Error: {e.Message}";
-                    Functions.WriteLogs(message, "error");
-                }
-            }
-            catch (Exception e)
+            else
             {
                 wowRealmStatus.Error = true;
-
-                string message = $"RealmUpdateFunction Error: {e.Message}";
-                Functions.WriteLogs(message, "error");
             }
-
 
         }
 
-        static string CheckRealmStatus(string beforeRealStatus)
+        private string CheckRealmStatus(string beforeRealStatus)
         {
 
             try
