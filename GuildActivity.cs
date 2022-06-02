@@ -194,7 +194,7 @@ namespace DiscordBot
         private void GetGuildActivityInfoMedia(string name, string achivname, long time, string category, string award, string linkmedia, string type)
         {
 
-            AcievCharMEdia activity = Functions.GetWebJson<AcievCharMEdia>($"{linkmedia}&locale=ru_RU&access_token={tokenWow}");
+            GetBNetMEdia activity = Functions.GetWebJson<GetBNetMEdia>($"{linkmedia}&locale=ru_RU&access_token={tokenWow}");
             if (activity != null)
             {
                 foreach (Asset asset in activity.assets)
@@ -358,7 +358,7 @@ namespace DiscordBot
         public int file_data_id { get; set; }
     }
 
-    public class AcievCharMEdia
+    public class GetBNetMEdia
     {
         public Links _links { get; set; }
         public List<Asset> assets { get; set; }

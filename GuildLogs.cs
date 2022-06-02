@@ -16,6 +16,7 @@ namespace DiscordBot
         public List<string> BossKilling { get; set; }
         public double BestWipeTryPer { get; set; }
         public string BestWipeTryName { get; set; }
+        public string InstanceImg { get; set; }
 
         public Log()
         {
@@ -124,7 +125,7 @@ namespace DiscordBot
                             if (fight.kill == true)
                             {
                                 kills++;
-                                _log.BossKilling.Add(Functions.GetEncounterRu(fight.name) + GetModeInst(fight.difficulty));
+                                _log.BossKilling.Add(Functions.GetEncounter(fight.name).EncounterRU + GetModeInst(fight.difficulty));
                                 _log.BestWipeTryPer = 0.0;
                             }
                             else
@@ -135,14 +136,14 @@ namespace DiscordBot
                                     if (_log.BestWipeTryPer == 0.0)
                                     {
                                         _log.BestWipeTryPer = Convert.ToDouble(fight.bossPercentage) / 100;
-                                        _log.BestWipeTryName = Functions.GetEncounterRu(fight.name) + GetModeInst(fight.difficulty);
+                                        _log.BestWipeTryName = Functions.GetEncounter(fight.name).EncounterRU + GetModeInst(fight.difficulty);
                                     }
                                     else
                                     {
                                         if (Convert.ToDouble(fight.bossPercentage) / 100 < _log.BestWipeTryPer)
                                         {
                                             _log.BestWipeTryPer = Convert.ToDouble(fight.bossPercentage) / 100;
-                                            _log.BestWipeTryName = Functions.GetEncounterRu(fight.name) + GetModeInst(fight.difficulty);
+                                            _log.BestWipeTryName = Functions.GetEncounter(fight.name).EncounterRU + GetModeInst(fight.difficulty);
                                         }
                                     }
 
@@ -156,12 +157,13 @@ namespace DiscordBot
                     TimeSpan ts = Functions.FromUnixTimeStampToDateTime(log.end.ToString()) - Functions.FromUnixTimeStampToDateTime(log.start.ToString());
                     _log.RaidTime = $"{ts.Hours} ч {ts.Minutes} м";
                     _log.Date = date;
-                    _log.Dungeon = dungeon;
+                    _log.Dungeon = Functions.GetInstance(dungeon).InstanceRU;
                     _log.KillBoss = kills.ToString();
                     _log.WipeBoss = wipe.ToString();
                     _log.Link = link;
                     _log.StartTime = log.start;
                     _log.ID = id;
+                    _log.InstanceImg = Functions.GetInstance(dungeon).InstanceImg;
                     _log.Error = false;
 
                 }

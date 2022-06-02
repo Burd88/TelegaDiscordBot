@@ -1,8 +1,4 @@
-﻿using Newtonsoft.Json;
-using System;
-using System.Collections.Generic;
-using System.IO;
-using System.Net;
+﻿using System.Collections.Generic;
 
 namespace DiscordBot
 {
@@ -14,86 +10,42 @@ namespace DiscordBot
 
         public static void LoadEncounterAll()
         {
-
-            try
+            encounterAll = new();
+            EncounterAll encounters = Functions.GetWebJson<EncounterAll>("https://eu.api.blizzard.com/data/wow/journal-encounter/index?namespace=static-eu&locale=en_US&access_token=" + Program.tokenWow);
+            if (encounters != null)
             {
-                encounterAll = new();
-
-                WebRequest requestchar = WebRequest.Create("https://eu.api.blizzard.com/data/wow/journal-encounter/index?namespace=static-eu&locale=en_US&access_token=" + Program.tokenWow);
-
-                WebResponse responcechar = requestchar.GetResponse();
-
-                using (Stream stream1 = responcechar.GetResponseStream())
-
+                foreach (Encounter encount in encounters.encounters)
                 {
-                    using (StreamReader reader1 = new StreamReader(stream1))
-                    {
-
-                        string line = "";
-
-                        while ((line = reader1.ReadLine()) != null)
-                        {
-
-                            line = line.Replace("'", " ");
-
-
-                            EncounterAll encounters = JsonConvert.DeserializeObject<EncounterAll>(line);
-
-                            foreach (Encounter encount in encounters.encounters)
-                            {
-
-                                GetEncounterAll(encount.key.href);
-
-
-                            }
-
-                        }
-                    }
+                    GetEncounterAll(encount.key.href);
                 }
                 Functions.WriteJSon(encounterAll, "EncounterList");
-            }
-            catch (Exception e)
-            {
-                Console.WriteLine(DateTime.Now + ": LoadEncounterAll Error: " + e.Message);
             }
         }
         public static void GetEncounterAll(string link)
         {
-
-            try
+            EncounterFullInfo encounter = Functions.GetWebJson<EncounterFullInfo>(link + "&access_token=" + Program.tokenWow);
+            if (encounter != null)
             {
-
-
-                WebRequest requestchar = WebRequest.Create(link + "&access_token=" + Program.tokenWow);
-
-                WebResponse responcechar = requestchar.GetResponse();
-
-                using (Stream stream1 = responcechar.GetResponseStream())
-
+                if (encounter.creatures != null)
                 {
-                    using (StreamReader reader1 = new StreamReader(stream1))
+                    encounterAll.Add(new EncounterLang
                     {
-
-                        string line = "";
-
-                        while ((line = reader1.ReadLine()) != null)
-                        {
-
-                            line = line.Replace("'", " ");
-
-
-                            EncounterFullInfo encounter = JsonConvert.DeserializeObject<EncounterFullInfo>(line);
-
-                            encounterAll.Add(new EncounterLang { EncounterEN = encounter.name.en_US, EncounterRU = encounter.name.ru_RU, EncounterID = encounter.id });
-
-                        }
-                    }
+                        EncounterEN = encounter.name.en_US,
+                        EncounterRU = encounter.name.ru_RU,
+                        EncounterID = encounter.id,
+                        EncounterImg = Functions.GetBNetMedia(encounter.creatures[0].creature_display.key.href)
+                    });
                 }
-
-            }
-            catch (Exception e)
-            {
-                Console.WriteLine(DateTime.Now + ": GetEncounterAll Error: " + e.Message);
+                else
+                {
+                    encounterAll.Add(new EncounterLang
+                    {
+                        EncounterEN = encounter.name.en_US,
+                        EncounterRU = encounter.name.ru_RU,
+                        EncounterID = encounter.id,
+                        EncounterImg = ""
+                    });
+                }
             }
         }
     }
@@ -109,6 +61,7 @@ namespace DiscordBot
         public string EncounterEN { get; set; }
         public string EncounterRU { get; set; }
         public int EncounterID { get; set; }
+        public string EncounterImg { get; set; }
     }
 
     public class BodyText

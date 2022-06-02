@@ -131,7 +131,7 @@ namespace DiscordBot
         private void GetGuildAchievementsRUMedia(string category, string name, long time, string link)
         {
 
-            AcievCharMEdia achievement = Functions.GetWebJson<AcievCharMEdia>(link + "&locale=ru_RU&access_token=" + tokenWow);
+            GetBNetMEdia achievement = Functions.GetWebJson<GetBNetMEdia>(link + "&locale=ru_RU&access_token=" + tokenWow);
             if (achievement != null)
             {
                 afterAchievement.Add(new Achievement { Category = category, Name = name, Time = time, Icon = achievement.assets[0].value });

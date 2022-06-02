@@ -41,6 +41,7 @@ namespace DiscordBot
             AutorizationsBattleNet();
             Thread.Sleep(10000);
             //GetEncounter.LoadEncounterAll();
+            //GetInstance.LoadInstanceAll();
             settings.RealmSlug = Functions.GetRealmSlug(settings.Realm);
             Console.WriteLine(
                 $"DiscordBotToken : {settings.DiscordBotToken}\n" +
@@ -266,7 +267,8 @@ namespace DiscordBot
             switch (update.Message.Text)
             {
                 case var s when s.Contains("/guild"):
-                    var fullInfo = GuildInfo.GetGuildInfo();
+                    GuildInfo guildInfo = new();
+                    var fullInfo = guildInfo.GetGuildInfo();
 
 
                     if (!fullInfo.Error)
@@ -705,14 +707,15 @@ namespace DiscordBot
         {
             try
             {
-                GuildInfo.GetGuildRosterChange();
-                if (GuildInfo.inviteRoster != null)
+                GuildInfo guild = new();
+                guild.GetGuildRosterChange();
+                if (guild.GetInviteRoster() != null)
                 {
-                    GetLeaveInvChar(GuildInfo.inviteRoster, "invite");
+                    GetLeaveInvChar(guild.GetInviteRoster(), "invite");
                 }
-                if (GuildInfo.leaveRoster != null)
+                if (guild.GetLeaveRoster() != null)
                 {
-                    GetLeaveInvChar(GuildInfo.leaveRoster, "leave");
+                    GetLeaveInvChar(guild.GetLeaveRoster(), "leave");
                 }
             }
             catch (WebException e)
@@ -961,6 +964,7 @@ namespace DiscordBot
                 {
                     var builder = new EmbedBuilder()
                         .WithThumbnailUrl("https://render.worldofwarcraft.com/eu/guild/crest/102/emblem-102-dfa55a-b1002e.jpg")
+                        .WithImageUrl(newLog.InstanceImg)
                          .WithTitle($"Крайний рейд-лог Гильдии \"Сердце Греха\"\n{newLog.Date}")
                          .WithDescription($"[Просмотр]({newLog.Link})" +
                          $"\n**Рейд:** {newLog.Dungeon}" +
@@ -970,9 +974,11 @@ namespace DiscordBot
                          $"\n**Продолжительность рейда:** {newLog.RaidTime}" +
                          $"\n[WipeFest](https://www.wipefest.gg/report/{newLog.ID})" +
                          $"\n[WoWAnalyzer](https://wowanalyzer.com/report/{newLog.ID})" +
-                         $"\n[Все логи](https://ru.warcraftlogs.com/guild/reports-list/47723/)")
+                        $"\n[Все логи](https://ru.warcraftlogs.com/guild/reports-list/47723/)")
                          .WithColor(Discord.Color.DarkRed)
+                         
                          .WithFooter(footer => footer.Text = $"Гильдия \"Сердце греха\".\nОбновлено: {DateTime.Now} (+4 Мск) ");
+                    
                     if (settings != null && builder != null)
                     {
                         await discordClient.GetGuild(settings.DiscordMainChatId).GetTextChannel(settings.DiscordLogChannelId).ModifyMessageAsync(958994640487481396, msg => msg.Embed = builder.Build());
@@ -1619,7 +1625,8 @@ namespace DiscordBot
                     case "!guild" or "!гильдия":
                         {
                             var builder = new EmbedBuilder();
-                            var fullInfo = GuildInfo.GetGuildInfo();
+                            GuildInfo guildInfo = new();
+                            var fullInfo = guildInfo.GetGuildInfo();
 
 
                             if (!fullInfo.Error)
@@ -1627,7 +1634,7 @@ namespace DiscordBot
 
                                 builder = new EmbedBuilder()
                                     .WithThumbnailUrl("https://render.worldofwarcraft.com/eu/guild/crest/102/emblem-102-dfa55a-b1002e.jpg")
-                                    .WithDescription($"Информация о Гильдии : **{fullInfo.Name}**")
+                                    .WithDescription($"Информация о Гильдии : [**{fullInfo.Name}**](https://worldofwarcraft.com/ru-ru/guild/eu/{settings.RealmSlug}/{settings.Guild.ToLower().Replace(" ", "-")})")
                                     .WithColor(Discord.Color.DarkRed).AddField("Лидер:", fullInfo.Leader, true)
                                     .AddField("Членов гильдии:", fullInfo.MemberCount, true)
                                     .AddField("Достижения:", fullInfo.Achievement, true)

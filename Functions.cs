@@ -5,8 +5,10 @@ using System.IO;
 using System.Net;
 using System.Text.Encodings.Web;
 using System.Text.Json;
+using System.Text.RegularExpressions;
 using System.Text.Unicode;
 using System.Threading.Tasks;
+using static DiscordBot.Program;
 
 namespace DiscordBot
 {
@@ -164,20 +166,28 @@ namespace DiscordBot
 
 
         }
-        public static string GetEncounterRu(string text)
+        public static EncounterLang GetEncounter(string text)
         {
             try
             {
                 List<EncounterLang> enconterAll = ReadJson<List<EncounterLang>>("EncounterList").Result;
                 foreach (EncounterLang enc in enconterAll)
                 {
-                    if (enc.EncounterEN.ToLower() == text.Trim().ToLower())
+                    if (!Regex.IsMatch(text, @"\P{IsBasicLatin}"))
                     {
-                        //Console.WriteLine("slug :" + rlm.Slug);
-                        return enc.EncounterRU;
+                        if (enc.EncounterEN != null && enc.EncounterEN.ToLower() == text.Trim().ToLower())
+                        {
+
+                            return enc;
 
 
 
+                        }
+                    } else if (!Regex.IsMatch(text, @"\P{IsCyrillic}")) {
+                        if (enc.EncounterRU != null && enc.EncounterRU.ToLower() == text.Trim().ToLower())
+                        {
+                            return enc;
+                        } 
                     }
                 }
             }
@@ -193,6 +203,42 @@ namespace DiscordBot
 
 
         }
+        public static InstanceLang GetInstance(string text)
+        {
+            try
+            {
+                List<InstanceLang> instanceAll = ReadJson<List<InstanceLang>>("InstanceList").Result;
+                foreach (InstanceLang inst in instanceAll)
+                {
+                    if (!Regex.IsMatch(text, @"\P{IsBasicLatin}"))
+                    {
+                        if (inst.InstanceEN != null && inst.InstanceEN.ToLower() == text.Trim().ToLower())
+                        {
+                          
+                            return inst;
+                        }
+                    } else if (!Regex.IsMatch(text, @"\P{IsCyrillic}"))
+                    {
+                     if (inst.InstanceRU != null && inst.InstanceRU.ToLower() == text.Trim().ToLower())
+                        {
+                            return inst;
+                        }
+                    }
+                }
+            }
+            catch (Exception e)
+            {
+
+                string message = $"{e.TargetSite} Error: {e.Message}";
+                WriteLogs(message, "error");
+                return null;
+            }
+            return null;
+
+
+
+        }
+
         public static void WriteLogs(string message, string type)
         {
             if (type == "error")
@@ -325,8 +371,25 @@ namespace DiscordBot
             return default;
         }
 
+        public static string GetBNetMedia(string link)
+        {
 
-       
+            GetBNetMEdia activity = Functions.GetWebJson<GetBNetMEdia>($"{link}&locale=ru_RU&access_token={tokenWow}");
+            if (activity != null)
+            {
+                foreach (Asset asset in activity.assets)
+                {
+                    return asset.value;
+
+                }
+                return null;
+            }
+            else
+            {
+                return null;
+            }
+        }
+
     }
 
     #region Classes

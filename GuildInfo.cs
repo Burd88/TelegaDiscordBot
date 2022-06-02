@@ -1,8 +1,6 @@
 ﻿using Newtonsoft.Json;
 using System;
 using System.Collections.Generic;
-using System.IO;
-using System.Net;
 using System.Text.Json;
 using System.Threading.Tasks;
 using static DiscordBot.Program;
@@ -28,8 +26,8 @@ namespace DiscordBot
     class GuildInfo
     {
         #region Получение инфы о гильдии
-        public static GuildInfoFull _guildInfoFull;
-        public static GuildInfoFull GetGuildInfo()
+        private GuildInfoFull _guildInfoFull;
+        public GuildInfoFull GetGuildInfo()
         {
             _guildInfoFull = new();
             Guild_raid_progress();
@@ -45,205 +43,138 @@ namespace DiscordBot
             }
         }
 
-        private static void GetGuildRosterInfo()
+        private void GetGuildRosterInfo()
         {
-
-            try
+            MainGuild guild = Functions.GetWebJson<MainGuild>($"https://eu.api.blizzard.com/data/wow/guild/{settings.RealmSlug}/{settings.Guild.ToLower().Replace(" ", "-")}/roster?namespace=profile-eu&locale=ru_RU&access_token=" + tokenWow);
+            if (guild != null)
             {
-                WebRequest request = WebRequest.Create($"https://eu.api.blizzard.com/data/wow/guild/{settings.RealmSlug}/{settings.Guild.ToLower().Replace(" ", "-")}/roster?namespace=profile-eu&locale=ru_RU&access_token=" + tokenWow);
-                WebResponse responce = request.GetResponse();
-
-                using (System.IO.Stream stream = responce.GetResponseStream())
-
+                foreach (Member_guild character in guild.members)
                 {
-                    using (StreamReader reader = new StreamReader(stream))
+                    if (character.rank == 0)
                     {
-                        string line = "";
-                        while ((line = reader.ReadLine()) != null)
-                        {
-                            MainGuild guild = JsonConvert.DeserializeObject<MainGuild>(line);
-                            foreach (Member_guild character in guild.members)
-                            {
-                                if (character.rank == 0)
-                                {
-                                    _guildInfoFull.Leader = $"{character.character.name}";
-                                }
-                            }
-                        }
+                        _guildInfoFull.Leader = $"{character.character.name}";
                     }
                 }
-                responce.Close();
-                _guildInfoFull.Error = false;
             }
-            catch (WebException e)
-            {
-                if (e.Status == WebExceptionStatus.ProtocolError)
-                {
-                    _guildInfoFull.Error = true;
-                    string message = $"\nGetGuildRosterInfo Error: {e.Message}";
-                    Functions.WriteLogs(message, "error");
-                }
-            }
-            catch (Exception e)
+            else
             {
                 _guildInfoFull.Error = true;
-                string message = $"GetGuildRosterInfo Error: {e.Message}";
-                Functions.WriteLogs(message, "error");
             }
 
         }
 
 
-        private static void GetGuildOtherInfo()
+        private void GetGuildOtherInfo()
         {
-            try
+            GuildMain guildmain = Functions.GetWebJson<GuildMain>($"https://eu.api.blizzard.com/data/wow/guild/{settings.RealmSlug}/{settings.Guild.ToLower().Replace(" ", "-")}?namespace=profile-eu&locale=ru_RU&access_token=" + tokenWow);
+            if (guildmain != null)
             {
-                WebRequest requestchar = WebRequest.Create($"https://eu.api.blizzard.com/data/wow/guild/{settings.RealmSlug}/{settings.Guild.ToLower().Replace(" ", "-")}?namespace=profile-eu&locale=ru_RU&access_token=" + tokenWow);
-
-                WebResponse responcechar = requestchar.GetResponse();
-
-                using (System.IO.Stream stream1 = responcechar.GetResponseStream())
-
-                {
-
-                    using (StreamReader reader1 = new(stream1))
-                    {
-                        string line = "";
-
-                        while ((line = reader1.ReadLine()) != null)
-                        {
-                            // Console.WriteLine(line);
-                            GuildMain guildmain = JsonConvert.DeserializeObject<GuildMain>(line);
-                            _guildInfoFull.TimeCreate = $"{Functions.FromUnixTimeStampToDateTime(guildmain.created_timestamp.ToString())}";
-                            _guildInfoFull.Name = guildmain.name;
-                            _guildInfoFull.Achievement = $"{guildmain.achievement_points}";
-                            _guildInfoFull.MemberCount = $"{guildmain.member_count}";
-                            _guildInfoFull.Faction = $"{guildmain.faction.name}";
-
-                        }
-
-                    }
-
-                }
-                responcechar.Close();
-                _guildInfoFull.Error = false;
+                _guildInfoFull.TimeCreate = $"{Functions.FromUnixTimeStampToDateTime(guildmain.created_timestamp.ToString())}";
+                _guildInfoFull.Name = guildmain.name;
+                _guildInfoFull.Achievement = $"{guildmain.achievement_points}";
+                _guildInfoFull.MemberCount = $"{guildmain.member_count}";
+                _guildInfoFull.Faction = $"{guildmain.faction.name}";
             }
-            catch (WebException e)
-            {
-                if (e.Status == WebExceptionStatus.ProtocolError)
-                {
-                    _guildInfoFull.Error = true;
-                    string message = $"\nGetGuildOtherInfo Error: {e.Message}";
-                    Functions.WriteLogs(message, "error");
-                }
-            }
-            catch (Exception e)
+            else
             {
                 _guildInfoFull.Error = true;
-                string message = $"GetGuildOtherInfo Error: {e.Message}";
-                Functions.WriteLogs(message, "error");
             }
         }
 
 
-        private static void Guild_raid_progress()
+        private void Guild_raid_progress()
         {
-
-            try
+            GuildRaiderIO rio_guild = Functions.GetWebJson<GuildRaiderIO>($"https://raider.io/api/v1/guilds/profile?region=eu&realm={settings.RealmSlug}&name={settings.Guild.ToLower()}&fields=raid_progression%2Craid_rankings");
+            if (rio_guild != null)
             {
-                WebRequest requestchar = WebRequest.Create($"https://raider.io/api/v1/guilds/profile?region=eu&realm={settings.RealmSlug}&name={settings.Guild.ToLower()}&fields=raid_progression%2Craid_rankings");
-
-                WebResponse responcechar = requestchar.GetResponse();
-
-                using (System.IO.Stream stream1 = responcechar.GetResponseStream())
-
+                _guildInfoFull.RaidProgress = rio_guild.raid_progression.SepulcherOfTheFirstOnes.summary;
+                if (rio_guild.raid_rankings.SepulcherOfTheFirstOnes.mythic.world == 0)
                 {
-                    using StreamReader reader1 = new StreamReader(stream1);
-                    string line = "";
-                    while ((line = reader1.ReadLine()) != null)
+                    if (rio_guild.raid_rankings.SepulcherOfTheFirstOnes.heroic.world == 0)
                     {
-                        GuildRaiderIO rio_guild = JsonConvert.DeserializeObject<GuildRaiderIO>(line);
-                        _guildInfoFull.RaidProgress = rio_guild.raid_progression.SepulcherOfTheFirstOnes.summary;
-                        if (rio_guild.raid_rankings.SepulcherOfTheFirstOnes.mythic.world == 0)
+                        if (rio_guild.raid_rankings.SepulcherOfTheFirstOnes.normal.world == 0)
                         {
-                            if (rio_guild.raid_rankings.SepulcherOfTheFirstOnes.heroic.world == 0)
-                            {
-                                if (rio_guild.raid_rankings.SepulcherOfTheFirstOnes.normal.world == 0)
-                                {
-                                    _guildInfoFull.RaidRankName = "**Сложность**: Обычный";
-                                    _guildInfoFull.RaidRankWorld = "**Мир**: -";
-                                    _guildInfoFull.RaidRankRegion = "**Регион**: -";
-                                    _guildInfoFull.RaidRankRealm = "**Сервер**: -";
-
-                                }
-                                else
-                                {
-                                    _guildInfoFull.RaidRankName = "**Сложность**: Обычный";
-                                    _guildInfoFull.RaidRankWorld = $"**Мир**: {rio_guild.raid_rankings.SepulcherOfTheFirstOnes.normal.world} место";
-                                    _guildInfoFull.RaidRankRegion = $"**Регион**: {rio_guild.raid_rankings.SepulcherOfTheFirstOnes.normal.region} место";
-                                    _guildInfoFull.RaidRankRealm = $"**Сервер**: {rio_guild.raid_rankings.SepulcherOfTheFirstOnes.normal.realm} место";
-                                }
-
-
-                            }
-                            else
-                            {
-                                _guildInfoFull.RaidRankName = "**Сложность**: Героический";
-                                _guildInfoFull.RaidRankWorld = $"**Мир**: {rio_guild.raid_rankings.SepulcherOfTheFirstOnes.heroic.world} место";
-                                _guildInfoFull.RaidRankRegion = $"**Регион**: {rio_guild.raid_rankings.SepulcherOfTheFirstOnes.heroic.region} место";
-                                _guildInfoFull.RaidRankRealm = $"**Сервер**: {rio_guild.raid_rankings.SepulcherOfTheFirstOnes.heroic.realm} место";
-                            }
+                            _guildInfoFull.RaidRankName = "**Сложность**: Обычный";
+                            _guildInfoFull.RaidRankWorld = "**Мир**: -";
+                            _guildInfoFull.RaidRankRegion = "**Регион**: -";
+                            _guildInfoFull.RaidRankRealm = "**Сервер**: -";
 
                         }
                         else
                         {
-                            _guildInfoFull.RaidRankName = "**Сложность**: Мифический";
-                            _guildInfoFull.RaidRankWorld = $"**Мир**: {rio_guild.raid_rankings.SepulcherOfTheFirstOnes.mythic.world} место";
-                            _guildInfoFull.RaidRankRegion = $"**Регион**: {rio_guild.raid_rankings.SepulcherOfTheFirstOnes.mythic.region} место";
-                            _guildInfoFull.RaidRankRealm = $"**Сервер**: {rio_guild.raid_rankings.SepulcherOfTheFirstOnes.mythic.realm} место";
+                            _guildInfoFull.RaidRankName = "**Сложность**: Обычный";
+                            _guildInfoFull.RaidRankWorld = $"**Мир**: {rio_guild.raid_rankings.SepulcherOfTheFirstOnes.normal.world} место";
+                            _guildInfoFull.RaidRankRegion = $"**Регион**: {rio_guild.raid_rankings.SepulcherOfTheFirstOnes.normal.region} место";
+                            _guildInfoFull.RaidRankRealm = $"**Сервер**: {rio_guild.raid_rankings.SepulcherOfTheFirstOnes.normal.realm} место";
                         }
 
+
                     }
+                    else
+                    {
+                        _guildInfoFull.RaidRankName = "**Сложность**: Героический";
+                        _guildInfoFull.RaidRankWorld = $"**Мир**: {rio_guild.raid_rankings.SepulcherOfTheFirstOnes.heroic.world} место";
+                        _guildInfoFull.RaidRankRegion = $"**Регион**: {rio_guild.raid_rankings.SepulcherOfTheFirstOnes.heroic.region} место";
+                        _guildInfoFull.RaidRankRealm = $"**Сервер**: {rio_guild.raid_rankings.SepulcherOfTheFirstOnes.heroic.realm} место";
+                    }
+
                 }
-                responcechar.Close();
+                else
+                {
+                    _guildInfoFull.RaidRankName = "**Сложность**: Мифический";
+                    _guildInfoFull.RaidRankWorld = $"**Мир**: {rio_guild.raid_rankings.SepulcherOfTheFirstOnes.mythic.world} место";
+                    _guildInfoFull.RaidRankRegion = $"**Регион**: {rio_guild.raid_rankings.SepulcherOfTheFirstOnes.mythic.region} место";
+                    _guildInfoFull.RaidRankRealm = $"**Сервер**: {rio_guild.raid_rankings.SepulcherOfTheFirstOnes.mythic.realm} место";
+                }
                 _guildInfoFull.RAidFull = $"{_guildInfoFull.RaidProgress}\n{ _guildInfoFull.RaidRankWorld}\n{ _guildInfoFull.RaidRankRegion}\n{ _guildInfoFull.RaidRankRealm}";
-                _guildInfoFull.Error = false;
 
             }
-            catch (WebException e)
-            {
-                if (e.Status == WebExceptionStatus.ProtocolError)
-                {
-                    _guildInfoFull.Error = true;
-                    string message = $"\nGuild_raid_progress Error: {e.Message}";
-                    Functions.WriteLogs(message, "error");
-                }
-            }
-            catch (Exception e)
+            else
             {
                 _guildInfoFull.Error = true;
-                string message = $"Guild_raid_progress Error: {e.Message}";
-                Functions.WriteLogs(message, "error");
             }
+
         }
         #endregion
 
         #region Проверка состава гильдии на встплуние и покидание
-        private static List<RosterLeaveInv> beforeRoster = new List<RosterLeaveInv>();
-        private static List<RosterLeaveInv> afterRoster = new List<RosterLeaveInv>();
-        public static List<RosterLeaveInv> inviteRoster = new List<RosterLeaveInv>();
-        public static List<RosterLeaveInv> leaveRoster = new List<RosterLeaveInv>();
-        private static bool error = false;
-        public static void GetGuildRosterChange()
+        private List<RosterLeaveInv> beforeRoster;
+        private List<RosterLeaveInv> afterRoster;
+        private List<RosterLeaveInv> inviteRoster;
+        private List<RosterLeaveInv> leaveRoster;
+        private bool error = false;
+        public List<RosterLeaveInv> GetInviteRoster()
+        {
+            if (inviteRoster != null && inviteRoster.Count != 0)
+            {
+                return inviteRoster;
+            }
+            else
+            {
+                return null;
+            }
+        }
+        public List<RosterLeaveInv> GetLeaveRoster()
+        {
+            if (leaveRoster != null && leaveRoster.Count != 0)
+            {
+                return leaveRoster;
+            }
+            else
+            {
+                return null;
+            }
+        }
+        public void GetGuildRosterChange()
         {
             try
             {
 
 
-                beforeRoster = new List<RosterLeaveInv>();
-                afterRoster = new List<RosterLeaveInv>();
-                inviteRoster = new List<RosterLeaveInv>();
-                leaveRoster = new List<RosterLeaveInv>();
+                beforeRoster = new();
+                afterRoster = new();
+                inviteRoster = new();
+                leaveRoster = new();
 
                 Task<List<RosterLeaveInv>> befordata = Functions.ReadJson<List<RosterLeaveInv>>("BeforeRoster");
                 beforeRoster = befordata.Result;
@@ -271,13 +202,13 @@ namespace DiscordBot
 
                         if (leaveRoster.Count != 0 || inviteRoster.Count != 0)
                         {
-                            Functions.WriteJSon<List<RosterLeaveInv>>(afterRoster, "BeforeRoster");
+                            Functions.WriteJSon(afterRoster, "BeforeRoster");
                         }
                     }
                 }
                 else
                 {
-                    Functions.WriteJSon<List<RosterLeaveInv>>(afterRoster, "BeforeRoster");
+                    Functions.WriteJSon(afterRoster, "BeforeRoster");
                 }
             }
 
@@ -288,55 +219,20 @@ namespace DiscordBot
                 Functions.WriteLogs(message, "error");
             }
         }
-        private static void GetGuildRosterFull()
+        private void GetGuildRosterFull()
         {
-
-            try
+            MainGuild guild = Functions.GetWebJson<MainGuild>($"https://eu.api.blizzard.com/data/wow/guild/{settings.RealmSlug}/{settings.Guild.ToLower().Replace(" ", "-")}/roster?namespace=profile-eu&locale=ru_RU&access_token=" + tokenWow);
+            if (guild != null)
             {
-
-                WebRequest request = WebRequest.Create($"https://eu.api.blizzard.com/data/wow/guild/{settings.RealmSlug}/{settings.Guild.ToLower().Replace(" ", "-")}/roster?namespace=profile-eu&locale=ru_RU&access_token=" + tokenWow);
-
-                WebResponse responce = request.GetResponse();
-
-                using (System.IO.Stream stream = responce.GetResponseStream())
-
+                foreach (Member_guild character in guild.members)
                 {
-                    using (StreamReader reader = new StreamReader(stream))
-                    {
-                        string line = "";
-                        while ((line = reader.ReadLine()) != null)
-                        {
-                            MainGuild guild = JsonConvert.DeserializeObject<MainGuild>(line);
-                            foreach (Member_guild character in guild.members)
-                            {
+                    afterRoster.Add(new RosterLeaveInv { Name = character.character.name, Class = character.character.playable_class.id.ToString(), LVL = character.character.level.ToString(), Race = character.character.playable_race.id.ToString(), Rank = character.rank });
 
-
-                                afterRoster.Add(new RosterLeaveInv { Name = character.character.name, Class = character.character.playable_class.id.ToString(), LVL = character.character.level.ToString(), Race = character.character.playable_race.id.ToString(), Rank = character.rank });
-
-
-
-                            }
-                        }
-                    }
-                }
-                rosterGuild = afterRoster;
-                responce.Close();
-                error = false;
-            }
-            catch (WebException e)
-            {
-                if (e.Status == WebExceptionStatus.ProtocolError)
-                {
-                    error = true;
-                    string message = $"\nGetGuildRosterFull Error: {e.Message}";
-                    Functions.WriteLogs(message, "error");
                 }
             }
-            catch (Exception e)
+            else
             {
                 error = true;
-                string message = $"GetGuildRosterFull Error: {e.Message}";
-                Functions.WriteLogs(message, "error");
             }
 
 
