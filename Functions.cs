@@ -105,67 +105,36 @@ namespace DiscordBot
         public static List<RealmList> Realms;
         public static void LoadRealmAll()
         {
-
-            try
+            Realms = new List<RealmList>();
+            Allrealm_ realms = GetWebJson<Allrealm_>("https://eu.api.blizzard.com/data/wow/search/realm?namespace=dynamic-eu&_page=1&_pageSize=1000&locale=ru_RU&access_token=" + Program.tokenWow);
+            if (realms != null)
             {
-                Realms = new List<RealmList>();
-
-                WebRequest requestchar = WebRequest.Create("https://eu.api.blizzard.com/data/wow/search/realm?namespace=dynamic-eu&_page=1&_pageSize=1000&locale=ru_RU&access_token=" + Program.tokenWow);
-
-                WebResponse responcechar = requestchar.GetResponse();
-
-                using (Stream stream1 = responcechar.GetResponseStream())
-
+                foreach (Result realm in realms.results)
                 {
-                    using (StreamReader reader1 = new StreamReader(stream1))
-                    {
+                    Dictionary<string, string> name = new Dictionary<string, string>();
+                    name.Add("it_IT", realm.data.name.it_IT);
+                    name.Add("ru_RU", realm.data.name.ru_RU);
+                    name.Add("en_GB", realm.data.name.en_GB);
+                    name.Add("zh_TW", realm.data.name.zh_TW);
+                    name.Add("ko_KR", realm.data.name.ko_KR);
+                    name.Add("en_US", realm.data.name.en_US);
+                    name.Add("es_MX", realm.data.name.es_MX);
+                    name.Add("pt_BR", realm.data.name.pt_BR);
+                    name.Add("es_ES", realm.data.name.es_ES);
+                    name.Add("zh_CN", realm.data.name.zh_CN);
+                    name.Add("fr_FR", realm.data.name.fr_FR);
+                    name.Add("de_DE", realm.data.name.fr_FR);
 
-                        string line = "";
+                    Realms.Add(new RealmList { Name = name["ru_RU"], Slug = realm.data.slug });
 
-                        while ((line = reader1.ReadLine()) != null)
-                        {
-
-                            line = line.Replace("'", " ");
-
-
-                            Allrealm_ realms = JsonConvert.DeserializeObject<Allrealm_>(line);
-
-                            foreach (Result realm in realms.results)
-                            {
-
-                                Dictionary<string, string> name = new Dictionary<string, string>();
-                                name.Add("it_IT", realm.data.name.it_IT);
-                                name.Add("ru_RU", realm.data.name.ru_RU);
-                                name.Add("en_GB", realm.data.name.en_GB);
-                                name.Add("zh_TW", realm.data.name.zh_TW);
-                                name.Add("ko_KR", realm.data.name.ko_KR);
-                                name.Add("en_US", realm.data.name.en_US);
-                                name.Add("es_MX", realm.data.name.es_MX);
-                                name.Add("pt_BR", realm.data.name.pt_BR);
-                                name.Add("es_ES", realm.data.name.es_ES);
-                                name.Add("zh_CN", realm.data.name.zh_CN);
-                                name.Add("fr_FR", realm.data.name.fr_FR);
-                                name.Add("de_DE", realm.data.name.fr_FR);
-
-                                Realms.Add(new RealmList { Name = name["ru_RU"], Slug = realm.data.slug });
-
-
-                                //
-
-
-                            }
-
-                        }
-                    }
                 }
+
                 Realms.Sort((a, b) => a.Name.CompareTo(b.Name));
-                // WriteRealmInFile();
+
                 WriteJSon(Realms, "RealmList");
+
             }
-            catch (Exception e)
-            {
-                Console.WriteLine(DateTime.Now + ": LoadRealmAll Error: " + e.Message);
-            }
+
         }
         public static string GetRealmSlug(string text)
         {

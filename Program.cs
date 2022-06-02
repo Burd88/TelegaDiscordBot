@@ -25,8 +25,7 @@ namespace DiscordBot
         private static TelegramBotClient telegramClient;
         public static BotSettings settings;
 
-        // private static string _MessageText = null;
-        //  private static string _MessageSender = null;
+
         public static SocketGuild _mainChat;
         // private QueuedUpdateReceiver updateReceiver;
         static void Main(string[] args)
@@ -113,7 +112,7 @@ namespace DiscordBot
 
             var receiverOptions = new ReceiverOptions
             {
-                AllowedUpdates = { } // receive all update types
+                AllowedUpdates = { }
             };
             telegramClient.StartReceiving(
                 HandleUpdateAsync,
@@ -124,24 +123,7 @@ namespace DiscordBot
 
             var telebot = await telegramClient.GetMeAsync();
             Console.WriteLine($"\nTelegram Bot started @{telebot.Username}\n");
-            //   updateReceiver = new QueuedUpdateReceiver(telegramClient, receiverOptions);
 
-            // to cancel
-            //  var cts = new CancellationTokenSource();
-
-            //      try
-            //    {
-            //        await foreach (Update update in updateReceiver.WithCancellation(cts.Token))
-            //        {
-            //           if (update.Message is Message message)
-            //            {
-            //              HandlerTelegramCommands(message);
-            //          }
-            //        }
-            //     }
-            //         catch (OperationCanceledException exception)
-            //        {
-            //       }
             Console.ReadLine();
             cts.Cancel();
         }
@@ -1016,10 +998,11 @@ namespace DiscordBot
             try
             {
                 var builder = new EmbedBuilder();
-                GuildAchievements.GetGuildAchievementChange();
-                if (GuildAchievements.newAchievement.Count != 0)
+                GuildAchievements guildAchive = new();
+                var achiev = guildAchive.GetGuildAchievementChange();
+                if (achiev != null && achiev.Count != 0)
                 {
-                    foreach (Achievement achieve in GuildAchievements.newAchievement)
+                    foreach (Achievement achieve in achiev)
                     {
 
                         builder = new EmbedBuilder()
@@ -1738,58 +1721,7 @@ namespace DiscordBot
                 }
             return Task.CompletedTask;
         }
-        /*   private async void HandlerTelegramCommands(Message message)
-           {
-               switch (message.Text)
-               {
-                   case "/test":
-                       {
-                           await telegramClient.SendTextMessageAsync(
-                  message.Chat,
-                  $"Still have to process {updateReceiver.PendingUpdates} updates {message.AuthorSignature}"
-              );
-                           break;
-                       }
-                   case var s when s.Contains("/guild") || s.Contains("/гильдия"):
-                       {
 
-                           var fullInfo = GuildInfo.GetGuildInfo();
-
-
-                           if (!fullInfo.Error)
-                           {
-
-
-                               await telegramClient.SendPhotoAsync(
-                                         message.Chat,
-                                         photo: "https://render.worldofwarcraft.com/eu/guild/crest/102/emblem-102-dfa55a-b1002e.jpg",
-                                         caption: $"Информация о Гильдии : <b>{fullInfo.Name}</b>" +
-                                   $"\nФракция: <b>{fullInfo.Faction}</b>" +
-                                   $"\nЛидер: <b>{fullInfo.Leader}</b>" +
-                                   $"\nЧленов гильдии: <b>{fullInfo.MemberCount}</b>" +
-                                   $"\nДостижения: <b>{fullInfo.Achievement}</b>" +
-                                   $"\nРейд Прогресс: <b>{fullInfo.RaidProgress}</b>" +
-                                   $"\nМесто: <b>{fullInfo.RaidRankRealm.Replace("**Сервер**:","")}</b>" +
-                                   $"\nОснована: <b>{fullInfo.TimeCreate}</b>"
-                                   , parseMode: ParseMode.Html);
-                           }
-                           else
-                           {
-
-                               await telegramClient.SendTextMessageAsync(
-                                          message.Chat, "<b>Ошибка</b>\nПроблема на сервере.\nПопробуй позже.", parseMode: ParseMode.Html);
-                           }
-
-
-
-
-
-
-                           break;
-                       }
-               }
-
-          }*/
         public static string tokenWow;
 
         class Token_for_api
