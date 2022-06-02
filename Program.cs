@@ -802,10 +802,12 @@ namespace DiscordBot
             try
             {
                 var builder = new EmbedBuilder();
-                GuildActivity.GetGuildActivityChange();
-                if (GuildActivity.newActivity.Count != 0)
+                GuildActivity activity = new();
+                var activNew = activity.GetGuildActivityChange();
+
+                if (activNew != null && activNew.Count != 0)
                 {
-                    foreach (Activity activ in GuildActivity.newActivity)
+                    foreach (Activity activ in activNew)
                     {
                         if (activ.Type == "CHARACTER_ACHIEVEMENT")
                         {

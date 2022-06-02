@@ -1,9 +1,6 @@
-﻿using Newtonsoft.Json;
-using System;
+﻿using System;
 using System.Collections.Generic;
-using System.IO;
 using System.Linq;
-using System.Net;
 using System.Threading.Tasks;
 using static DiscordBot.Program;
 
@@ -12,20 +9,20 @@ namespace DiscordBot
     class GuildActivity
     {
 
-        private static string error = "false";
+        private bool error = false;
 
 
-        private static List<Activity> afterActivity = new List<Activity>();
-        public static List<Activity> newActivity = new List<Activity>();
+        private List<Activity> afterActivity = new();
+        private List<Activity> newActivity = new();
 
 
-        public static void GetGuildActivityChange()
+        public List<Activity> GetGuildActivityChange()
         {
             try
             {
 
-                afterActivity = new List<Activity>();
-                newActivity = new List<Activity>();
+                afterActivity = new();
+                newActivity = new();
                 Task<BotSettings> set = Functions.ReadJson<BotSettings>("BotSettings");
                 settings = set.Result;
 
@@ -34,7 +31,7 @@ namespace DiscordBot
 
                 if (settings.LastGuildActiveTime != 0)
                 {
-                    if (afterActivity.Count != 0 && error == "false")
+                    if (afterActivity.Count != 0 && error == false)
                     {
 
                         for (int i = 0; i < afterActivity.Count; i++)
@@ -56,10 +53,11 @@ namespace DiscordBot
                             Functions.WriteJSon<List<Activity>>(afterActivity, "BeforeGuildActivity");
                             settings.LastGuildActiveTime = last;
                             Functions.WriteJSon(settings, "BotSettings");
-
+                            return newActivity;
                         }
 
                     }
+                    return null;
                 }
                 else
                 {
@@ -68,7 +66,7 @@ namespace DiscordBot
                     settings.LastGuildActiveTime = last;
                     Functions.WriteJSon<List<Activity>>(afterActivity, "BeforeGuildActivity");
                     Functions.WriteJSon(settings, "BotSettings");
-
+                    return null;
                 }
 
             }
@@ -78,12 +76,13 @@ namespace DiscordBot
 
                 string message = $"GetGuildActivityChange Error: {e.Message}";
                 Functions.WriteLogs(message, "error");
+                return null;
             }
 
         }
 
 
-        private static void GetGuildActivityNew()
+        private void GetGuildActivityNew()
         {
             ActivityAll activity = Functions.GetWebJson<ActivityAll>($"https://eu.api.blizzard.com/data/wow/guild/{settings.RealmSlug}/{settings.Guild.ToLower().Replace(" ", "-")}/activity?namespace=profile-eu&locale=ru_RU&access_token=" + tokenWow);
 
@@ -116,209 +115,98 @@ namespace DiscordBot
             }
             else
             {
-                error = "false";
+                error = true;
             }
 
         }
-        public static void GetGuildActivity()
+        private void GetGuildActivity()
         {
-
-            try
+            ActivityAll activity = Functions.GetWebJson<ActivityAll>($"https://eu.api.blizzard.com/data/wow/guild/{settings.RealmSlug}/{settings.Guild.ToLower().Replace(" ", "-")}/activity?namespace=profile-eu&locale=ru_RU&access_token=" + tokenWow);
+            if (activity != null)
             {
-
-
-                WebRequest requesta = WebRequest.Create($"https://eu.api.blizzard.com/data/wow/guild/{settings.RealmSlug}/{settings.Guild.ToLower().Replace(" ", "-")}/activity?namespace=profile-eu&locale=ru_RU&access_token=" + tokenWow);
-                WebResponse responcea = requesta.GetResponse();
-
-                using (Stream stream = responcea.GetResponseStream())
-
+                if (activity.activities != null)
                 {
-                    using (StreamReader reader = new StreamReader(stream))
+
+                    for (int i = 0; i < activity.activities.Count; i++)
                     {
-                        string line = "";
-                        while ((line = reader.ReadLine()) != null)
+                        if (Convert.ToInt64(activity.activities[i].timestamp) > settings.LastGuildActiveTime)
                         {
 
-
-
-                            ActivityAll activity = JsonConvert.DeserializeObject<ActivityAll>(line);
-
-
-                            if (activity.activities != null)
+                            if (activity.activities[i].activity.type == "CHARACTER_ACHIEVEMENT")
                             {
-
-                                for (int i = 0; i < activity.activities.Count; i++)
-                                {
-                                    if (Convert.ToInt64(activity.activities[i].timestamp) > settings.LastGuildActiveTime)
-                                    {
-
-                                        if (activity.activities[i].activity.type == "CHARACTER_ACHIEVEMENT")
-                                        {
-                                            GetGuildActivityInfo(activity.activities[i].character_achievement.character.name, activity.activities[i].character_achievement.achievement.name, Convert.ToInt64(activity.activities[i].timestamp), activity.activities[i].character_achievement.achievement.key.href, "CHARACTER_ACHIEVEMENT");
-
-                                        }
-                                        else if (activity.activities[i].activity.type == "ENCOUNTER")
-                                        {
-                                            GetGuildActivityInfo(activity.activities[i].encounter_completed.encounter.name, activity.activities[i].encounter_completed.mode.name, Convert.ToInt64(activity.activities[i].timestamp), activity.activities[i].encounter_completed.encounter.key.href, "ENCOUNTER");
-
-
-                                        }
-                                    }
-
-                                }
+                                GetGuildActivityInfo(activity.activities[i].character_achievement.character.name, activity.activities[i].character_achievement.achievement.name, Convert.ToInt64(activity.activities[i].timestamp), activity.activities[i].character_achievement.achievement.key.href, "CHARACTER_ACHIEVEMENT");
 
                             }
+                            else if (activity.activities[i].activity.type == "ENCOUNTER")
+                            {
+                                GetGuildActivityInfo(activity.activities[i].encounter_completed.encounter.name, activity.activities[i].encounter_completed.mode.name, Convert.ToInt64(activity.activities[i].timestamp), activity.activities[i].encounter_completed.encounter.key.href, "ENCOUNTER");
 
+
+                            }
                         }
-
 
                     }
 
+                }
 
-                    responcea.Close();
-                    error = "false";
-                }
             }
-            catch (WebException e)
+            else
             {
-                if (e.Status == WebExceptionStatus.ProtocolError)
-                {
-                    error = "true";
-                    string message = $"GetGuildActivity Error: {e.Message}";
-                    Functions.WriteLogs(message, "error");
-                }
+                error = true;
             }
-            catch (Exception e)
-            {
-                error = "true";
-                string message = $"GetGuildActivity Error: {e.Message}";
-                Functions.WriteLogs(message, "error");
-            }
+
 
         }
-        public static void GetGuildActivityInfo(string name, string achivname, long time, string linkmedia, string type)
+        private void GetGuildActivityInfo(string name, string achivname, long time, string linkmedia, string type)
         {
-
-            try
+            if (type == "CHARACTER_ACHIEVEMENT")
             {
-
-                //  Console.WriteLine($"{linkmedia}&locale=ru_RU&access_token={tokenWow}");
-                WebRequest requesta = WebRequest.Create($"{linkmedia}&locale=ru_RU&access_token={tokenWow}");
-                WebResponse responcea = requesta.GetResponse();
-
-                using (Stream stream = responcea.GetResponseStream())
-
+                AchievChar activity = Functions.GetWebJson<AchievChar>($"{linkmedia}&locale=ru_RU&access_token={tokenWow}");
+                if (activity != null)
                 {
-                    using (StreamReader reader = new StreamReader(stream))
-                    {
-                        string line = "";
-                        while ((line = reader.ReadLine()) != null)
-                        {
-
-                            if (type == "CHARACTER_ACHIEVEMENT")
-                            {
-                                AchievChar activity = JsonConvert.DeserializeObject<AchievChar>(line);
-
-                                GetGuildActivityInfoMedia(name, achivname, time, activity.category.name, activity.reward_description, activity.media.key.href, type);
-                            }
-                            else if (type == "ENCOUNTER")
-                            {
-                                BossKill activity = JsonConvert.DeserializeObject<BossKill>(line);
-
-                                GetGuildActivityInfoMedia(name, achivname, time, activity.instance.name, null, activity.creatures[0].creature_display.key.href, type);
-                            }
-
-
-
-
-
-
-
-                        }
-                    }
+                    GetGuildActivityInfoMedia(name, achivname, time, activity.category.name, activity.reward_description, activity.media.key.href, type);
                 }
-                responcea.Close();
-                error = "false";
-            }
-            catch (WebException e)
-            {
-                if (e.Status == WebExceptionStatus.ProtocolError)
+                else
                 {
-                    if (type == "CHARACTER_ACHIEVEMENT")
-                    {
-                        afterActivity.Add(new Activity() { Name = name, Mode = achivname, Time = time, Icon = null, Award = null, Categor = null, Type = type });
-                    }
-                    else if (type == "ENCOUNTER")
-                    {
-                        afterActivity.Add(new Activity() { Name = name, Mode = achivname, Time = time, Icon = null, Award = null, Categor = null, Type = type });
-                    }
+
+                    afterActivity.Add(new Activity() { Name = name, Mode = achivname, Time = time, Icon = null, Award = null, Categor = null, Type = type });
+                }
+
+            }
+            else if (type == "ENCOUNTER")
+            {
+                BossKill activity = Functions.GetWebJson<BossKill>($"{linkmedia}&locale=ru_RU&access_token={tokenWow}");
+                if (activity != null)
+                {
+                    GetGuildActivityInfoMedia(name, achivname, time, activity.instance.name, null, activity.creatures[0].creature_display.key.href, type);
+                }
+                else
+                {
+                    afterActivity.Add(new Activity() { Name = name, Mode = achivname, Time = time, Icon = null, Award = null, Categor = null, Type = type });
 
                 }
             }
-            catch (Exception e)
-            {
-                error = "true";
-                string message = $"GetGuildActivityInfo Error: {e.Message}";
-                Functions.WriteLogs(message, "error");
-            }
+
+
 
         }
 
-        public static void GetGuildActivityInfoMedia(string name, string achivname, long time, string category, string award, string linkmedia, string type)
+        private void GetGuildActivityInfoMedia(string name, string achivname, long time, string category, string award, string linkmedia, string type)
         {
 
-            try
+            AcievCharMEdia activity = Functions.GetWebJson<AcievCharMEdia>($"{linkmedia}&locale=ru_RU&access_token={tokenWow}");
+            if (activity != null)
             {
-
-
-                WebRequest requesta = WebRequest.Create($"{linkmedia}&locale=ru_RU&access_token={tokenWow}");
-                WebResponse responcea = requesta.GetResponse();
-
-                using (Stream stream = responcea.GetResponseStream())
-
+                foreach (Asset asset in activity.assets)
                 {
-                    using (StreamReader reader = new StreamReader(stream))
-                    {
-                        string line = "";
-                        while ((line = reader.ReadLine()) != null)
-                        {
+                    afterActivity.Add(new Activity() { Name = name, Mode = achivname, Time = time, Icon = asset.value, Award = award, Categor = category, Type = type });
 
-
-
-                            AcievCharMEdia activity = JsonConvert.DeserializeObject<AcievCharMEdia>(line);
-
-                            foreach (Asset asset in activity.assets)
-                            {
-                                afterActivity.Add(new Activity() { Name = name, Mode = achivname, Time = time, Icon = asset.value, Award = award, Categor = category, Type = type });
-
-                            }
-
-
-
-
-
-                        }
-                    }
-                }
-                responcea.Close();
-                error = "false";
-            }
-            catch (WebException e)
-            {
-                if (e.Status == WebExceptionStatus.ProtocolError)
-                {
-                    error = "true";
-                    string message = $"GetGuildActivityInfoMedia Error: {e.Message}";
-                    Functions.WriteLogs(message, "error");
                 }
             }
-            catch (Exception e)
+            else
             {
-                error = "true";
-                string message = $"GetGuildActivityInfoMedia Error: {e.Message}";
-                Functions.WriteLogs(message, "error");
+                error = true;
             }
-
         }
 
     }
