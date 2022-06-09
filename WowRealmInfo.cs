@@ -16,7 +16,7 @@ namespace DiscordBot
     class WowRealmInfo
     {
         private WoWRealStatus wowRealmStatus;
-        private string realmstatustype = "";
+      
         public WoWRealStatus GetRealmInfo()
         {
             wowRealmStatus = new();

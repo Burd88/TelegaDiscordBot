@@ -27,10 +27,13 @@ namespace DiscordBot
 
 
         public static SocketGuild _mainChat;
+
         // private QueuedUpdateReceiver updateReceiver;
+        [Obsolete]
         static void Main(string[] args)
             => new Program().MainAsync().GetAwaiter().GetResult();
 
+        [Obsolete]
         private async Task MainAsync()
         {
             settings = new BotSettings();
@@ -966,7 +969,7 @@ namespace DiscordBot
                         .WithThumbnailUrl("https://render.worldofwarcraft.com/eu/guild/crest/102/emblem-102-dfa55a-b1002e.jpg")
                         .WithImageUrl(newLog.InstanceImg)
                          .WithTitle($"Крайний рейд-лог Гильдии \"Сердце Греха\"\n{newLog.Date}")
-                         .WithDescription($"[Просмотр]({newLog.Link})" +
+                         .WithDescription($"[Открыть на сайте]({newLog.Link})" +
                          $"\n**Рейд:** {newLog.Dungeon}" +
                          $"\n**Убитые боссы ( {newLog.KillBoss} ):** {string.Join(",", newLog.BossKilling)}" +
                          $"\n**Вайпов:** {newLog.WipeBoss}" +
@@ -1050,6 +1053,7 @@ namespace DiscordBot
         private Task Log(LogMessage msg)
         {
             Console.WriteLine(msg.ToString());
+           
             return Task.CompletedTask;
         }
 
@@ -1461,7 +1465,10 @@ namespace DiscordBot
                             await msg.Author.SendMessageAsync(null, false, emb);
 
 
-                            await msg.DeleteAsync();
+                            if (!msg.Channel.Name.Contains("@"))
+                            {
+                                await msg.DeleteAsync();
+                            }
                             break;
                         }
                     case "!мир" or "!realm":
@@ -1488,7 +1495,10 @@ namespace DiscordBot
                                 await msg.Author.SendMessageAsync(null, false, emb);
 
                             }
-                            await msg.DeleteAsync();
+                            if (!msg.Channel.Name.Contains("@"))
+                            {
+                                await msg.DeleteAsync();
+                            }
                             break;
                         }
                     case var s when s.Contains("!affix") || s.Contains("!аффикс") || s.Contains("!афикс"):
@@ -1518,7 +1528,10 @@ namespace DiscordBot
                                 await msg.Author.SendMessageAsync(null, false, emb);
                             }
 
-                            await msg.DeleteAsync();
+                            if (!msg.Channel.Name.Contains("@"))
+                            {
+                                await msg.DeleteAsync();
+                            }
                             break;
                         }
 
@@ -1548,7 +1561,10 @@ namespace DiscordBot
 
 
 
-                            await msg.DeleteAsync();
+                            if (!msg.Channel.Name.Contains("@"))
+                            {
+                                await msg.DeleteAsync();
+                            }
                             break;
                         }
                     case var s when s.Contains("!чар ") || s.Contains("!char "):
@@ -1588,7 +1604,10 @@ namespace DiscordBot
                             }
 
 
-                            await msg.DeleteAsync();
+                            if (!msg.Channel.Name.Contains("@"))
+                            {
+                                await msg.DeleteAsync();
+                            }
                             break;
                         }
                     case "!lastlog":
@@ -1619,7 +1638,10 @@ namespace DiscordBot
                             {
                                 await msg.Author.SendMessageAsync("**Ошибка**\nПроблема на сервере.\nПопробуй позже.");
                             }
-                            await msg.DeleteAsync();
+                            if (!msg.Channel.Name.Contains("@"))
+                            {
+                                await msg.DeleteAsync();
+                            }
                             break;
                         }
                     case "!guild" or "!гильдия":
@@ -1651,10 +1673,13 @@ namespace DiscordBot
                                 await msg.Author.SendMessageAsync("**Ошибка**\nПроблема на сервере.\nПопробуй позже.");
                             }
 
+                            
 
-
-
-                            await msg.DeleteAsync();
+                            if(!msg.Channel.Name.Contains("@"))
+                            {
+                                await msg.DeleteAsync();
+                            }
+                            
 
                             break;
                         }
@@ -1675,7 +1700,10 @@ namespace DiscordBot
                                     .AddField("Мдд:", Static.mdd, false)
                                     .WithFooter(footer => footer.Text = $"Гильдия \"Сердце греха\".\nОбновлено: {DateTime.Now} (+4 Мск) ");
                             await discordClient.GetGuild(settings.DiscordMainChatId).GetTextChannel(944575829105594438).ModifyMessageAsync(944583210434719775, msg => msg.Embed = builder.Build());
-                            await msg.DeleteAsync();
+                            if (!msg.Channel.Name.Contains("@"))
+                            {
+                                await msg.DeleteAsync();
+                            }
 
                             break;
                         }
@@ -1699,7 +1727,10 @@ namespace DiscordBot
                                     .AddField("Мдд:", Static.mdd, false)
                                     .WithFooter(footer => footer.Text = $"Гильдия \"Сердце греха\".\nОбновлено: {DateTime.Now} (+4 Мск) ");
                             await discordClient.GetGuild(settings.DiscordMainChatId).GetTextChannel(944575829105594438).ModifyMessageAsync(944583210434719775, msg => msg.Embed = builder.Build());
-                            await msg.DeleteAsync();
+                            if (!msg.Channel.Name.Contains("@"))
+                            {
+                                await msg.DeleteAsync();
+                            }
 
                             break;
                         }
@@ -1723,7 +1754,10 @@ namespace DiscordBot
                                     .AddField("Мдд:", Static.mdd, false)
                                     .WithFooter(footer => footer.Text = $"Гильдия \"Сердце греха\".\nОбновлено: {DateTime.Now} (+4 Мск) ");
                             await discordClient.GetGuild(settings.DiscordMainChatId).GetTextChannel(944575829105594438).ModifyMessageAsync(944583210434719775, msg => msg.Embed = builder.Build());
-                            await msg.DeleteAsync();
+                            if (!msg.Channel.Name.Contains("@"))
+                            {
+                                await msg.DeleteAsync();
+                            }
 
                             break;
                         }

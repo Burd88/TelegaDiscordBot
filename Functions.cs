@@ -171,25 +171,31 @@ namespace DiscordBot
             try
             {
                 List<EncounterLang> enconterAll = ReadJson<List<EncounterLang>>("EncounterList").Result;
-                foreach (EncounterLang enc in enconterAll)
+                if (enconterAll != null)
                 {
-                    if (!Regex.IsMatch(text, @"\P{IsBasicLatin}"))
+                    foreach (EncounterLang enc in enconterAll)
                     {
-                        if (enc.EncounterEN != null && enc.EncounterEN.ToLower() == text.Trim().ToLower())
+                        if (!Regex.IsMatch(text, @"\P{IsBasicLatin}"))
                         {
+                            if (enc.EncounterEN != null && enc.EncounterEN.ToLower() == text.Trim().ToLower())
+                            {
 
-                            return enc;
+                                return enc;
 
 
 
+                            }
                         }
-                    } else if (!Regex.IsMatch(text, @"\P{IsCyrillic}")) {
-                        if (enc.EncounterRU != null && enc.EncounterRU.ToLower() == text.Trim().ToLower())
+                        else if (!Regex.IsMatch(text, @"\P{IsCyrillic}"))
                         {
-                            return enc;
-                        } 
+                            if (enc.EncounterRU != null && enc.EncounterRU.ToLower() == text.Trim().ToLower())
+                            {
+                                return enc;
+                            }
+                        }
                     }
                 }
+                
             }
             catch (Exception e)
             {
@@ -279,7 +285,7 @@ namespace DiscordBot
 
 
 
-                using (FileStream fs = new(writePathJSON, FileMode.Create, FileAccess.Write, FileShare.Write))
+                using (FileStream fs = new(writePathJSON, FileMode.OpenOrCreate, FileAccess.Write, FileShare.Write))
                 {
 
 
@@ -315,7 +321,7 @@ namespace DiscordBot
             try
             {
 
-                using (FileStream fs = new(PathJSON, FileMode.Open, FileAccess.Read, FileShare.Read))
+                using (FileStream fs = new(PathJSON, FileMode.OpenOrCreate, FileAccess.Read, FileShare.Read))
                 {
 
                     return await System.Text.Json.JsonSerializer.DeserializeAsync<T>(fs);
@@ -333,7 +339,7 @@ namespace DiscordBot
             catch (Exception e)
             {
 
-                string message = $"{e.TargetSite} Error: {e.Message}";
+                string message = $"{e.GetType().Name} Error: {e.Message}";
                 WriteLogs(message, "error");
                 return default;
             }

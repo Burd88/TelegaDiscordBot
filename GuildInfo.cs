@@ -176,11 +176,11 @@ namespace DiscordBot
                 inviteRoster = new();
                 leaveRoster = new();
 
-                Task<List<RosterLeaveInv>> befordata = Functions.ReadJson<List<RosterLeaveInv>>("BeforeRoster");
+                Task<List<RosterLeaveInv>> befordata = Functions.ReadJson<List<RosterLeaveInv>>("Roster");
                 beforeRoster = befordata.Result;
                 GetGuildRosterFull();
                 //Functions.WriteJSon<List<RosterLeaveInv>>(afterRoster, "BeforeRoster");
-                if (beforeRoster.Count != 0)
+                if (beforeRoster != null && beforeRoster.Count != 0 )
                 {
                     if (afterRoster.Count != 0 && !error)
                     {
@@ -202,13 +202,13 @@ namespace DiscordBot
 
                         if (leaveRoster.Count != 0 || inviteRoster.Count != 0)
                         {
-                            Functions.WriteJSon(afterRoster, "BeforeRoster");
+                            Functions.WriteJSon(afterRoster, "Roster");
                         }
                     }
                 }
                 else
                 {
-                    Functions.WriteJSon(afterRoster, "BeforeRoster");
+                    Functions.WriteJSon(afterRoster, "Roster");
                 }
             }
 

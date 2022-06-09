@@ -9,27 +9,20 @@ namespace DiscordBot
     class GuildAchievements
     {
 
-        private AllAchievements achievements = new() { Achievements = new List<Achievement>() };
-        private bool error = false;
-
-        private List<Achievement> beforeAchievement = new();
-        private List<Achievement> afterAchievement = new();
-        private List<Achievement> newAchievement = new();
-
+        private bool error = false;   
+        private List<Achievement> afterAchievement ;
+        private List<Achievement> newAchievement ;
 
         public List<Achievement> GetGuildAchievementChange()
         {
             try
-            {
-                beforeAchievement = new();
+            {               
                 afterAchievement = new();
                 newAchievement = new();
-                achievements = new() { Achievements = new List<Achievement>() };
-                Task<BotSettings> set = Functions.ReadJson<BotSettings>("BotSettings");
-                settings = set.Result;
+              
+                settings = Functions.ReadJson<BotSettings>("BotSettings").Result;                
 
                 GetGuildAchievements();
-
 
                 if (settings.LastGuildAchiveTime != 0)
                 {
@@ -51,8 +44,8 @@ namespace DiscordBot
                         if (newAchievement.Count != 0)
                         {
                             var last = newAchievement.Max(after => after.Time);
-                            Console.WriteLine($"LastGuildAchiveTime write new : {last}\n");
-                            Functions.WriteJSon<List<Achievement>>(afterAchievement, "BeforeGuildAchievement");
+                          
+                           
                             settings.LastGuildAchiveTime = last;
                             Functions.WriteJSon(settings, "BotSettings");
                             return newAchievement;
@@ -65,7 +58,7 @@ namespace DiscordBot
                 {
 
                     var last = afterAchievement.Max(after => after.Time);
-                    Console.WriteLine($"LastGuildAchiveTime write : {last}\n");
+                  
                     settings.LastGuildAchiveTime = last;
                     Functions.WriteJSon(settings, "BotSettings");
                     return null;
@@ -93,15 +86,48 @@ namespace DiscordBot
 
                     for (int i = 0; i < achievementsAll.recent_events.Count; i++)
                     {
+
                         if (Convert.ToInt64(achievementsAll.recent_events[i].timestamp) > settings.LastGuildAchiveTime)
                         {
-                            GetGuildAchievementsRU(achievementsAll.recent_events[i].achievement.key.href, achievementsAll.recent_events[i].timestamp.ToString());
+                            Achievement achievement = new();
+                            achievement.Time = Convert.ToInt64(achievementsAll.recent_events[i].timestamp.ToString());
+                           
+                            GuildAchievementMedia achievementInfo = Functions.GetWebJson<GuildAchievementMedia>(achievementsAll.recent_events[i].achievement.key.href + "&locale=ru_RU&access_token=" + tokenWow);
+                            if (achievementInfo != null)
+                            {
+                                achievement.Name = achievementInfo.name;
+                                achievement.Category = achievementInfo.category.name;
+                                // GetGuildAchievementsRUMedia(achievementInfo.category.name, achievementInfo.name, Convert.ToInt64(time), achievementInfo.media.key.href);
+                                GetBNetMEdia achievementMedia = Functions.GetWebJson<GetBNetMEdia>(achievementInfo.media.key.href + "&locale=ru_RU&access_token=" + tokenWow);
+                                if (achievementMedia != null)
+                                {
+                                    achievement.Icon = achievementMedia.assets[0].value;
+                                    //  afterAchievement.Add(new Achievement { Category = category, Name = name, Time = time, Icon = achievementMedia.assets[0].value });
+                                    afterAchievement.Add(achievement);
+                                }
+                                else
+                                {
+                                    error = true;
+                                }
+                            }
+                            else
+                            {
+                                error = true;
+                            }
+                        }
+                        else
+                        {
+                            error = true;
                         }
 
 
 
                     }
 
+                }
+                else
+                {
+                    error = true;
                 }
             }
             else
@@ -111,6 +137,7 @@ namespace DiscordBot
 
 
         }
+        /*
         private void GetGuildAchievementsRU(string link, string time)
         {
 
@@ -144,6 +171,7 @@ namespace DiscordBot
 
 
         }
+        */
     }
 
 
