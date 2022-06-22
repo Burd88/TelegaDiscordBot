@@ -176,8 +176,8 @@ namespace DiscordBot
                 inviteRoster = new();
                 leaveRoster = new();
 
-                Task<List<RosterLeaveInv>> befordata = Functions.ReadJson<List<RosterLeaveInv>>("Roster");
-                beforeRoster = befordata.Result;
+                beforeRoster = Functions.ReadJson<List<RosterLeaveInv>>("Roster");
+                
                 GetGuildRosterFull();
                 //Functions.WriteJSon<List<RosterLeaveInv>>(afterRoster, "BeforeRoster");
                 if (beforeRoster != null && beforeRoster.Count != 0 )

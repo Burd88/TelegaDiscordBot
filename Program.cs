@@ -37,8 +37,8 @@ namespace DiscordBot
         private async Task MainAsync()
         {
             settings = new BotSettings();
-            Task<BotSettings> set = Functions.ReadJson<BotSettings>("BotSettings");
-            settings = set.Result;
+            settings = Functions.ReadJson<BotSettings>("BotSettings");
+           
 
             int num = 0;
             AutorizationsBattleNet();
@@ -108,9 +108,9 @@ namespace DiscordBot
 
             TimerCallback tmsetRole = new(OnTimerHandlerSetUserRole);
             Timer timerSetRole = new(tmsetRole, num, 10000, 60000 * 15);
-
-            TimerCallback tmUpdateStatic = new(OnTimerHandlerUpdateStatic);
-            Timer timerUpdateStatic = new(tmUpdateStatic, num, 10000, 60000 * 20);
+            
+          //  TimerCallback tmUpdateStatic = new(OnTimerHandlerUpdateStatic);
+          //  Timer timerUpdateStatic = new(tmUpdateStatic, num, 10000, 60000 * 20);
             telegramClient = new TelegramBotClient(settings.TelegramBotToken);
             using var cts = new CancellationTokenSource();
 
@@ -150,12 +150,12 @@ namespace DiscordBot
             CharInfo pers = new();
 
 
-            var builder = new EmbedBuilder();
+            
             var fullInfo = pers.GetCharInfo((string)command.Data.Options.First().Value);
 
             if (fullInfo != null)
             {
-                builder = new EmbedBuilder()
+               var builder = new EmbedBuilder()
                     .WithTitle($"{fullInfo.Name}({fullInfo.Lvl} уровень) {fullInfo.Race}")
                     .WithUrl(fullInfo.LinkBnet).WithDescription($"Информация о персонаже  :")
                     .WithColor(Discord.Color.DarkRed).AddField("Уровень\nпредметов:", fullInfo.ILvl, true)
@@ -258,7 +258,7 @@ namespace DiscordBot
             }
             else
             {
-                chatName = update.Message.Chat.FirstName + update.Message.Chat.LastName;
+                chatName = update.Message.Chat.FirstName + " " + update.Message.Chat.LastName;
             }
 
             var messageText = update.Message.Text;
@@ -1052,21 +1052,25 @@ namespace DiscordBot
         }
         private Task Log(LogMessage msg)
         {
+        
             Console.WriteLine(msg.ToString());
-           
+ 
+
+
             return Task.CompletedTask;
         }
 
-        public static List<RosterLeaveInv> rosterGuild = new();
+        public static List<RosterLeaveInv> rosterGuild;
 
         private async void OnTimerHandlerSetUserRole(object obj)
         {
             try
             {
-                // Console.WriteLine("\n Начинаю сверять роли ВОВ-ДИСКОРД \n");
+               //  Console.WriteLine("\n Начинаю сверять роли ВОВ-ДИСКОРД \n");
                 var allUser = discordClient.GetGuild(settings.DiscordMainChatId).GetUsersAsync(RequestOptions.Default);
 
-
+                rosterGuild = new();
+                rosterGuild= Functions.ReadJson<List<RosterLeaveInv>>("Roster");
 
 
 
@@ -1083,41 +1087,47 @@ namespace DiscordBot
                     var roleAdmin = discordClient.GetGuild(settings.DiscordMainChatId).Roles.FirstOrDefault(x => x.Name == "Админ").Id;
                     var roleTest = discordClient.GetGuild(settings.DiscordMainChatId).Roles.FirstOrDefault(x => x.Name == "Тест").Id;
                     List<ulong> roleList = new() { roleGuildMaster, roleLieutenant, roleOfficer, roleRaider, roleVeteran, roleWarrior, roleTwink, roleNewbie };
-
+                   
                     foreach (IGuildUser us in user)
                     {
                         if (us.Id != 0)
 
                         {
+                           
                             if (!us.IsBot)
                             {
+                                
                                 if (rosterGuild.Count != 0)
                                 {
-
+                                    
                                     if (us.Nickname != null)
                                     {
+                                        
                                         var nick = rosterGuild.Find(x => us.Nickname.ToLower().Contains(x.Name.ToLower()));
 
                                         if (nick != null)
                                         {
-
+                                            
                                             if (us.RoleIds.Count != 1)
                                             {
+                                               
                                                 //Console.WriteLine(us.RoleIds.Count);
                                                 if (us.RoleIds.Count > 2)
                                                 {
+                                                    
                                                     bool admin = false;
                                                     foreach (var role in us.RoleIds)
                                                     {
                                                         if (role == roleAdmin)
                                                         {
+                                                            
                                                             admin = true;
                                                             // Console.WriteLine($"Изменение роли на сервере для Username: {us.Username}, Nickname: {us.Nickname}, Admin");
                                                         }
                                                     }
                                                     if (!admin)
                                                     {
-
+                                                        
                                                         await us.RemoveRolesAsync(roleList);
                                                         await us.AddRoleAsync(roleList[nick.Rank]);
                                                         Console.ForegroundColor = ConsoleColor.Green;

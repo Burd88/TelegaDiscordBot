@@ -9,6 +9,7 @@ using System.Text.RegularExpressions;
 using System.Text.Unicode;
 using System.Threading.Tasks;
 using static DiscordBot.Program;
+using Json.Net;
 
 namespace DiscordBot
 {
@@ -157,7 +158,7 @@ namespace DiscordBot
             catch (Exception e)
             {
 
-                string message = $"{e.TargetSite} Error: {e.Message}";
+                string message = $"{e.GetType().Name} Error: {e.Message}";
                 WriteLogs(message, "error");
                 return null;
             }
@@ -170,7 +171,7 @@ namespace DiscordBot
         {
             try
             {
-                List<EncounterLang> enconterAll = ReadJson<List<EncounterLang>>("EncounterList").Result;
+                List<EncounterLang> enconterAll = ReadJson<List<EncounterLang>>("EncounterList");
                 if (enconterAll != null)
                 {
                     foreach (EncounterLang enc in enconterAll)
@@ -200,7 +201,7 @@ namespace DiscordBot
             catch (Exception e)
             {
 
-                string message = $"{e.TargetSite} Error: {e.Message}";
+                string message = $"{e.GetType().Name} Error: {e.Message}";
                 WriteLogs(message, "error");
                 return null;
             }
@@ -213,7 +214,7 @@ namespace DiscordBot
         {
             try
             {
-                List<InstanceLang> instanceAll = ReadJson<List<InstanceLang>>("InstanceList").Result;
+                List<InstanceLang> instanceAll = ReadJson<List<InstanceLang>>("InstanceList");
                 foreach (InstanceLang inst in instanceAll)
                 {
                     if (!Regex.IsMatch(text, @"\P{IsBasicLatin}"))
@@ -235,7 +236,7 @@ namespace DiscordBot
             catch (Exception e)
             {
 
-                string message = $"{e.TargetSite} Error: {e.Message}";
+                string message = $"{e.GetType().Name} Error: {e.Message}";
                 WriteLogs(message, "error");
                 return null;
             }
@@ -276,33 +277,41 @@ namespace DiscordBot
             }
         }
 
-        public static async void WriteJSon<T>(T data, string filename)
+        public static void WriteJSon<T>(T data, string filename)
         {
             string writePathJSON = @".\json\" + filename + ".json";
 
             try
             {
 
-
-
-                using (FileStream fs = new(writePathJSON, FileMode.OpenOrCreate, FileAccess.Write, FileShare.Write))
+                using (StreamWriter file = File.CreateText(writePathJSON))
                 {
-
-
-
-                    var options = new JsonSerializerOptions
-                    {
-                        Encoder = JavaScriptEncoder.Create(UnicodeRanges.BasicLatin, UnicodeRanges.Cyrillic),
-                        WriteIndented = true
-                    };
-
-                    await System.Text.Json.JsonSerializer.SerializeAsync(fs, data, options);
-                    //   WriteLogs($"Запись {filename} прошла успешно", "notification");
-
-                    fs.Close();
-
+                    Newtonsoft.Json.JsonSerializer serializer = new();
+                    //serialize object directly into file stream
+                    serializer.Formatting = Formatting.Indented;
+                   
+                    serializer.Serialize(file, data);
+                    
                 }
+           
+                 /*using (FileStream fs = new(writePathJSON, FileMode.OpenOrCreate, FileAccess.Write, FileShare.Write))
+                 {
 
+
+
+                     var options = new JsonSerializerOptions
+                     {
+                         Encoder = JavaScriptEncoder.Create(UnicodeRanges.BasicLatin, UnicodeRanges.Cyrillic),
+                         WriteIndented = true
+                     };
+
+                     await System.Text.Json.JsonSerializer.SerializeAsync(fs, data, options);
+                     //   WriteLogs($"Запись {filename} прошла успешно", "notification");
+
+                     fs.Close();
+
+                 }
+                */
 
 
             }
@@ -310,11 +319,11 @@ namespace DiscordBot
             catch (Exception e)
             {
 
-                string message = $"{e.TargetSite} Error: {e.Message}";
+                string message = $"File : {filename}\n{e.GetType().Name}\nError: {e.Message}";
                 WriteLogs(message, "error");
             }
         }
-        public static async Task<T> ReadJson<T>(string filename)
+        public static T ReadJson<T>(string filename)
         {
             string PathJSON = @".\json\" + filename + ".json";
 
@@ -322,9 +331,12 @@ namespace DiscordBot
             {
 
                 using (FileStream fs = new(PathJSON, FileMode.OpenOrCreate, FileAccess.Read, FileShare.Read))
-                {
-
-                    return await System.Text.Json.JsonSerializer.DeserializeAsync<T>(fs);
+                {using (StreamReader reader = new(fs))
+                    {
+                        string line = reader.ReadToEnd();
+                        return JsonConvert.DeserializeObject<T>(line);
+                    }
+                  
 
 
 
@@ -339,7 +351,7 @@ namespace DiscordBot
             catch (Exception e)
             {
 
-                string message = $"{e.GetType().Name} Error: {e.Message}";
+                string message = $"File : {filename}\n{e.GetType().Name}\nError: {e.Message}";
                 WriteLogs(message, "error");
                 return default;
             }

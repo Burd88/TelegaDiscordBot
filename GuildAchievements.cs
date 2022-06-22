@@ -20,7 +20,7 @@ namespace DiscordBot
                 afterAchievement = new();
                 newAchievement = new();
               
-                settings = Functions.ReadJson<BotSettings>("BotSettings").Result;                
+                settings = Functions.ReadJson<BotSettings>("BotSettings");                
 
                 GetGuildAchievements();
 

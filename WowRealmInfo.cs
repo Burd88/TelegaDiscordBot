@@ -28,7 +28,7 @@ namespace DiscordBot
 
         public string[] GetRealmInfoForTimer()
         {
-            settings = Functions.ReadJson<BotSettings>("BotSettings").Result;
+            settings = Functions.ReadJson<BotSettings>("BotSettings");
 
             wowRealmStatus = new();
             GetRealmConnectedLink();

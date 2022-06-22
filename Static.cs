@@ -16,14 +16,22 @@ namespace DiscordBot
 
         public void UpdateStaticRoster()
         {
-            var roster = Functions.ReadJson<StaticRoster>("Static").Result;
-            GetStaticRoster(roster);
+            var roster = Functions.ReadJson<StaticRoster>("Static");
+            if(roster != null)
+            {
+                GetStaticRoster(roster);
+            }
+            else
+            {
+                Functions.WriteLogs("Roster is null, check json file", "error");
+            }
+            
         }
 
         public void AddMemberStaticRoster(string name)
         {
             string[] str = name.Split("-");
-            var roster = Functions.ReadJson<StaticRoster>("Static").Result;
+            var roster = Functions.ReadJson<StaticRoster>("Static");
             //  Console.WriteLine(str[0].ToLower());
             var member = roster.Static.Find(x => x.Name.ToLower() == str[0].ToLower());
 
@@ -39,7 +47,7 @@ namespace DiscordBot
         public void DeleteMemberStaticRoster(string name)
         {
 
-            var roster = Functions.ReadJson<StaticRoster>("Static").Result;
+            var roster = Functions.ReadJson<StaticRoster>("Static");
             var member = roster.Static.Find(x => x.Name.ToLower() == name.ToLower());
 
             if (member != null)
@@ -73,25 +81,25 @@ namespace DiscordBot
                     if (member.Role == "танк")
                     {
                         tankid++;
-                        tank += $"**{tankid})** [{persinfo.Name}](https://worldofwarcraft.com/ru-ru/character/eu/howling-fjord/{persinfo.Name.ToLower()})-**{persinfo.Class}** (**{persinfo.ILvl}**)\n__Рейд: **{persinfo.RaidProgress}** Миф+: **{persinfo.MythicPlus}** {persinfo.SetcountItem}__\n";
+                        tank += $"**{tankid})** [{persinfo.Name}](https://worldofwarcraft.com/ru-ru/character/eu/howling-fjord/{persinfo.Name.ToLower()})(**{persinfo.ILvl}**)\n**{persinfo.Class}**-**{persinfo.Spec}**\n__Рейд: **{persinfo.RaidProgress}** Миф+: **{persinfo.MythicPlus}** {persinfo.SetcountItem}__\n";
                     }
                     else if (member.Role == "хил")
                     {
                         healid++;
-                        heal += $"**{healid})** [{persinfo.Name}](https://worldofwarcraft.com/ru-ru/character/eu/howling-fjord/{persinfo.Name.ToLower()})-**{persinfo.Class}** (**{persinfo.ILvl}**)\n__Рейд: **{persinfo.RaidProgress}** Миф+: **{persinfo.MythicPlus}** {persinfo.SetcountItem}__\n";
+                        heal += $"**{healid})** [{persinfo.Name}](https://worldofwarcraft.com/ru-ru/character/eu/howling-fjord/{persinfo.Name.ToLower()})(**{persinfo.ILvl}**)\n**{persinfo.Class}**-**{persinfo.Spec}**\n__Рейд: **{persinfo.RaidProgress}** Миф+: **{persinfo.MythicPlus}** {persinfo.SetcountItem}__\n";
                     }
                     else if (member.Role == "мдд")
                     {
                         mddid++;
-                        mdd += $"**{mddid})** [{persinfo.Name}](https://worldofwarcraft.com/ru-ru/character/eu/howling-fjord/{persinfo.Name.ToLower()})-**{persinfo.Class}** (**{persinfo.ILvl}**)\n__Рейд: **{persinfo.RaidProgress}** Миф+: **{persinfo.MythicPlus}** {persinfo.SetcountItem}__\n";
+                        mdd += $"**{mddid})** [{persinfo.Name}](https://worldofwarcraft.com/ru-ru/character/eu/howling-fjord/{persinfo.Name.ToLower()})(**{persinfo.ILvl}**)\n**{persinfo.Class}**-**{persinfo.Spec}**\n__Рейд: **{persinfo.RaidProgress}** Миф+: **{persinfo.MythicPlus}** {persinfo.SetcountItem}__\n";
                     }
                     else if (member.Role == "рдд")
                     {
                         rddid++;
-                        rdd += $"**{rddid})** [{persinfo.Name}](https://worldofwarcraft.com/ru-ru/character/eu/howling-fjord/{persinfo.Name.ToLower()})-**{persinfo.Class}** (**{persinfo.ILvl}**)\n__Рейд: **{persinfo.RaidProgress}** Миф+: **{persinfo.MythicPlus}** {persinfo.SetcountItem}__\n";
+                        rdd += $"**{rddid})** [{persinfo.Name}](https://worldofwarcraft.com/ru-ru/character/eu/howling-fjord/{persinfo.Name.ToLower()})(**{persinfo.ILvl}**)\n**{persinfo.Class}**-**{persinfo.Spec}**\n__Рейд: **{persinfo.RaidProgress}** Миф+: **{persinfo.MythicPlus}** {persinfo.SetcountItem}__\n";
                     }
                     everage += Convert.ToInt32(persinfo.ILvl);
-                    newroster.Add(new StaticChar { Name = persinfo.Name.Replace("**", ""), Role = member.Role, Class = persinfo.Class, Ilvl = persinfo.ILvl, Raid = persinfo.RaidProgress });
+                    newroster.Add(new StaticChar { Name = persinfo.Name.Replace("**", ""), Role = member.Role, Class = persinfo.Class, Ilvl = persinfo.ILvl, Raid = persinfo.RaidProgress, Spec = persinfo.Spec });
                 }
 
             }
@@ -112,6 +120,7 @@ namespace DiscordBot
         public string Ilvl { get; set; }
         public string Class { get; set; }
         public string Raid { get; set; }
+        public string Spec { get; set; }
 
     }
 

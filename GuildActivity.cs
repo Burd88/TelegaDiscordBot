@@ -24,7 +24,7 @@ namespace DiscordBot
                
                 afterActivity = new();
                 newActivity = new();
-                settings = Functions.ReadJson<BotSettings>("BotSettings").Result;
+                settings = Functions.ReadJson<BotSettings>("BotSettings");
               
 
                 GetGuildActivityNew();
