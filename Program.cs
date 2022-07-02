@@ -192,6 +192,7 @@ namespace DiscordBot
 
                 var builder = new EmbedBuilder()
                       .WithTitle($"**{affixs.title}**")
+                      .WithThumbnailUrl("https://cdn.discordapp.com/avatars/931442555332198400/bb4f0a2c3f5534cc199b54cc6b805d1a.webp?size=100")
                       .WithDescription("Мифик+ аффиксы на эту неделю.")
                       .AddField("(+2)", $"**[{affixs.affix_details[0].name}]({affixs.affix_details[0].wowhead_url.Replace("wowhead", "ru.wowhead")}): {affixs.affix_details[0].description}**")
                       .AddField("(+4)", $"**[{affixs.affix_details[1].name}]({affixs.affix_details[1].wowhead_url.Replace("wowhead", "ru.wowhead")}): {affixs.affix_details[1].description}**")
@@ -674,6 +675,7 @@ namespace DiscordBot
 
                                 var builder = new EmbedBuilder()
                                       .WithTitle($"**{affixs.title}**")
+                                      .WithThumbnailUrl("https://cdn.discordapp.com/avatars/931442555332198400/bb4f0a2c3f5534cc199b54cc6b805d1a.webp?size=100")
                                       .WithDescription("Мифик+ аффиксы на эту неделю обновлены.")
                                       .AddField("(+2)", $"**[{affixs.affix_details[0].name}]({affixs.affix_details[0].wowhead_url.Replace("wowhead", "ru.wowhead")}): {affixs.affix_details[0].description}**")
                                       .AddField("(+4)", $"**[{affixs.affix_details[1].name}]({affixs.affix_details[1].wowhead_url.Replace("wowhead", "ru.wowhead")}): {affixs.affix_details[1].description}**")
@@ -966,7 +968,7 @@ namespace DiscordBot
                 if (newLog != null)
                 {
                     var builder = new EmbedBuilder()
-                        .WithThumbnailUrl("https://render.worldofwarcraft.com/eu/guild/crest/102/emblem-102-dfa55a-b1002e.jpg")
+                        .WithThumbnailUrl("https://cdn.discordapp.com/avatars/931442555332198400/bb4f0a2c3f5534cc199b54cc6b805d1a.webp?size=100")
                         .WithImageUrl(newLog.InstanceImg)
                          .WithTitle($"Крайний рейд-лог Гильдии \"Сердце Греха\"\n{newLog.Date}")
                          .WithDescription($"[Открыть на сайте]({newLog.Link})" +
@@ -1317,7 +1319,7 @@ namespace DiscordBot
                 updatestatic.UpdateStaticRoster();
 
                 var builder = new EmbedBuilder()
-                        .WithThumbnailUrl("https://render.worldofwarcraft.com/eu/guild/crest/102/emblem-102-dfa55a-b1002e.jpg")
+                        .WithThumbnailUrl("https://cdn.discordapp.com/avatars/931442555332198400/bb4f0a2c3f5534cc199b54cc6b805d1a.webp?size=100")
                         .WithTitle("Состав рейд-статика")
                         .WithDescription(Static.description)
                         .WithColor(Discord.Color.DarkRed)
@@ -1521,6 +1523,7 @@ namespace DiscordBot
                             {
 
                                 builder = new EmbedBuilder().WithTitle($"**{affixs.title}**").WithDescription("Мифик+ аффиксы на эту неделю.")
+                                    .WithThumbnailUrl("https://cdn.discordapp.com/avatars/931442555332198400/bb4f0a2c3f5534cc199b54cc6b805d1a.webp?size=100")
                                     .AddField("(+2)", $"**[{affixs.affix_details[0].name}]({affixs.affix_details[0].wowhead_url.Replace("wowhead", "ru.wowhead")}): {affixs.affix_details[0].description}**")
                                     .AddField("(+4)", $"**[{affixs.affix_details[1].name}]({affixs.affix_details[1].wowhead_url.Replace("wowhead", "ru.wowhead")}): {affixs.affix_details[1].description}**")
                                     .AddField("(+7)", $"**[{affixs.affix_details[2].name}]({affixs.affix_details[2].wowhead_url.Replace("wowhead", "ru.wowhead")}): {affixs.affix_details[2].description}**")
@@ -1665,7 +1668,7 @@ namespace DiscordBot
                             {
 
                                 builder = new EmbedBuilder()
-                                    .WithThumbnailUrl("https://render.worldofwarcraft.com/eu/guild/crest/102/emblem-102-dfa55a-b1002e.jpg")
+                                    .WithThumbnailUrl("https://cdn.discordapp.com/avatars/931442555332198400/bb4f0a2c3f5534cc199b54cc6b805d1a.webp?size=100")
                                     .WithDescription($"Информация о Гильдии : [**{fullInfo.Name}**](https://worldofwarcraft.com/ru-ru/guild/eu/{settings.RealmSlug}/{settings.Guild.ToLower().Replace(" ", "-")})")
                                     .WithColor(Discord.Color.DarkRed).AddField("Лидер:", fullInfo.Leader, true)
                                     .AddField("Членов гильдии:", fullInfo.MemberCount, true)
@@ -1699,7 +1702,7 @@ namespace DiscordBot
                             updatestatic.UpdateStaticRoster();
 
                             var builder = new EmbedBuilder()
-                                    .WithThumbnailUrl("https://render.worldofwarcraft.com/eu/guild/crest/102/emblem-102-dfa55a-b1002e.jpg")
+                                    .WithThumbnailUrl("https://cdn.discordapp.com/avatars/931442555332198400/bb4f0a2c3f5534cc199b54cc6b805d1a.webp?size=100")
                                     .WithTitle("Состав рейд-статика")
                                     .WithDescription(Static.description)
                                     .WithColor(Discord.Color.DarkRed)
@@ -1726,7 +1729,7 @@ namespace DiscordBot
                             updatestatic.DeleteMemberStaticRoster(name);
 
                             var builder = new EmbedBuilder()
-                                    .WithThumbnailUrl("https://render.worldofwarcraft.com/eu/guild/crest/102/emblem-102-dfa55a-b1002e.jpg")
+                                    .WithThumbnailUrl("https://cdn.discordapp.com/avatars/931442555332198400/bb4f0a2c3f5534cc199b54cc6b805d1a.webp?size=100")
                                     .WithTitle("Состав рейд-статика")
                                     .WithDescription(Static.description)
                                     .WithColor(Discord.Color.DarkRed)
@@ -1753,7 +1756,7 @@ namespace DiscordBot
                             updatestatic.AddMemberStaticRoster(name);
 
                             var builder = new EmbedBuilder()
-                                    .WithThumbnailUrl("https://render.worldofwarcraft.com/eu/guild/crest/102/emblem-102-dfa55a-b1002e.jpg")
+                                    .WithThumbnailUrl("https://cdn.discordapp.com/avatars/931442555332198400/bb4f0a2c3f5534cc199b54cc6b805d1a.webp?size=100")
                                     .WithTitle("Состав рейд-статика")
                                     .WithDescription(Static.description)
                                     .WithColor(Discord.Color.DarkRed)
