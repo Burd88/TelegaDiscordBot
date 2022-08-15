@@ -202,58 +202,10 @@ namespace DiscordBot
             }
         }
     }
-    public class CharInfoAll
-    {
-        public string Name { get; set; }
-        public string Race { get; set; }
-        public string Lvl { get; set; }
-        public string Guild { get; set; }
-        public string ILvl { get; set; }
-        public string Class { get; set; }
-        public string Spec { get; set; }
-        public string Coven { get; set; }
-        public string CovenSoul { get; set; }
-        public string RaidProgress { get; set; }
-        public string MythicPlus { get; set; }
-        public string LastLogin { get; set; }
-        public bool Error { get; set; }
-        public string ImageCharMain { get; set; }
-        public string ImageCharMainRaw { get; set; }
-        public string ImageCharAvatar { get; set; }
-        public string ImageCharInset { get; set; }
-        public string Stats { get; set; }
-        public string LinkBnet { get; set; }
-        public string SetcountItem { get; set; }
-
-        public CharInfoAll()
-        {
-            Name = "";
-            ILvl = "";
-            Class = "нет";
-            Spec = "нет";
-            Coven = "нет";
-            Stats = "";
-            CovenSoul = "нет";
-            LastLogin = "хз";
-            Guild = "нет";
-            RaidProgress = "0/0";
-            MythicPlus = "0";
-            ImageCharMain = "";
-            ImageCharAvatar = "";
-            ImageCharMainRaw = "";
-            ImageCharInset = "";
-            Error = false;
-            LinkBnet = "";
-            SetcountItem = "";
-        }
-
-    }
+    
     #region Char Stats
 
-    public class Self
-    {
-        public string href { get; set; }
-    }
+    
 
     public class Links
     {
@@ -399,7 +351,7 @@ namespace DiscordBot
         public string slug { get; set; }
     }
 
-    public class Character
+   public class Character
     {
         public Key key { get; set; }
         public string name { get; set; }
@@ -1249,7 +1201,7 @@ namespace DiscordBot
 
     public class Expansion
     {
-        public Expansion expansion { get; set; }
+        public Expansion2 expansion { get; set; }
         public List<Instances> instances { get; set; }
     }
 

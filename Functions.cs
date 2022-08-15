@@ -366,7 +366,7 @@ namespace DiscordBot
                 WebResponse responcea = requesta.GetResponse();
 
                 using Stream stream = responcea.GetResponseStream();
-                using StreamReader reader = new StreamReader(stream);
+                using StreamReader reader = new(stream);
 
                 string line = reader.ReadToEnd();
 
@@ -392,7 +392,7 @@ namespace DiscordBot
         public static string GetBNetMedia(string link)
         {
 
-            GetBNetMEdia activity = Functions.GetWebJson<GetBNetMEdia>($"{link}&locale=ru_RU&access_token={tokenWow}");
+            GetBNetMEdia activity = GetWebJson<GetBNetMEdia>($"{link}&locale=ru_RU&access_token={tokenWow}");
             if (activity != null)
             {
                 foreach (Asset asset in activity.assets)
@@ -407,103 +407,5 @@ namespace DiscordBot
                 return null;
             }
         }
-
     }
-
-    #region Classes
-
-
-    public class Root_Realm
-    {
-        public Links _links { get; set; }
-        public List<Realm> realms { get; set; }
-    }
-
-    public class RealmList
-    {
-        public string Name { get; set; }
-        public string Slug { get; set; }
-    }
-
-
-
-
-
-    public class RootRealmlocal
-    {
-        public Links _links { get; set; }
-        public int id { get; set; }
-        public Region region { get; set; }
-        public ConnectedRealm connected_realm { get; set; }
-        public string name { get; set; }
-        public string category { get; set; }
-        public string locale { get; set; }
-        public string timezone { get; set; }
-        public Type type { get; set; }
-        public bool is_tournament { get; set; }
-        public string slug { get; set; }
-    }
-
-
-
-
-
-    public class RegionNameLocals
-    {
-        public Name name { get; set; }
-        public int id { get; set; }
-    }
-
-    public class CategoryLocals
-    {
-        public string it_IT { get; set; }
-        public string ru_RU { get; set; }
-        public string en_GB { get; set; }
-        public string zh_TW { get; set; }
-        public string ko_KR { get; set; }
-        public string en_US { get; set; }
-        public string es_MX { get; set; }
-        public string pt_BR { get; set; }
-        public string es_ES { get; set; }
-        public string zh_CN { get; set; }
-        public string fr_FR { get; set; }
-        public string de_DE { get; set; }
-    }
-
-    public class TypeNameLocals
-    {
-        public Name name { get; set; }
-        public string type { get; set; }
-    }
-
-    public class Data
-    {
-        public bool is_tournament { get; set; }
-        public string timezone { get; set; }
-        public Name name { get; set; }
-        public int id { get; set; }
-        public RegionNameLocals region { get; set; }
-        public CategoryLocals category { get; set; }
-        public string locale { get; set; }
-        public TypeNameLocals type { get; set; }
-        public string slug { get; set; }
-    }
-
-    public class Result
-    {
-        public Key key { get; set; }
-        public Data data { get; set; }
-    }
-
-    public class Allrealm_
-    {
-        public int page { get; set; }
-        public int pageSize { get; set; }
-        public int maxPageSize { get; set; }
-        public int pageCount { get; set; }
-        public List<Result> results { get; set; }
-    }
-    #endregion
-
-
 }

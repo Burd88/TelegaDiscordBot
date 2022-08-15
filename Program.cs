@@ -3,6 +3,7 @@ using Discord.Net;
 using Discord.WebSocket;
 using Newtonsoft.Json;
 using System;
+using System.Text;
 using System.Collections.Generic;
 using System.Linq;
 using System.Net;
@@ -21,10 +22,11 @@ namespace DiscordBot
 {
     class Program
     {
+        StringBuilder textAll = new();
         public static DiscordSocketClient discordClient;
         private static TelegramBotClient telegramClient;
         public static BotSettings settings;
-
+        private static bool telegramBotNotification = false;
 
         public static SocketGuild _mainChat;
 
@@ -38,16 +40,15 @@ namespace DiscordBot
         {
             settings = new BotSettings();
             settings = Functions.ReadJson<BotSettings>("BotSettings");
-           
 
+            telegramBotNotification = false;
             int num = 0;
             AutorizationsBattleNet();
             Thread.Sleep(10000);
             //GetEncounter.LoadEncounterAll();
             //GetInstance.LoadInstanceAll();
             settings.RealmSlug = Functions.GetRealmSlug(settings.Realm);
-            Console.WriteLine(
-                $"DiscordBotToken : {settings.DiscordBotToken}\n" +
+            textAll = new($"DiscordBotToken : {settings.DiscordBotToken}\n" +
                 $"TelegramBotToken : {settings.TelegramBotToken}\n" +
                 $"BatNetToken : {settings.BatNetToken}\n" +
                 $"BatNetSecretKey : {settings.BatNetSecretKey}\n" +
@@ -68,9 +69,10 @@ namespace DiscordBot
                 $"LastGuildAchiveTime : {settings.LastGuildAchiveTime}\n" +
                 $"LastGuildActiveTime : {settings.LastGuildActiveTime}\n" +
                 $"LastGuildLogTime : {settings.LastGuildLogTime}\n");
+            Console.WriteLine(textAll.ToString());
 
             Functions.WriteJSon(settings, "BotSettings");
-            Thread.Sleep(5000);
+            
             discordClient = new DiscordSocketClient();
             discordClient.MessageReceived += CommandsHandler;
             discordClient.Log += Log;
@@ -300,7 +302,7 @@ namespace DiscordBot
                     break;
                 case var s when s.Contains("/token"):
 
-                    var tokenprice = Functions.GetWebJson<Token>("https://eu.api.blizzard.com/data/wow/token/index?namespace=dynamic-eu&locale=ru_RU&access_token=" + Program.tokenWow);
+                    var tokenprice = Functions.GetWebJson<TokenWarcraft>("https://eu.api.blizzard.com/data/wow/token/index?namespace=dynamic-eu&locale=ru_RU&access_token=" + Program.tokenWow);
                     if (tokenprice != null)
                     {
                         await telegramClient.SendTextMessageAsync(
@@ -649,7 +651,10 @@ namespace DiscordBot
                          .AddField($"{text[0]}", $"**{text[1]}**");
 
                     await chan.SendMessageAsync(null, false, builder.Build());
-                    await telegramClient.SendTextMessageAsync(settings.TelegramMainChatID, $"{text[0]}\n{text[1]}", parseMode: ParseMode.Html);
+                    if (telegramBotNotification)
+                    {
+                        await telegramClient.SendTextMessageAsync(settings.TelegramMainChatID, $"{text[0]}\n{text[1]}", parseMode: ParseMode.Html);
+                    }
                     string message = ("Отправленно оповещение о Тех.Работах!");
                     Functions.WriteLogs(message, "notification");
                 }
@@ -692,11 +697,13 @@ namespace DiscordBot
                                     $"<b>(+4) {affixs.affix_details[1].name}</b>:\n {affixs.affix_details[1].description}\n" +
                                    $"<b>(+7) {affixs.affix_details[2].name}</b>:\n {affixs.affix_details[2].description}\n" +
                                    $"<b>(+10) {affixs.affix_details[3].name}</b>:\n {affixs.affix_details[3].description}\n";
-
-                                await telegramClient.SendTextMessageAsync(
-                                    chatId: settings.TelegramMainChatID,
-                                    text: text,
-                                    parseMode: ParseMode.Html, disableWebPagePreview: true);
+                                if (telegramBotNotification)
+                                {
+                                      await telegramClient.SendTextMessageAsync(
+                                        chatId: settings.TelegramMainChatID,
+                                        text: text,
+                                        parseMode: ParseMode.Html, disableWebPagePreview: true);
+                                }
                             }
 
 
@@ -773,24 +780,29 @@ namespace DiscordBot
                             .AddField("Класс:", fullInfo.Class, true).AddField("Специализация:", fullInfo.Spec, true)
                             .AddField("Ковенант:", fullInfo.Coven, true).AddField("Медиум:", fullInfo.CovenSoul, true)
                             .AddField("Рейд прогресс:", fullInfo.RaidProgress, true).AddField("Счет Мифик+:", fullInfo.MythicPlus, true);
-                        await telegramClient.SendPhotoAsync(
+                        if (telegramBotNotification)
+                        {
+                            await telegramClient.SendPhotoAsync(
                             photo: fullInfo.ImageCharInset,
                             chatId: settings.TelegramMainChatID,
                             caption: $"{fullInfo.Name}({inv.LVL} уровень) {fullInfo.Race}\n{text}\nУровень предметов: {fullInfo.ILvl}\nКласс: {fullInfo.Class}\nСпециализация: {fullInfo.Spec}" +
                             $"\nКовенант: {fullInfo.Coven}\nМедиум: {fullInfo.CovenSoul}" +
                             $"\nРейд прогресс: {fullInfo.RaidProgress}\nСчет Мифик+: {fullInfo.MythicPlus}"
                             , parseMode: ParseMode.Html);
+                        }
                     }
                     else if (Convert.ToInt32(inv.LVL) < 60)
                     {
                         builder = new EmbedBuilder().WithTitle($"**{fullInfo.Name}**({inv.LVL} уровень) {fullInfo.Race}").WithUrl(fullInfo.LinkBnet).WithDescription($"**{text}**").WithColor(Discord.Color.DarkRed).AddField("Уровень\nпредметов:", fullInfo.ILvl, true).WithImageUrl(fullInfo.ImageCharInset)
                           .AddField("Класс:", fullInfo.Class, true).AddField("Специализация:", fullInfo.Spec, true);
-                        await telegramClient.SendPhotoAsync(
+                        if (telegramBotNotification)
+                        {
+                            await telegramClient.SendPhotoAsync(
                             photo: fullInfo.ImageCharInset,
                             chatId: settings.TelegramMainChatID,
                             caption: $"{fullInfo.Name}({inv.LVL} уровень) {fullInfo.Race}\n{text}\nУровень предметов: {fullInfo.ILvl}\nКласс: {fullInfo.Class}\nСпециализация: {fullInfo.Spec}",
                             parseMode: ParseMode.Html);
-
+                        }
 
                     }
                     _mainChat = discordClient.GetGuild(settings.DiscordMainChatId);
@@ -830,15 +842,18 @@ namespace DiscordBot
                                 var chan = _mainChat.GetChannel(settings.DiscordActivityChannelId) as IMessageChannel;
                                 var embed = builder.Build();
                                 await chan.SendMessageAsync(null, false, embed);
-
-                                if (activ.Categor != "Рейды Legion" && activ.Categor != "Рейды Azeroth" && activ.Categor != "Рейды Draenor" && activ.Categor != "Рейды Pandaria")
+                                if (telegramBotNotification)
                                 {
+                                    if (activ.Categor != "Рейды Legion" && activ.Categor != "Рейды Azeroth" && activ.Categor != "Рейды Draenor" && activ.Categor != "Рейды Pandaria")
+                                    {
 
-                                    await telegramClient.SendTextMessageAsync(
-                                     chatId: settings.TelegramMainChatID,
-                                     text: $"Всё збс, это <b>Достижение</b>!\n<a href =\"https://www.youtube.com/watch?v=d-diB65scQU&ab_channel=BobbyMcFerrinVEVO\">Don't Worry Be Happy</a>\nПолучил(а): <b>{activ.Name}</b>\nНазвание: <b>{activ.Mode}</b>",
-                                     parseMode: ParseMode.Html, disableWebPagePreview: true);
+                                        await telegramClient.SendTextMessageAsync(
+                                         chatId: settings.TelegramMainChatID,
+                                         text: $"Всё збс, это <b>Достижение</b>!\n<a href =\"https://www.youtube.com/watch?v=d-diB65scQU&ab_channel=BobbyMcFerrinVEVO\">Don't Worry Be Happy</a>\nПолучил(а): <b>{activ.Name}</b>\nНазвание: <b>{activ.Mode}</b>",
+                                         parseMode: ParseMode.Html, disableWebPagePreview: true);
+                                    }
                                 }
+                               
                             }
                             else
                             {
@@ -855,16 +870,17 @@ namespace DiscordBot
                                     var chan = _mainChat.GetChannel(settings.DiscordActivityChannelId) as IMessageChannel;
                                     var embed = builder.Build();
                                     await chan.SendMessageAsync(null, false, embed);
-
-                                    if (activ.Categor != "Рейды Legion" && activ.Categor != "Рейды Azeroth" && activ.Categor != "Рейды Draenor" && activ.Categor != "Рейды Pandaria")
+                                    if (telegramBotNotification)
                                     {
+                                        if (activ.Categor != "Рейды Legion" && activ.Categor != "Рейды Azeroth" && activ.Categor != "Рейды Draenor" && activ.Categor != "Рейды Pandaria")
+                                        {
 
-                                        await telegramClient.SendTextMessageAsync(
-                                   chatId: settings.TelegramMainChatID,
-                                   text: $"Всё збс, это <b>Достижение</b>!\n<a href =\"https://www.youtube.com/watch?v=d-diB65scQU&ab_channel=BobbyMcFerrinVEVO\">Don't Worry Be Happy</a>\nПолучил(а): <b>{activ.Name}</b>\nНазвание: <b>{activ.Mode}</b>\nКатегоря: <b>{activ.Categor}</b>",
-                                   parseMode: ParseMode.Html, disableWebPagePreview: true);
+                                            await telegramClient.SendTextMessageAsync(
+                                       chatId: settings.TelegramMainChatID,
+                                       text: $"Всё збс, это <b>Достижение</b>!\n<a href =\"https://www.youtube.com/watch?v=d-diB65scQU&ab_channel=BobbyMcFerrinVEVO\">Don't Worry Be Happy</a>\nПолучил(а): <b>{activ.Name}</b>\nНазвание: <b>{activ.Mode}</b>\nКатегоря: <b>{activ.Categor}</b>",
+                                       parseMode: ParseMode.Html, disableWebPagePreview: true);
+                                        }
                                     }
-
                                 }
 
                                 else if (activ.Award != null)
@@ -881,14 +897,16 @@ namespace DiscordBot
                                     var chan = _mainChat.GetChannel(settings.DiscordActivityChannelId) as IMessageChannel;
                                     var embed = builder.Build();
                                     await chan.SendMessageAsync(null, false, embed);
-
-                                    if (activ.Categor != "Рейды Legion" && activ.Categor != "Рейды Azeroth" && activ.Categor != "Рейды Draenor" && activ.Categor != "Рейды Pandaria")
+                                    if (telegramBotNotification)
                                     {
+                                        if (activ.Categor != "Рейды Legion" && activ.Categor != "Рейды Azeroth" && activ.Categor != "Рейды Draenor" && activ.Categor != "Рейды Pandaria")
+                                        {
 
-                                        await telegramClient.SendTextMessageAsync(
-                                   chatId: settings.TelegramMainChatID,
-                                   text: $"Всё збс, это <b>Достижение</b>!\n<a href =\"https://www.youtube.com/watch?v=d-diB65scQU&ab_channel=BobbyMcFerrinVEVO\">Don't Worry Be Happy</a>\nПолучил(а): <b>{activ.Name}</b>\nНазвание: <b>{activ.Mode}</b>\nКатегоря: <b>{activ.Categor}</b>\nНаграда: <b>{activ.Award}</b>",
-                                   parseMode: ParseMode.Html, disableWebPagePreview: true);
+                                            await telegramClient.SendTextMessageAsync(
+                                       chatId: settings.TelegramMainChatID,
+                                       text: $"Всё збс, это <b>Достижение</b>!\n<a href =\"https://www.youtube.com/watch?v=d-diB65scQU&ab_channel=BobbyMcFerrinVEVO\">Don't Worry Be Happy</a>\nПолучил(а): <b>{activ.Name}</b>\nНазвание: <b>{activ.Mode}</b>\nКатегоря: <b>{activ.Categor}</b>\nНаграда: <b>{activ.Award}</b>",
+                                       parseMode: ParseMode.Html, disableWebPagePreview: true);
+                                        }
                                     }
                                 }
 
@@ -909,11 +927,14 @@ namespace DiscordBot
                                 var chan = _mainChat.GetChannel(settings.DiscordActivityChannelId) as IMessageChannel;
                                 var embed = builder.Build();
                                 await chan.SendMessageAsync(null, false, embed);
-                                await telegramClient.SendTextMessageAsync(
+                                if (telegramBotNotification)
+                                {
+                                    await telegramClient.SendTextMessageAsync(
                                    chatId: settings.TelegramMainChatID,
                                    text: $"<b>Гильдия одержала победу!</b>\nБосс: {activ.Mode}\nРежим: {activ.Categor}"
                                    , parseMode: ParseMode.Html, disableWebPagePreview: true
                                    );
+                                }
                             }
                             else if (activ.Icon != null)
                             {
@@ -929,12 +950,15 @@ namespace DiscordBot
                                 var chan = _mainChat.GetChannel(settings.DiscordActivityChannelId) as IMessageChannel;
                                 var embed = builder.Build();
                                 await chan.SendMessageAsync(null, false, embed);
-                                await telegramClient.SendPhotoAsync(
+                                if (telegramBotNotification)
+                                {
+                                    await telegramClient.SendPhotoAsync(
                                   chatId: settings.TelegramMainChatID,
                                  photo: activ.Icon,
                                  caption: $"<b>Гильдия одержала победу!</b>\nРейд: <b>{activ.Categor}</b>\nБосс: <b>{activ.Name}</b>\nРежим: <b>{activ.Mode}</b>"
                                   , parseMode: ParseMode.Html
                                   );
+                                }
                             }
 
                         }
@@ -1027,12 +1051,15 @@ namespace DiscordBot
                         _mainChat = discordClient.GetGuild(settings.DiscordMainChatId);
                         var chan = _mainChat.GetChannel(settings.DiscordActivityChannelId) as IMessageChannel;
                         await chan.SendMessageAsync(null, false, embed);
-                        await telegramClient.SendTextMessageAsync(
+                        if (telegramBotNotification)
+                        {
+                            await telegramClient.SendTextMessageAsync(
                                  chatId: settings.TelegramMainChatID,
 
                                 $"<b>Гильдия получила достижение!!</b>\nНазвание: {achieve.Name}\nКатегоря: {achieve.Category}"
                                  , parseMode: ParseMode.Html
                                  );
+                        }
                     }
                     string message = ("Отправленно оповещение о получении достижения гильдии!");
                     Functions.WriteLogs(message, "notification");
@@ -1779,57 +1806,7 @@ namespace DiscordBot
         }
 
         public static string tokenWow;
-
-        class Token_for_api
-        {
-            public string access_token { get; set; }
-            public string expires_in { get; set; }
-            public string token_type { get; set; }
-        }
-        class UsersIdForTelegram
-        {
-            public List<User> members { get; set; }
-        }
-
-        class User
-        {
-            public string Title { get; set; }
-            public string Name { get; set; }
-            public string Id { get; set; }
-        }
-        public class BotSettings
-        {
-            public string DiscordBotToken { get; set; }
-            public string TelegramBotToken { get; set; }
-            public string BatNetToken { get; set; }
-            public string BatNetSecretKey { get; set; }
-            public string Realm { get; set; }
-            public string RealmSlug { get; set; }
-
-            public bool NeedPoolRT { get; set; }
-            public bool AddtionalRT { get; set; }
-            public string RealmStatusType { get; set; }
-            public string Guild { get; set; }
-            public ulong DiscordMainChatId { get; set; }
-
-            public ulong DiscordMainChannelId { get; set; }
-            public ulong DiscordActivityChannelId { get; set; }
-            public ulong DiscordRosterChannelId { get; set; }
-            public ulong DiscordLogChannelId { get; set; }
-            public ulong DiscordAffixChannelId { get; set; }
-            public ulong DiscordTestChatId { get; set; }
-            public ulong TestDiscordMainChannelId { get; set; }
-            public long TelegramMainChatID { get; set; }
-            public long TelegramTestChatID { get; set; }
-            public long LastGuildAchiveTime { get; set; }
-            public long LastGuildActiveTime { get; set; }
-            public long LastGuildLogTime { get; set; }
-        }
-        public class UserDiscord
-        {
-            public ulong ID { get; set; }
-            public string Name { get; set; }
-        }
+            
         private static async void AutorizationsBattleNet()
         {
 

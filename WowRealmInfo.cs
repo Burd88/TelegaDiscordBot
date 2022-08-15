@@ -4,15 +4,7 @@ using static DiscordBot.Program;
 
 namespace DiscordBot
 {
-    public class WoWRealStatus
-    {
-        public string RealmName { get; set; }
-        public string RealmStatus { get; set; }
-        public string RealnStatusType { get; set; }
-        public bool Error { get; set; }
-
-
-    }
+    
     class WowRealmInfo
     {
         private WoWRealStatus wowRealmStatus;
@@ -94,7 +86,7 @@ namespace DiscordBot
         {
 
 
-            ConnectRealm realm = Functions.GetWebJson<ConnectRealm>($"https://eu.api.blizzard.com/data/wow/connected-realm/{id}?namespace=dynamic-eu&locale=ru_RU&access_token={tokenWow}");
+            Realms realm = Functions.GetWebJson<Realms>($"https://eu.api.blizzard.com/data/wow/connected-realm/{id}?namespace=dynamic-eu&locale=ru_RU&access_token={tokenWow}");
             if (realm != null)
             {
                 if (realm.status.type == "UP")
@@ -110,7 +102,7 @@ namespace DiscordBot
 
                 }
 
-                foreach (ConectRealm realms in realm.realms)
+                foreach (ConnectRealm realms in realm.realms)
                 {
                     wowRealmStatus.RealmName = realms.name;
 
@@ -173,92 +165,5 @@ namespace DiscordBot
         }
 
     }
-    #region RealmInfo Classes
-
-
-
-
-    public class Population
-    {
-        public string type { get; set; }
-        public string name { get; set; }
-    }
-
-
-
-    public class Region
-    {
-        public Key key { get; set; }
-        public string name { get; set; }
-        public int id { get; set; }
-    }
-
-    public class ConnectedRealm
-    {
-        public string href { get; set; }
-    }
-
-    public class Type1
-    {
-        public string type { get; set; }
-        public string name { get; set; }
-    }
-
-    public class ConectRealm
-    {
-        public int id { get; set; }
-        public Region region { get; set; }
-        public ConnectedRealm connected_realm { get; set; }
-        public string name { get; set; }
-        public string category { get; set; }
-        public string locale { get; set; }
-        public string timezone { get; set; }
-        public Type1 type { get; set; }
-        public bool is_tournament { get; set; }
-        public string slug { get; set; }
-    }
-
-    public class MythicLeaderboards
-    {
-        public string href { get; set; }
-    }
-
-    public class Auctions
-    {
-        public string href { get; set; }
-    }
-
-    public class ConnectRealm
-    {
-        public Links _links { get; set; }
-        public int id { get; set; }
-        public bool has_queue { get; set; }
-        public Status status { get; set; }
-        public Population population { get; set; }
-        public List<ConectRealm> realms { get; set; }
-        public MythicLeaderboards mythic_leaderboards { get; set; }
-        public Auctions auctions { get; set; }
-    }
-
-
-
-
-
-
-
-    public class RealmInfo
-    {
-        public Links _links { get; set; }
-        public int id { get; set; }
-        public Region region { get; set; }
-        public ConnectedRealm connected_realm { get; set; }
-        public string name { get; set; }
-        public string category { get; set; }
-        public string locale { get; set; }
-        public string timezone { get; set; }
-        public Type type { get; set; }
-        public bool is_tournament { get; set; }
-        public string slug { get; set; }
-    }
-    #endregion
+   
 }
