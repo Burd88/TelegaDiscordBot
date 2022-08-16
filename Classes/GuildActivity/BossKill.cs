@@ -13,7 +13,7 @@ namespace DiscordBot
         public string name { get; set; }
         public string description { get; set; }
         public List<Creature> creatures { get; set; }
-        public List<Item> items { get; set; }
+        public List<ItemLoot> items { get; set; }
         public List<Section> sections { get; set; }
         public Instance instance { get; set; }
         public CategoryBossKill category { get; set; }

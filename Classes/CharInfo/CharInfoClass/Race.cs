@@ -6,7 +6,7 @@ using System.Threading.Tasks;
 
 namespace DiscordBot 
 {
-    public class Item
+    public class Race
     {
         public Key key { get; set; }
         public string name { get; set; }

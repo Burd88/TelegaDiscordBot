@@ -4,9 +4,9 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 
-namespace DiscordBot 
+namespace DiscordBot
 {
-    public class Item
+    public class Conduit
     {
         public Key key { get; set; }
         public string name { get; set; }

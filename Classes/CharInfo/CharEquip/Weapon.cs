@@ -6,10 +6,10 @@ using System.Threading.Tasks;
 
 namespace DiscordBot 
 {
-    public class Item
+    public class Weapon
     {
-        public Key key { get; set; }
-        public string name { get; set; }
-        public int id { get; set; }
+        public Damage damage { get; set; }
+        public AttackSpeed attack_speed { get; set; }
+        public Dps dps { get; set; }
     }
 }

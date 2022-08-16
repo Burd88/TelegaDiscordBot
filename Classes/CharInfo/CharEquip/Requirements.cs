@@ -6,10 +6,9 @@ using System.Threading.Tasks;
 
 namespace DiscordBot 
 {
-    public class Item
+    public class Requirements
     {
-        public Key key { get; set; }
-        public string name { get; set; }
-        public int id { get; set; }
+        public Level level { get; set; }
+        public PlayableClasses playable_classes { get; set; }
     }
 }

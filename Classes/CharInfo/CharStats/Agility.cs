@@ -6,10 +6,10 @@ using System.Threading.Tasks;
 
 namespace DiscordBot 
 {
-    public class Item
+
+    public class Agility
     {
-        public Key key { get; set; }
-        public string name { get; set; }
-        public int id { get; set; }
+        public int @base { get; set; }
+        public int effective { get; set; }
     }
 }
