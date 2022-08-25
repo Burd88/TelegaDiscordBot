@@ -23,8 +23,8 @@ namespace DiscordBot
                     _mainChat = discordClient.GetGuild(settings.DiscordMainChatId);
                     var chan = _mainChat.GetChannel(settings.DiscordMainChannelId) as IMessageChannel;
                     var builder = new EmbedBuilder()
-                         .WithTitle($"**Информация о техобслуживании!**")
-                         .AddField($"{text[0]}", $"**{text[1]}**");
+                         .WithTitle($"**{text[0]}**")
+                         .AddField($"", $"**{text[1]}**");
 
                     await chan.SendMessageAsync(null, false, builder.Build());
                     if (telegramBotNotification)

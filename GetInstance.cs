@@ -11,7 +11,7 @@ namespace DiscordBot
         public static List<InstanceLang> instanceAll;
 
 
-        public static void LoadInstanceAll()
+        public static async Task LoadInstanceAll()
         {
             instanceAll = new();
             WoWInstance instances = Functions.GetWebJson<WoWInstance>("https://eu.api.blizzard.com/data/wow/journal-instance/index?namespace=static-eu&locale=en_US&access_token=" + Program.tokenWow);
@@ -19,7 +19,7 @@ namespace DiscordBot
             {
                 foreach (Instance instance in instances.instances)
                 {
-                    GetInstanceAll(instance.key.href, instance.name);
+                   await Task.Run(() =>  GetInstanceAll(instance.key.href, instance.name));
                 }
                 Functions.WriteJSon(instanceAll, "InstanceList");
             }

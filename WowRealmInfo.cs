@@ -33,7 +33,7 @@ namespace DiscordBot
                     settings.RealmStatusType = wowRealmStatus.RealnStatusType;
                     Functions.WriteJSon(settings, "BotSettings");
                     string[] str1 = new string[2];
-                    str1[0] = "**Тех. Обслуживание закончилось!**";
+                    str1[0] = "**Техническое обслуживание закончилось!**";
                     str1[1] = $"Игровой мир: **{wowRealmStatus.RealmName}** работает!\u2705";
                     return str1;
 
@@ -43,7 +43,7 @@ namespace DiscordBot
                     settings.RealmStatusType = wowRealmStatus.RealnStatusType;
                     Functions.WriteJSon(settings, "BotSettings");
                     string[] str1 = new string[2];
-                    str1[0] = "**Тех. Обслуживание началось!**";
+                    str1[0] = "**Техническое обслуживание началось!**";
                     str1[1] = $"Игровой мир: **{wowRealmStatus.RealmName}** не работает!\u274c";
 
                     return str1;

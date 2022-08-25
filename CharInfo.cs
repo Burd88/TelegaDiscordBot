@@ -73,7 +73,7 @@ namespace DiscordBot
                 _charInfo.Race = character.race.name;
                 _charInfo.Lvl = character.level.ToString();
 
-                _charInfo.LastLogin = relative_time(FromUnixTimeStampToDateTime(character.last_login_timestamp.ToString()));
+                _charInfo.LastLogin = Relative_time(FromUnixTimeStampToDateTime(character.last_login_timestamp.ToString()));
                 if (character.covenant_progress != null)
                 {
                     _charInfo.Coven = GetCoven(character.covenant_progress.chosen_covenant.id.ToString()) + " (" + character.covenant_progress.renown_level.ToString() + ")";

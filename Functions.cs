@@ -27,7 +27,7 @@ namespace DiscordBot
 
             return DateTimeOffset.FromUnixTimeSeconds(long.Parse(unixTimeStamp) / 1000).UtcDateTime;
         }
-        public static string relative_time(DateTime date)
+        public static string Relative_time(DateTime date)
         {
             TimeSpan ts = DateTime.Now - date;
             if (ts.TotalMinutes < 1)//seconds ago
@@ -98,7 +98,7 @@ namespace DiscordBot
             return (int)(ts.TotalDays / 365.242) == 1 ? "1 Год назад" : "Больше года назад";
             //return (int)(ts.TotalDays / 365.242) == 1 ? "1 Year ago" : (int)(ts.TotalDays / 365.242) + " Years ago";
         }
-        public static TimeSpan getRelativeDateTime(DateTime date)
+        public static TimeSpan GetRelativeDateTime(DateTime date)
         {
             TimeSpan ts = DateTime.Now - date;
             return ts;
@@ -114,19 +114,21 @@ namespace DiscordBot
             {
                 foreach (Result realm in realms.results)
                 {
-                    Dictionary<string, string> name = new Dictionary<string, string>();
-                    name.Add("it_IT", realm.data.name.it_IT);
-                    name.Add("ru_RU", realm.data.name.ru_RU);
-                    name.Add("en_GB", realm.data.name.en_GB);
-                    name.Add("zh_TW", realm.data.name.zh_TW);
-                    name.Add("ko_KR", realm.data.name.ko_KR);
-                    name.Add("en_US", realm.data.name.en_US);
-                    name.Add("es_MX", realm.data.name.es_MX);
-                    name.Add("pt_BR", realm.data.name.pt_BR);
-                    name.Add("es_ES", realm.data.name.es_ES);
-                    name.Add("zh_CN", realm.data.name.zh_CN);
-                    name.Add("fr_FR", realm.data.name.fr_FR);
-                    name.Add("de_DE", realm.data.name.fr_FR);
+                    Dictionary<string, string> name = new()
+                    {
+                        { "it_IT", realm.data.name.it_IT },
+                        { "ru_RU", realm.data.name.ru_RU },
+                        { "en_GB", realm.data.name.en_GB },
+                        { "zh_TW", realm.data.name.zh_TW },
+                        { "ko_KR", realm.data.name.ko_KR },
+                        { "en_US", realm.data.name.en_US },
+                        { "es_MX", realm.data.name.es_MX },
+                        { "pt_BR", realm.data.name.pt_BR },
+                        { "es_ES", realm.data.name.es_ES },
+                        { "zh_CN", realm.data.name.zh_CN },
+                        { "fr_FR", realm.data.name.fr_FR },
+                        { "de_DE", realm.data.name.fr_FR }
+                    };
 
                     Realms.Add(new RealmList { Name = name["ru_RU"], Slug = realm.data.slug });
 
@@ -280,38 +282,36 @@ namespace DiscordBot
         public static void WriteJSon<T>(T data, string filename)
         {
             string writePathJSON = @".\json\" + filename + ".json";
-
+           
             try
             {
 
-                using (StreamWriter file = File.CreateText(writePathJSON))
+                using StreamWriter file = File.CreateText(writePathJSON);
+                Newtonsoft.Json.JsonSerializer serializer = new();
+
+                serializer.Formatting = Formatting.Indented;
+
+                serializer.Serialize(file, data);
+
+
+                /*using (FileStream fs = new(writePathJSON, FileMode.OpenOrCreate, FileAccess.Write, FileShare.Write))
                 {
-                    Newtonsoft.Json.JsonSerializer serializer = new();
-                    //serialize object directly into file stream
-                    serializer.Formatting = Formatting.Indented;
-                   
-                    serializer.Serialize(file, data);
-                    
+
+
+
+                    var options = new JsonSerializerOptions
+                    {
+                        Encoder = JavaScriptEncoder.Create(UnicodeRanges.BasicLatin, UnicodeRanges.Cyrillic),
+                        WriteIndented = true
+                    };
+
+                    await System.Text.Json.JsonSerializer.SerializeAsync(fs, data, options);
+                    //   WriteLogs($"Запись {filename} прошла успешно", "notification");
+
+                    fs.Close();
+
                 }
-           
-                 /*using (FileStream fs = new(writePathJSON, FileMode.OpenOrCreate, FileAccess.Write, FileShare.Write))
-                 {
-
-
-
-                     var options = new JsonSerializerOptions
-                     {
-                         Encoder = JavaScriptEncoder.Create(UnicodeRanges.BasicLatin, UnicodeRanges.Cyrillic),
-                         WriteIndented = true
-                     };
-
-                     await System.Text.Json.JsonSerializer.SerializeAsync(fs, data, options);
-                     //   WriteLogs($"Запись {filename} прошла успешно", "notification");
-
-                     fs.Close();
-
-                 }
-                */
+               */
 
 
             }
@@ -330,17 +330,10 @@ namespace DiscordBot
             try
             {
 
-                using (FileStream fs = new(PathJSON, FileMode.OpenOrCreate, FileAccess.Read, FileShare.Read))
-                {using (StreamReader reader = new(fs))
-                    {
-                        string line = reader.ReadToEnd();
-                        return JsonConvert.DeserializeObject<T>(line);
-                    }
-                  
-
-
-
-                }
+                using FileStream fs = new(PathJSON, FileMode.OpenOrCreate, FileAccess.Read, FileShare.Read);
+                using StreamReader reader = new(fs);
+                string line = reader.ReadToEnd();
+                return JsonConvert.DeserializeObject<T>(line);
 
 
 

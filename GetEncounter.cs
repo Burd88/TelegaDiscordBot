@@ -1,4 +1,5 @@
 ﻿using System.Collections.Generic;
+using System.Threading.Tasks;
 
 namespace DiscordBot
 {
@@ -8,7 +9,7 @@ namespace DiscordBot
         public static List<EncounterLang> encounterAll;
 
 
-        public static void LoadEncounterAll()
+        public static async Task LoadEncounterAll()
         {
             encounterAll = new();
             EncounterAll encounters = Functions.GetWebJson<EncounterAll>("https://eu.api.blizzard.com/data/wow/journal-encounter/index?namespace=static-eu&locale=en_US&access_token=" + Program.tokenWow);
@@ -16,7 +17,7 @@ namespace DiscordBot
             {
                 foreach (Encounter encount in encounters.encounters)
                 {
-                    GetEncounterAll(encount.key.href);
+                 await Task.Run(() => GetEncounterAll(encount.key.href));
                 }
                 Functions.WriteJSon(encounterAll, "EncounterList");
             }

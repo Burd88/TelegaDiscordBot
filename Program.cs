@@ -1,23 +1,12 @@
 ﻿using Discord;
-using Discord.Net;
 using Discord.WebSocket;
-using Newtonsoft.Json;
 using System;
 using System.Text;
-using System.Collections.Generic;
-using System.Linq;
-using System.Net;
-using System.Net.Http;
-using System.Net.Http.Headers;
 using System.Threading;
 using System.Threading.Tasks;
 using Telegram.Bot;
-using Telegram.Bot.Exceptions;
 using Telegram.Bot.Extensions.Polling;
-using Telegram.Bot.Types;
-using Telegram.Bot.Types.Enums;
-using Telegram.Bot.Types.ReplyMarkups;
-using Discord.Commands;
+
 
 namespace DiscordBot
 {
@@ -31,12 +20,7 @@ namespace DiscordBot
         public static string tokenWow;
         public static SocketGuild _mainChat;
 
-        // private QueuedUpdateReceiver updateReceiver;
-        //   [Obsolete]
-        //static void Main(string[] args)
-        //   => new Program().MainAsync().GetAwaiter().GetResult();
-
-        // [Obsolete]
+        
         static async Task Main(string[] args)
         {
             settings = new BotSettings();
@@ -47,8 +31,9 @@ namespace DiscordBot
             tokenWow = await AutorizationBattleNet.OnTimerHandlerAutorizationBattleNet();
             Functions.LoadRealmAll();
 
-            //GetEncounter.LoadEncounterAll();
-            //GetInstance.LoadInstanceAll();
+          var encouter =  GetEncounter.LoadEncounterAll();
+          var instance =  GetInstance.LoadInstanceAll();
+          
             settings.RealmSlug = Functions.GetRealmSlug(settings.Realm);
             textAll = new($"BattleNetAutorizationToken  : {tokenWow}\n" +
                 $"DiscordBotToken : {settings.DiscordBotToken}\n" +
@@ -86,36 +71,36 @@ namespace DiscordBot
             await discordClient.LoginAsync(TokenType.Bot, settings.DiscordBotToken);
             await discordClient.StartAsync();
 
-            int num = 0;
+            
             // TimerCallback tmAutoriz = new(AutorizationBattleNet.OnTimerHandlerAutorizationBattleNet);
-            // Timer timerAutoriz = new(tmAutoriz, num, 3000, 1000 * 60 * 60);
+            // Timer timerAutoriz = new(tmAutoriz, null, 3000, 1000 * 60 * 60);
 
             //  TimerCallback tmPoolRT = new(PoolRT.OnTimerHandlerPoolRT);
-            //  Timer timerPoolRT = new(tmPoolRT, num, 0, 1000);
+            //  Timer timerPoolRT = new(tmPoolRT, null, 0, 1000);
 
             TimerCallback tmCheckReboot = new(CheckReboot.OnTimerHandlerCheckReboot);
-            Timer timerheckReboot = new(tmCheckReboot, num, 15000, 10000);
+            Timer timerheckReboot = new(tmCheckReboot, null, 15000, 10000);
 
             TimerCallback tmCheckAffix = new(CheckAffix.OnTimerHandlerCheckAffix);
-            Timer timerheckAffix = new(tmCheckAffix, num, 15000, 1000);
+            Timer timerheckAffix = new(tmCheckAffix, null, 15000, 1000);
 
             TimerCallback tmactivity = new(CheckActivity.OnTimerHandlerCheckActivity);
-            Timer timerActivity = new(tmactivity, num, 15000, 30000);
+            Timer timerActivity = new(tmactivity, null, 15000, 30000);
 
-            TimerCallback tmlog = new(CheckLog.OnTimerHandlerCheckLog);
-            Timer timerlog = new(tmlog, num, 15000, 15000);
+          //  TimerCallback tmlog = new(CheckLog.OnTimerHandlerCheckLog);
+           // Timer timerlog = new(tmlog, null, 15000, 15000);
 
             TimerCallback tmachieve = new(CheckAchievements.OnTimerHandlerCheckAchievements);
-            Timer timerAchievements = new(tmachieve, num, 15000, 30000);
+            Timer timerAchievements = new(tmachieve, null, 15000, 30000);
 
             TimerCallback tmroster = new(CheckRoster.OnTimerHandlerCheckRoster);
-            Timer timerRoster = new(tmroster, num, 15000, 300000);
+            Timer timerRoster = new(tmroster, null, 15000, 300000);
 
             TimerCallback tmsetRole = new(SetDiscordUserRole.OnTimerHandlerSetDiscordUserRole);
-            Timer timerSetRole = new(tmsetRole, num, 10000, 60000 * 15);
+            Timer timerSetRole = new(tmsetRole, null, 10000, 60000 * 15);
 
             //TimerCallback tmUpdateStatic = new(UpdateStatic.OnTimerHandlerUpdateStatic);
-            //Timer timerUpdateStatic = new(tmUpdateStatic, num, 10000, 60000 * 20);
+            //Timer timerUpdateStatic = new(tmUpdateStatic, null, 10000, 60000 * 20);
 
 
             telegramClient = new TelegramBotClient(settings.TelegramBotToken);
