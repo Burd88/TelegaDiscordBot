@@ -2,7 +2,7 @@
 using System.Collections.Generic;
 namespace DiscordBot
 {
-  
+
 
     class GuildLogs
     {
@@ -51,7 +51,7 @@ namespace DiscordBot
 
         private void Update_warcraftlogs_data()
         {
-            List<Logs_all> logs = Functions.GetWebJson<List<Logs_all>>($"https://www.warcraftlogs.com/v1/reports/guild/{Program.settings.Guild.ToLower()}/{Functions.GetRealmSlug(Program.settings.Realm)}/eu?api_key=c2c9093c70e642ac6ec003d4b0904c33");
+            List<Logs_all> logs = Functions.GetWebJson<List<Logs_all>>($"https://www.warcraftlogs.com/v1/reports/guild/{Program.settings.GuildName.ToLower()}/{Functions.GetRealmSlug(Program.settings.RealmName)}/eu?api_key=c2c9093c70e642ac6ec003d4b0904c33");
             if (logs != null)
             {
                 if (logs[0].zone == 29)
@@ -171,5 +171,5 @@ namespace DiscordBot
                 return "";
             }
         }
-    } 
+    }
 }

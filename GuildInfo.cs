@@ -1,13 +1,10 @@
-﻿using Newtonsoft.Json;
-using System;
+﻿using System;
 using System.Collections.Generic;
-using System.Text.Json;
-using System.Threading.Tasks;
 using static DiscordBot.Program;
 
 namespace DiscordBot
 {
-  
+
     class GuildInfo
     {
         #region Получение инфы о гильдии
@@ -30,7 +27,7 @@ namespace DiscordBot
 
         private void GetGuildRosterInfo()
         {
-            MainGuild guild = Functions.GetWebJson<MainGuild>($"https://eu.api.blizzard.com/data/wow/guild/{settings.RealmSlug}/{settings.Guild.ToLower().Replace(" ", "-")}/roster?namespace=profile-eu&locale=ru_RU&access_token=" + tokenWow);
+            MainGuild guild = Functions.GetWebJson<MainGuild>($"https://eu.api.blizzard.com/data/wow/guild/{settings.RealmSlug}/{settings.GuildName.ToLower().Replace(" ", "-")}/roster?namespace=profile-eu&locale=ru_RU&access_token=" + tokenWow);
             if (guild != null)
             {
                 foreach (Member character in guild.members)
@@ -51,7 +48,7 @@ namespace DiscordBot
 
         private void GetGuildOtherInfo()
         {
-            GuildMain guildmain = Functions.GetWebJson<GuildMain>($"https://eu.api.blizzard.com/data/wow/guild/{settings.RealmSlug}/{settings.Guild.ToLower().Replace(" ", "-")}?namespace=profile-eu&locale=ru_RU&access_token=" + tokenWow);
+            GuildMain guildmain = Functions.GetWebJson<GuildMain>($"https://eu.api.blizzard.com/data/wow/guild/{settings.RealmSlug}/{settings.GuildName.ToLower().Replace(" ", "-")}?namespace=profile-eu&locale=ru_RU&access_token=" + tokenWow);
             if (guildmain != null)
             {
                 _guildInfoFull.TimeCreate = $"{Functions.FromUnixTimeStampToDateTime(guildmain.created_timestamp.ToString())}";
@@ -69,7 +66,7 @@ namespace DiscordBot
 
         private void Guild_raid_progress()
         {
-            GuildRaiderIO rio_guild = Functions.GetWebJson<GuildRaiderIO>($"https://raider.io/api/v1/guilds/profile?region=eu&realm={settings.RealmSlug}&name={settings.Guild.ToLower()}&fields=raid_progression%2Craid_rankings");
+            GuildRaiderIO rio_guild = Functions.GetWebJson<GuildRaiderIO>($"https://raider.io/api/v1/guilds/profile?region=eu&realm={settings.RealmSlug}&name={settings.GuildName.ToLower()}&fields=raid_progression%2Craid_rankings");
             if (rio_guild != null)
             {
                 _guildInfoFull.RaidProgress = rio_guild.raid_progression.SepulcherOfTheFirstOnes.summary;
@@ -162,10 +159,10 @@ namespace DiscordBot
                 leaveRoster = new();
 
                 beforeRoster = Functions.ReadJson<List<RosterLeaveInv>>("Roster");
-                
+
                 GetGuildRosterFull();
                 //Functions.WriteJSon<List<RosterLeaveInv>>(afterRoster, "BeforeRoster");
-                if (beforeRoster != null && beforeRoster.Count != 0 )
+                if (beforeRoster != null && beforeRoster.Count != 0)
                 {
                     if (afterRoster.Count != 0 && !error)
                     {
@@ -206,7 +203,7 @@ namespace DiscordBot
         }
         private void GetGuildRosterFull()
         {
-            MainGuild guild = Functions.GetWebJson<MainGuild>($"https://eu.api.blizzard.com/data/wow/guild/{settings.RealmSlug}/{settings.Guild.ToLower().Replace(" ", "-")}/roster?namespace=profile-eu&locale=ru_RU&access_token=" + tokenWow);
+            MainGuild guild = Functions.GetWebJson<MainGuild>($"https://eu.api.blizzard.com/data/wow/guild/{settings.RealmSlug}/{settings.GuildName.ToLower().Replace(" ", "-")}/roster?namespace=profile-eu&locale=ru_RU&access_token=" + tokenWow);
             if (guild != null)
             {
                 foreach (Member character in guild.members)

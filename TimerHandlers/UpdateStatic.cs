@@ -1,12 +1,8 @@
 ﻿using Discord;
 using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 using static DiscordBot.Program;
 
-namespace DiscordBot 
+namespace DiscordBot
 {
     class UpdateStatic
     {
@@ -28,7 +24,7 @@ namespace DiscordBot
                         .AddField("Рдд:", Static.rdd, false)
                         .AddField("Мдд", Static.mdd, false)
                         .WithFooter(footer => footer.Text = $"Гильдия \"Сердце греха\".\nОбновлено: {DateTime.Now} (+4 Мск) ");
-                await discordClient.GetGuild(settings.DiscordMainChatId).GetTextChannel(944575829105594438).ModifyMessageAsync(944583210434719775, msg => msg.Embed = builder.Build());
+                await discordClient.GetGuild(settings.DiscordChatId).GetTextChannel(944575829105594438).ModifyMessageAsync(944583210434719775, msg => msg.Embed = builder.Build());
 
             }
             catch (Exception e)

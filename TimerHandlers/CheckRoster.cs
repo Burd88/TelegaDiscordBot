@@ -1,46 +1,47 @@
 ﻿using Discord;
 using System;
 using System.Collections.Generic;
-using System.Linq;
 using System.Net;
-using System.Text;
-using System.Threading.Tasks;
 using Telegram.Bot;
 using Telegram.Bot.Types.Enums;
 using static DiscordBot.Program;
 
-namespace DiscordBot 
+namespace DiscordBot
 {
     class CheckRoster
     {
         public static void OnTimerHandlerCheckRoster(object obj)
         {
-            try
+            if (settings.EnableCheckRoster)
             {
-                GuildInfo guild = new();
-                guild.GetGuildRosterChange();
-                if (guild.GetInviteRoster() != null)
+                try
                 {
-                    GetLeaveInvChar(guild.GetInviteRoster(), "invite");
+                    GuildInfo guild = new();
+                    guild.GetGuildRosterChange();
+                    if (guild.GetInviteRoster() != null)
+                    {
+                        GetLeaveInvChar(guild.GetInviteRoster(), "invite");
+                    }
+                    if (guild.GetLeaveRoster() != null)
+                    {
+                        GetLeaveInvChar(guild.GetLeaveRoster(), "leave");
+                    }
                 }
-                if (guild.GetLeaveRoster() != null)
+                catch (WebException e)
                 {
-                    GetLeaveInvChar(guild.GetLeaveRoster(), "leave");
+                    if (e.Status == WebExceptionStatus.ProtocolError)
+                    {
+                        string message = $"\nOnTimerHandlerRoster Error: {e.Message}";
+                        Functions.WriteLogs(message, "error");
+                    }
                 }
-            }
-            catch (WebException e)
-            {
-                if (e.Status == WebExceptionStatus.ProtocolError)
+                catch (Exception e)
                 {
-                    string message = $"\nOnTimerHandlerRoster Error: {e.Message}";
+                    string message = $"OnTimerHandlerRoster Error: {e.Message}";
                     Functions.WriteLogs(message, "error");
                 }
             }
-            catch (Exception e)
-            {
-                string message = $"OnTimerHandlerRoster Error: {e.Message}";
-                Functions.WriteLogs(message, "error");
-            }
+
         }
         private static async void GetLeaveInvChar(List<RosterLeaveInv> list, string type)
         {
@@ -78,11 +79,11 @@ namespace DiscordBot
                             .AddField("Класс:", fullInfo.Class, true).AddField("Специализация:", fullInfo.Spec, true)
                             .AddField("Ковенант:", fullInfo.Coven, true).AddField("Медиум:", fullInfo.CovenSoul, true)
                             .AddField("Рейд прогресс:", fullInfo.RaidProgress, true).AddField("Счет Мифик+:", fullInfo.MythicPlus, true);
-                        if (telegramBotNotification)
+                        if (settings.TelegramNotificationEnable)
                         {
                             await telegramClient.SendPhotoAsync(
                             photo: fullInfo.ImageCharInset,
-                            chatId: settings.TelegramMainChatID,
+                            chatId: settings.TelegramChatID,
                             caption: $"{fullInfo.Name}({inv.LVL} уровень) {fullInfo.Race}\n{text}\nУровень предметов: {fullInfo.ILvl}\nКласс: {fullInfo.Class}\nСпециализация: {fullInfo.Spec}" +
                             $"\nКовенант: {fullInfo.Coven}\nМедиум: {fullInfo.CovenSoul}" +
                             $"\nРейд прогресс: {fullInfo.RaidProgress}\nСчет Мифик+: {fullInfo.MythicPlus}"
@@ -93,17 +94,17 @@ namespace DiscordBot
                     {
                         builder = new EmbedBuilder().WithTitle($"**{fullInfo.Name}**({inv.LVL} уровень) {fullInfo.Race}").WithUrl(fullInfo.LinkBnet).WithDescription($"**{text}**").WithColor(Discord.Color.DarkRed).AddField("Уровень\nпредметов:", fullInfo.ILvl, true).WithImageUrl(fullInfo.ImageCharInset)
                           .AddField("Класс:", fullInfo.Class, true).AddField("Специализация:", fullInfo.Spec, true);
-                        if (telegramBotNotification)
+                        if (settings.TelegramNotificationEnable)
                         {
                             await telegramClient.SendPhotoAsync(
                             photo: fullInfo.ImageCharInset,
-                            chatId: settings.TelegramMainChatID,
+                            chatId: settings.TelegramChatID,
                             caption: $"{fullInfo.Name}({inv.LVL} уровень) {fullInfo.Race}\n{text}\nУровень предметов: {fullInfo.ILvl}\nКласс: {fullInfo.Class}\nСпециализация: {fullInfo.Spec}",
                             parseMode: ParseMode.Html);
                         }
 
                     }
-                    _mainChat = discordClient.GetGuild(settings.DiscordMainChatId);
+                    _mainChat = discordClient.GetGuild(settings.DiscordChatId);
                     var chan = _mainChat.GetChannel(settings.DiscordRosterChannelId) as IMessageChannel;
                     var embed = builder.Build();
 

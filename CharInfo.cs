@@ -1,6 +1,4 @@
-﻿using Newtonsoft.Json;
-using System;
-using System.Collections.Generic;
+﻿using System;
 using static DiscordBot.Functions;
 using static DiscordBot.Program;
 
@@ -44,7 +42,7 @@ namespace DiscordBot
         }
         private void GetCharacterMainInfo(string name, string realm)
         {
-            string mainLink = $"https://eu.api.blizzard.com/profile/wow/character/{realm}/{name.ToLower()}?namespace=profile-eu&locale=ru_RU&access_token={tokenWow}";
+            string mainLink = $"https://eu.api.blizzard.com/profile/wow/character/{realm}/{name.ToLower()}?namespace=profile-eu&locale={settings.Locale}&access_token={tokenWow}";
             CharFullInfo character = GetWebJson<CharFullInfo>(mainLink);
             if (character != null)
             {
@@ -76,14 +74,14 @@ namespace DiscordBot
                 _charInfo.LastLogin = Relative_time(FromUnixTimeStampToDateTime(character.last_login_timestamp.ToString()));
                 if (character.covenant_progress != null)
                 {
-                    _charInfo.Coven = GetCoven(character.covenant_progress.chosen_covenant.id.ToString()) + " (" + character.covenant_progress.renown_level.ToString() + ")";
+                    _charInfo.Coven = character.covenant_progress.chosen_covenant.name + " (" + character.covenant_progress.renown_level.ToString() + ")";
                 }
 
-                string soulbindsLink = $"https://eu.api.blizzard.com/profile/wow/character/{realm}/{name.ToLower()}/soulbinds?namespace=profile-eu&locale=ru_RU&access_token={tokenWow}";
+                string soulbindsLink = $"https://eu.api.blizzard.com/profile/wow/character/{realm}/{name.ToLower()}/soulbinds?namespace=profile-eu&locale={settings.Locale}&access_token={tokenWow}";
                 string raidLink = $"https://raider.io/api/v1/characters/profile?region=eu&realm={realm}&name={Char.ToUpper(name[0]) + name.Substring(1).ToLower()}&fields=mythic_plus_scores%2Craid_progression";
-                string mediaLink = $"https://eu.api.blizzard.com/profile/wow/character/{realm}/{name.ToLower()}/character-media?namespace=profile-eu&locale=ru_RU&access_token={tokenWow}";
-                string setLink = $"https://eu.api.blizzard.com/profile/wow/character/{realm}/{name.ToLower()}/equipment?namespace=profile-eu&locale=ru_RU&access_token={tokenWow}";
-                string statsLink = $"https://eu.api.blizzard.com/profile/wow/character/{realm}/{name.ToLower()}/statistics?namespace=profile-eu&locale=ru_RU&access_token={tokenWow}";
+                string mediaLink = $"https://eu.api.blizzard.com/profile/wow/character/{realm}/{name.ToLower()}/character-media?namespace=profile-eu&locale={settings.Locale}&access_token={tokenWow}";
+                string setLink = $"https://eu.api.blizzard.com/profile/wow/character/{realm}/{name.ToLower()}/equipment?namespace=profile-eu&locale={settings.Locale}&access_token={tokenWow}";
+                string statsLink = $"https://eu.api.blizzard.com/profile/wow/character/{realm}/{name.ToLower()}/statistics?namespace=profile-eu&locale={settings.Locale}&access_token={tokenWow}";
                 GetSoulbindsCharacter(soulbindsLink);
                 Character_raid_progress(raidLink);
                 GetCharMedia(mediaLink, realm, name);
@@ -95,26 +93,7 @@ namespace DiscordBot
                 _charInfo.Error = true;
             }
         }
-        private string GetCoven(string id)
-        {
-            if (id == "1")
-            {
-                return "Кирии";
-            }
-            else if (id == "2")
-            {
-                return "Вентиры";
-            }
-            else if (id == "3")
-            {
-                return "Ночной народец";
-            }
-            else if (id == "4")
-            {
-                return "Некролорды";
-            }
-            return "";
-        }
+
         private void GetSoulbindsCharacter(string link)
         {
             CharacterSoulbinds allSoulbinds = GetWebJson<CharacterSoulbinds>(link);
@@ -201,12 +180,12 @@ namespace DiscordBot
 
             }
         }
-    } 
-  //  public class Asset
-  //  {
-  //      public string key { get; set; }
-  //     public string value { get; set; }
-//   }
+    }
+    //  public class Asset
+    //  {
+    //      public string key { get; set; }
+    //     public string value { get; set; }
+    //   }
 
 
 }

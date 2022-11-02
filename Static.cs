@@ -17,7 +17,7 @@ namespace DiscordBot
         public void UpdateStaticRoster()
         {
             var roster = Functions.ReadJson<StaticRoster>("Static");
-            if(roster != null)
+            if (roster != null)
             {
                 GetStaticRoster(roster);
             }
@@ -25,7 +25,7 @@ namespace DiscordBot
             {
                 Functions.WriteLogs("Roster is null, check json file", "error");
             }
-            
+
         }
 
         public void AddMemberStaticRoster(string name)
@@ -113,7 +113,7 @@ namespace DiscordBot
 
     }
 
-   
+
 
 
 }

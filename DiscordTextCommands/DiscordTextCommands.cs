@@ -1,9 +1,6 @@
 ﻿using Discord;
 using Discord.WebSocket;
 using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
 using System.Threading.Tasks;
 using static DiscordBot.Program;
 
@@ -65,7 +62,7 @@ namespace DiscordBot
 
 
                             _mainChat = discordClient.GetGuild(settings.DiscordTestChatId);
-                            var chan = _mainChat.GetChannel(settings.TestDiscordMainChannelId) as IMessageChannel;
+                            var chan = _mainChat.GetChannel(settings.DiscordTestMainChannelId) as IMessageChannel;
                             PoolRT.discordmessagepool = chan.SendMessageAsync("@here Всем привет!", false, embed: textbuilder.Build(), components: buttonbuilder.Build()).Result;
                             PoolRT.discordmessageresultpool = chan.SendMessageAsync($"Результат:\nПриду: \nНе приду: \nОпоздаю: ").Result;
                             break;
@@ -74,14 +71,14 @@ namespace DiscordBot
                     case "!needpool":
                         {
 
-                            if (settings.NeedPoolRT)
+                            if (settings.EnablePoolRT)
                             {
-                                settings.NeedPoolRT = false;
+                                settings.EnablePoolRT = false;
                                 await msg.Author.SendMessageAsync("Отключены опросы перед РТ");
                             }
                             else
                             {
-                                settings.NeedPoolRT = true;
+                                settings.EnablePoolRT = true;
                                 await msg.Author.SendMessageAsync("Включены опросы перед РТ");
                             }
                             Functions.WriteJSon(settings, "BotSettings");
@@ -92,14 +89,14 @@ namespace DiscordBot
                     case "!addpool":
                         {
 
-                            if (settings.AddtionalRT)
+                            if (settings.EnableAddtionalRT)
                             {
-                                settings.AddtionalRT = false;
+                                settings.EnableAddtionalRT = false;
                                 await msg.Author.SendMessageAsync("Отключены опросы перед допРТ во вторник");
                             }
                             else
                             {
-                                settings.AddtionalRT = true;
+                                settings.EnableAddtionalRT = true;
                                 await msg.Author.SendMessageAsync("Включены опросы перед допРТ во вторник");
                             }
                             Functions.WriteJSon(settings, "BotSettings");
@@ -157,7 +154,7 @@ namespace DiscordBot
                                 await msg.Author.SendMessageAsync(null, false, emb);
 
                             }
-                            else if (realStatus.Error == false)
+                            else if (realStatus.Error == true)
                             {
                                 builder = new EmbedBuilder().WithTitle("**Информация об игровом мире**").AddField("Ошибка:", "Проблема на сервере.\nПопробуй позже.", true);
                                 var emb = builder.Build();
@@ -327,7 +324,7 @@ namespace DiscordBot
 
                                 builder = new EmbedBuilder()
                                     .WithThumbnailUrl("https://cdn.discordapp.com/avatars/931442555332198400/bb4f0a2c3f5534cc199b54cc6b805d1a.webp?size=100")
-                                    .WithDescription($"Информация о Гильдии : [**{fullInfo.Name}**](https://worldofwarcraft.com/ru-ru/guild/eu/{settings.RealmSlug}/{settings.Guild.ToLower().Replace(" ", "-")})")
+                                    .WithDescription($"Информация о Гильдии : [**{fullInfo.Name}**](https://worldofwarcraft.com/ru-ru/guild/eu/{settings.RealmSlug}/{settings.GuildName.ToLower().Replace(" ", "-")})")
                                     .WithColor(Discord.Color.DarkRed).AddField("Лидер:", fullInfo.Leader, true)
                                     .AddField("Членов гильдии:", fullInfo.MemberCount, true)
                                     .AddField("Достижения:", fullInfo.Achievement, true)
@@ -370,7 +367,7 @@ namespace DiscordBot
                                     .AddField("Рдд:", Static.rdd, false)
                                     .AddField("Мдд:", Static.mdd, false)
                                     .WithFooter(footer => footer.Text = $"Гильдия \"Сердце греха\".\nОбновлено: {DateTime.Now} (+4 Мск) ");
-                            await discordClient.GetGuild(settings.DiscordMainChatId).GetTextChannel(944575829105594438).ModifyMessageAsync(944583210434719775, msg => msg.Embed = builder.Build());
+                            await discordClient.GetGuild(settings.DiscordChatId).GetTextChannel(944575829105594438).ModifyMessageAsync(944583210434719775, msg => msg.Embed = builder.Build());
                             if (!msg.Channel.Name.Contains("@"))
                             {
                                 await msg.DeleteAsync();
@@ -397,7 +394,7 @@ namespace DiscordBot
                                     .AddField("Рдд:", Static.rdd, false)
                                     .AddField("Мдд:", Static.mdd, false)
                                     .WithFooter(footer => footer.Text = $"Гильдия \"Сердце греха\".\nОбновлено: {DateTime.Now} (+4 Мск) ");
-                            await discordClient.GetGuild(settings.DiscordMainChatId).GetTextChannel(944575829105594438).ModifyMessageAsync(944583210434719775, msg => msg.Embed = builder.Build());
+                            await discordClient.GetGuild(settings.DiscordChatId).GetTextChannel(944575829105594438).ModifyMessageAsync(944583210434719775, msg => msg.Embed = builder.Build());
                             if (!msg.Channel.Name.Contains("@"))
                             {
                                 await msg.DeleteAsync();
@@ -424,7 +421,7 @@ namespace DiscordBot
                                     .AddField("Рдд:", Static.rdd, false)
                                     .AddField("Мдд:", Static.mdd, false)
                                     .WithFooter(footer => footer.Text = $"Гильдия \"Сердце греха\".\nОбновлено: {DateTime.Now} (+4 Мск) ");
-                            await discordClient.GetGuild(settings.DiscordMainChatId).GetTextChannel(944575829105594438).ModifyMessageAsync(944583210434719775, msg => msg.Embed = builder.Build());
+                            await discordClient.GetGuild(settings.DiscordChatId).GetTextChannel(944575829105594438).ModifyMessageAsync(944583210434719775, msg => msg.Embed = builder.Build());
                             if (!msg.Channel.Name.Contains("@"))
                             {
                                 await msg.DeleteAsync();
@@ -440,6 +437,6 @@ namespace DiscordBot
 
 
 
-    
-}
+
+    }
 }

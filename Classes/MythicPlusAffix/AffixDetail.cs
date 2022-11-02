@@ -1,11 +1,5 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
-
-namespace DiscordBot
-{ 
+﻿namespace DiscordBot
+{
     public class AffixDetail
     {
         public int id { get; set; }

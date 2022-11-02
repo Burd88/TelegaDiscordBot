@@ -1,14 +1,13 @@
 ﻿using System;
-using System.Collections.Generic;
 using static DiscordBot.Program;
 
 namespace DiscordBot
 {
-    
+
     class WowRealmInfo
     {
         private WoWRealStatus wowRealmStatus;
-      
+
         public WoWRealStatus GetRealmInfo()
         {
             wowRealmStatus = new();
@@ -30,12 +29,26 @@ namespace DiscordBot
 
                 if (str == "Up")
                 {
-                    settings.RealmStatusType = wowRealmStatus.RealnStatusType;
-                    Functions.WriteJSon(settings, "BotSettings");
-                    string[] str1 = new string[2];
-                    str1[0] = "**Техническое обслуживание закончилось!**";
-                    str1[1] = $"Игровой мир: **{wowRealmStatus.RealmName}** работает!\u2705";
-                    return str1;
+                    try
+                    {
+                        settings.RealmStatusType = wowRealmStatus.RealnStatusType;
+
+                        Functions.WriteJSon(settings, "BotSettings");
+
+                        string[] str1 = new string[2];
+
+                        str1[0] = "**Техническое обслуживание закончилось!**";
+
+                        str1[1] = $"Игровой мир: **{wowRealmStatus.RealmName}** работает!\u2705";
+
+                        return str1;
+                    }
+                    catch (Exception e)
+                    {
+                        Console.WriteLine(e.Message);
+                        return null;
+                    }
+
 
                 }
                 else if (str == "Down")
@@ -65,7 +78,7 @@ namespace DiscordBot
         private void GetRealmConnectedLink()
         {
 
-            RealmInfo realm = Functions.GetWebJson<RealmInfo>($"https://eu.api.blizzard.com/data/wow/realm/{settings.RealmSlug}?namespace=dynamic-eu&locale=ru_RU&access_token={tokenWow}");
+            RealmInfo realm = Functions.GetWebJson<RealmInfo>($"https://eu.api.blizzard.com/data/wow/realm/{settings.RealmSlug}?namespace=dynamic-eu&locale={settings.Locale}&access_token={tokenWow}");
             if (realm != null)
             {
                 wowRealmStatus.Error = false;
@@ -86,7 +99,7 @@ namespace DiscordBot
         {
 
 
-            Realms realm = Functions.GetWebJson<Realms>($"https://eu.api.blizzard.com/data/wow/connected-realm/{id}?namespace=dynamic-eu&locale=ru_RU&access_token={tokenWow}");
+            Realms realm = Functions.GetWebJson<Realms>($"https://eu.api.blizzard.com/data/wow/connected-realm/{id}?namespace=dynamic-eu&locale={settings.Locale}&access_token={tokenWow}");
             if (realm != null)
             {
                 if (realm.status.type == "UP")
@@ -165,5 +178,5 @@ namespace DiscordBot
         }
 
     }
-   
+
 }

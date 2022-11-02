@@ -3,20 +3,17 @@ using Discord.Commands;
 using Discord.WebSocket;
 using Newtonsoft.Json;
 using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
 using System.Threading.Tasks;
 using static DiscordBot.Program;
 
-namespace DiscordBot 
+namespace DiscordBot
 {
     class SlashCommandHandler
     {
         public static async Task Client_Ready()
         {
             // Let's build a guild command! We're going to need a guild so lets just put that in a variable.
-            var guild = discordClient.GetGuild(settings.DiscordMainChatId);
+            var guild = discordClient.GetGuild(settings.DiscordChatId);
 
             // Next, lets create our slash command builder. This is like the embed builder but for slash commands.
             var affix = new SlashCommandBuilder()
@@ -31,9 +28,9 @@ namespace DiscordBot
 
             try
             {
-
+               
                 await guild.CreateApplicationCommandAsync(affix.Build());
-                await discordClient.Rest.CreateGuildCommand(charcommand.Build(), settings.DiscordMainChatId);
+               await discordClient.Rest.CreateGuildCommand(charcommand.Build(), settings.DiscordChatId);
             }
             catch (CommandException exception)
             {

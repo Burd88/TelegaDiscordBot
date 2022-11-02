@@ -1,41 +1,44 @@
 ﻿using Discord;
 using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 using Telegram.Bot;
 using Telegram.Bot.Types.Enums;
 using static DiscordBot.Program;
 
-namespace DiscordBot 
+namespace DiscordBot
 {
     class CheckReboot
     {
         public static async void OnTimerHandlerCheckReboot(object obj)
         {
-            if (DateTime.Now.DayOfWeek == DayOfWeek.Wednesday)
+            if (settings.EnableCheckReboot)
             {
-                WowRealmInfo realmcheck = new();
-                string[] text = realmcheck.GetRealmInfoForTimer();
-                if (text != null)
+                if (DateTime.Now.DayOfWeek == DayOfWeek.Wednesday)
                 {
-                    _mainChat = discordClient.GetGuild(settings.DiscordMainChatId);
-                    var chan = _mainChat.GetChannel(settings.DiscordMainChannelId) as IMessageChannel;
-                    var builder = new EmbedBuilder()
-                         .WithTitle($"**{text[0]}**")
-                         .AddField($"", $"**{text[1]}**");
-
-                    await chan.SendMessageAsync(null, false, builder.Build());
-                    if (telegramBotNotification)
+                    
+                    WowRealmInfo realmcheck = new();
+                    
+                    string[] text = realmcheck.GetRealmInfoForTimer();
+                    
+                    if (text != null)
                     {
-                        await telegramClient.SendTextMessageAsync(settings.TelegramMainChatID, $"{text[0]}\n{text[1]}", parseMode: ParseMode.Html);
-                    }
-                    string message = ("Отправленно оповещение о Тех.Работах!");
-                    Functions.WriteLogs(message, "notification");
-                }
+                        _mainChat = discordClient.GetGuild(settings.DiscordChatId);
+                        var chan = _mainChat.GetChannel(settings.DiscordRebootChannelId) as IMessageChannel;
+                        var builder = new EmbedBuilder()
+                             .WithTitle($"**{text[0]}**")
+                             .WithDescription($"**{text[1]}**");
 
+                        await chan.SendMessageAsync(null, false, builder.Build());
+                        if (settings.TelegramNotificationEnable)
+                        {
+                            await telegramClient.SendTextMessageAsync(settings.TelegramChatID, $"{text[0]}\n{text[1]}", parseMode: ParseMode.Html);
+                        }
+                        string message = ("Отправленно оповещение о Тех.Работах!");
+                        Functions.WriteLogs(message, "notification");
+                    }
+
+                }
             }
+
 
         }
     }

@@ -3,13 +3,8 @@ using System;
 using System.Collections.Generic;
 using System.IO;
 using System.Net;
-using System.Text.Encodings.Web;
-using System.Text.Json;
 using System.Text.RegularExpressions;
-using System.Text.Unicode;
-using System.Threading.Tasks;
 using static DiscordBot.Program;
-using Json.Net;
 
 namespace DiscordBot
 {
@@ -109,7 +104,7 @@ namespace DiscordBot
         public static void LoadRealmAll()
         {
             Realms = new List<RealmList>();
-            Allrealm_ realms = GetWebJson<Allrealm_>("https://eu.api.blizzard.com/data/wow/search/realm?namespace=dynamic-eu&_page=1&_pageSize=1000&locale=ru_RU&access_token=" + Program.tokenWow);
+            Allrealm_ realms = GetWebJson<Allrealm_>("https://eu.api.blizzard.com/data/wow/search/realm?namespace=dynamic-eu&_page=1&_pageSize=1000&locale={settings.Locale}&access_token=" + Program.tokenWow);
             if (realms != null)
             {
                 foreach (Result realm in realms.results)
@@ -130,7 +125,7 @@ namespace DiscordBot
                         { "de_DE", realm.data.name.fr_FR }
                     };
 
-                    Realms.Add(new RealmList { Name = name["ru_RU"], Slug = realm.data.slug });
+                    Realms.Add(new RealmList { Name = name[settings.Locale], Slug = realm.data.slug });
 
                 }
 
@@ -198,7 +193,7 @@ namespace DiscordBot
                         }
                     }
                 }
-                
+
             }
             catch (Exception e)
             {
@@ -223,12 +218,13 @@ namespace DiscordBot
                     {
                         if (inst.InstanceEN != null && inst.InstanceEN.ToLower() == text.Trim().ToLower())
                         {
-                          
+
                             return inst;
                         }
-                    } else if (!Regex.IsMatch(text, @"\P{IsCyrillic}"))
+                    }
+                    else if (!Regex.IsMatch(text, @"\P{IsCyrillic}"))
                     {
-                     if (inst.InstanceRU != null && inst.InstanceRU.ToLower() == text.Trim().ToLower())
+                        if (inst.InstanceRU != null && inst.InstanceRU.ToLower() == text.Trim().ToLower())
                         {
                             return inst;
                         }
@@ -282,7 +278,7 @@ namespace DiscordBot
         public static void WriteJSon<T>(T data, string filename)
         {
             string writePathJSON = @".\json\" + filename + ".json";
-           
+
             try
             {
 
@@ -385,7 +381,7 @@ namespace DiscordBot
         public static string GetBNetMedia(string link)
         {
 
-            GetBNetMEdia activity = GetWebJson<GetBNetMEdia>($"{link}&locale=ru_RU&access_token={tokenWow}");
+            GetBNetMEdia activity = GetWebJson<GetBNetMEdia>($"{link}&locale={settings.Locale}&access_token={tokenWow}");
             if (activity != null)
             {
                 foreach (Asset asset in activity.assets)

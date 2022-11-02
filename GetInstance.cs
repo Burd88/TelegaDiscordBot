@@ -1,8 +1,6 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
+﻿using System.Collections.Generic;
 using System.Threading.Tasks;
+using static DiscordBot.Program;
 
 namespace DiscordBot
 {
@@ -19,29 +17,34 @@ namespace DiscordBot
             {
                 foreach (Instance instance in instances.instances)
                 {
-                   await Task.Run(() =>  GetInstanceAll(instance.key.href, instance.name));
+
+                    await Task.Run(() => GetInstanceAll(instance.key.href, instance.name));
                 }
+
                 Functions.WriteJSon(instanceAll, "InstanceList");
+
             }
         }
-        public static void GetInstanceAll(string link,string nameEn)
+        public static void GetInstanceAll(string link, string nameEn)
         {
-            InstanceMainInfo instance = Functions.GetWebJson<InstanceMainInfo>(link + "&locale=ru_RU&access_token=" + Program.tokenWow);
+            InstanceMainInfo instance = Functions.GetWebJson<InstanceMainInfo>(link + $"&locale={settings.Locale}&access_token=" + Program.tokenWow);
             if (instance != null)
             {
-                
-                    instanceAll.Add(new InstanceLang
-                    {
-                        InstanceEN = nameEn,
-                        InstanceRU = instance.name,
-                        InstanceID = instance.id,
-                        InstanceImg = Functions.GetBNetMedia(instance.media.key.href)
-                    });
-                
-              
+
+                //Console.WriteLine($"{nameEn} , {instance.name} , {instance.id} , {Functions.GetBNetMedia(instance.media.key.href)}");
+                instanceAll.Add(new InstanceLang
+                {
+
+                    InstanceEN = nameEn,
+                    InstanceRU = instance.name,
+                    InstanceID = instance.id,
+                    InstanceImg = Functions.GetBNetMedia(instance.media.key.href)
+                });
+
+
             }
         }
     }
 
-   
+
 }

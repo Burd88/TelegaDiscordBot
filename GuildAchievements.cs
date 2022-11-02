@@ -1,7 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Linq;
-using System.Threading.Tasks;
 using static DiscordBot.Program;
 
 namespace DiscordBot
@@ -9,18 +8,18 @@ namespace DiscordBot
     class GuildAchievements
     {
 
-        private bool error = false;   
-        private List<Achievement> afterAchievement ;
-        private List<Achievement> newAchievement ;
+        private bool error = false;
+        private List<Achievement> afterAchievement;
+        private List<Achievement> newAchievement;
 
         public List<Achievement> GetGuildAchievementChange()
         {
             try
-            {               
+            {
                 afterAchievement = new();
                 newAchievement = new();
-              
-                settings = Functions.ReadJson<BotSettings>("BotSettings");                
+
+                settings = Functions.ReadJson<BotSettings>("BotSettings");
 
                 GetGuildAchievements();
 
@@ -44,8 +43,8 @@ namespace DiscordBot
                         if (newAchievement.Count != 0)
                         {
                             var last = newAchievement.Max(after => after.Time);
-                          
-                           
+
+
                             settings.LastGuildAchiveTime = last;
                             Functions.WriteJSon(settings, "BotSettings");
                             return newAchievement;
@@ -58,7 +57,7 @@ namespace DiscordBot
                 {
 
                     var last = afterAchievement.Max(after => after.Time);
-                  
+
                     settings.LastGuildAchiveTime = last;
                     Functions.WriteJSon(settings, "BotSettings");
                     return null;
@@ -78,7 +77,7 @@ namespace DiscordBot
         private void GetGuildAchievements()
         {
 
-            GuildAchievement achievementsAll = Functions.GetWebJson<GuildAchievement>($"https://eu.api.blizzard.com/data/wow/guild/{settings.RealmSlug}/{settings.Guild.ToLower().Replace(" ", "-")}/achievements?namespace=profile-eu&locale=ru_RU&access_token=" + tokenWow);
+            GuildAchievement achievementsAll = Functions.GetWebJson<GuildAchievement>($"https://eu.api.blizzard.com/data/wow/guild/{settings.RealmSlug}/{settings.GuildName.ToLower().Replace(" ", "-")}/achievements?namespace=profile-eu&locale=ru_RU&access_token=" + tokenWow);
             if (achievementsAll != null)
             {
                 if (achievementsAll.recent_events != null)
@@ -91,14 +90,14 @@ namespace DiscordBot
                         {
                             Achievement achievement = new();
                             achievement.Time = Convert.ToInt64(achievementsAll.recent_events[i].timestamp.ToString());
-                           
-                            GuildAchievementMedia achievementInfo = Functions.GetWebJson<GuildAchievementMedia>(achievementsAll.recent_events[i].achievement.key.href + "&locale=ru_RU&access_token=" + tokenWow);
+
+                            GuildAchievementMedia achievementInfo = Functions.GetWebJson<GuildAchievementMedia>(achievementsAll.recent_events[i].achievement.key.href + "&locale={settings.Locale}&access_token=" + tokenWow);
                             if (achievementInfo != null)
                             {
                                 achievement.Name = achievementInfo.name;
                                 achievement.Category = achievementInfo.category.name;
                                 // GetGuildAchievementsRUMedia(achievementInfo.category.name, achievementInfo.name, Convert.ToInt64(time), achievementInfo.media.key.href);
-                                GetBNetMEdia achievementMedia = Functions.GetWebJson<GetBNetMEdia>(achievementInfo.media.key.href + "&locale=ru_RU&access_token=" + tokenWow);
+                                GetBNetMEdia achievementMedia = Functions.GetWebJson<GetBNetMEdia>(achievementInfo.media.key.href + "&locale={settings.Locale}&access_token=" + tokenWow);
                                 if (achievementMedia != null)
                                 {
                                     achievement.Icon = achievementMedia.assets[0].value;

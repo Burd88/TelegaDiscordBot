@@ -2,14 +2,12 @@
 using Discord.WebSocket;
 using System;
 using System.Collections.Generic;
-using System.Linq;
-using System.Text;
 using System.Threading.Tasks;
 using Telegram.Bot;
 using Telegram.Bot.Types;
 using static DiscordBot.Program;
 
-namespace DiscordBot 
+namespace DiscordBot
 {
     class PoolRT
     {
@@ -23,7 +21,7 @@ namespace DiscordBot
         public static bool poolready = false;
         public static async void OnTimerHandlerPoolRT(object obj)
         {
-            if (settings.NeedPoolRT == true)
+            if (settings.EnablePoolRT)
             {
 
                 if (DateTime.Now.DayOfWeek == DayOfWeek.Monday || DateTime.Now.DayOfWeek == DayOfWeek.Wednesday || DateTime.Now.DayOfWeek == DayOfWeek.Thursday)// || DateTime.Now.DayOfWeek == DayOfWeek.Tuesday)
@@ -37,7 +35,7 @@ namespace DiscordBot
 
                                 userDiscList = new();
 
-                                await foreach (var s in discordClient.GetGuild(settings.DiscordMainChatId).GetUsersAsync())
+                                await foreach (var s in discordClient.GetGuild(settings.DiscordChatId).GetUsersAsync())
                                 {
                                     foreach (var l in s)
                                     {
@@ -72,7 +70,7 @@ namespace DiscordBot
                                       .AddField("Тактики", "Тактики можно смотреть в разделе \"**[Тактики](https://discord.com/channels/219741774556430336/938739958695489596)**\"", false)
                                       .WithImageUrl("https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcSeDhzUwFEg6HESybW2BScFMwIMJy7pbpEcXA&usqp=CAU");
 
-                                _mainChat = discordClient.GetGuild(settings.DiscordMainChatId);
+                                _mainChat = discordClient.GetGuild(settings.DiscordChatId);
                                 var chan = _mainChat.GetChannel(821981413858607104) as IMessageChannel;
                                 discordmessagepool = chan.SendMessageAsync("@here Всем привет!", false, embed: textbuilder.Build(), components: buttonbuilder.Build()).Result;
                                 discordmessageresultpool = chan.SendMessageAsync($"Приду: \nНе приду: \nОпоздаю: ").Result;
@@ -83,7 +81,7 @@ namespace DiscordBot
                                 options[0] = "Да";
                                 options[1] = "Нет";
                                 options[2] = "Опоздаю";
-                                telegrammessagepool = await telegramClient.SendPollAsync(settings.TelegramMainChatID, "Через час идем в рейд \"Гробница Предвечных\"! Тебя ждать?", options, false);
+                                telegrammessagepool = await telegramClient.SendPollAsync(settings.TelegramChatID, "Через час идем в рейд \"Гробница Предвечных\"! Тебя ждать?", options, false);
                                 poolready = true;
                             }
 
@@ -100,7 +98,7 @@ namespace DiscordBot
                                 {
                                     await discordmessagepool.DeleteAsync();
                                     await discordmessageresultpool.DeleteAsync();
-                                    await telegramClient.DeleteMessageAsync(settings.TelegramMainChatID, telegrammessagepool.MessageId);
+                                    await telegramClient.DeleteMessageAsync(settings.TelegramChatID, telegrammessagepool.MessageId);
                                     poolready = false;
                                 }
 
@@ -112,7 +110,7 @@ namespace DiscordBot
                     }
                 }
             }
-            if (settings.AddtionalRT == true)
+            if (settings.EnableAddtionalRT)
             {
                 if (DateTime.Now.DayOfWeek == DayOfWeek.Tuesday)
                 {
@@ -125,7 +123,7 @@ namespace DiscordBot
 
                                 userDiscList = new();
 
-                                await foreach (var s in discordClient.GetGuild(settings.DiscordMainChatId).GetUsersAsync())
+                                await foreach (var s in discordClient.GetGuild(settings.DiscordChatId).GetUsersAsync())
                                 {
                                     foreach (var l in s)
                                     {
@@ -160,7 +158,7 @@ namespace DiscordBot
                                       .AddField("Тактики", "Тактики можно смотреть в разделе \"**[Тактики](https://discord.com/channels/219741774556430336/938739958695489596)**\"", false)
                                       .WithImageUrl("https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcSeDhzUwFEg6HESybW2BScFMwIMJy7pbpEcXA&usqp=CAU");
 
-                                _mainChat = discordClient.GetGuild(settings.DiscordMainChatId);
+                                _mainChat = discordClient.GetGuild(settings.DiscordChatId);
                                 var chan = _mainChat.GetChannel(821981413858607104) as IMessageChannel;
                                 discordmessagepool = chan.SendMessageAsync("@here Всем привет!", false, embed: textbuilder.Build(), components: buttonbuilder.Build()).Result;
                                 discordmessageresultpool = chan.SendMessageAsync($"Результат:\nПриду: \nНе приду: \nОпоздаю: ").Result;
@@ -171,7 +169,7 @@ namespace DiscordBot
                                 options[0] = "Да";
                                 options[1] = "Нет";
                                 options[2] = "Опоздаю";
-                                telegrammessagepool = await telegramClient.SendPollAsync(settings.TelegramMainChatID, "Через час идем в рейд \"Гробница Предвечных\"! Тебя ждать?", options, false);
+                                telegrammessagepool = await telegramClient.SendPollAsync(settings.TelegramChatID, "Через час идем в рейд \"Гробница Предвечных\"! Тебя ждать?", options, false);
                                 poolready = true;
                             }
 
@@ -188,7 +186,7 @@ namespace DiscordBot
                                 {
                                     await discordmessagepool.DeleteAsync();
                                     await discordmessageresultpool.DeleteAsync();
-                                    await telegramClient.DeleteMessageAsync(settings.TelegramMainChatID, telegrammessagepool.MessageId);
+                                    await telegramClient.DeleteMessageAsync(settings.TelegramChatID, telegrammessagepool.MessageId);
                                     poolready = false;
                                 }
 

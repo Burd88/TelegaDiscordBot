@@ -17,7 +17,7 @@ namespace DiscordBot
             {
                 foreach (Encounter encount in encounters.encounters)
                 {
-                 await Task.Run(() => GetEncounterAll(encount.key.href));
+                    await Task.Run(() => GetEncounterAll(encount.key.href));
                 }
                 Functions.WriteJSon(encounterAll, "EncounterList");
             }
@@ -49,5 +49,5 @@ namespace DiscordBot
                 }
             }
         }
-    }  
+    }
 }

@@ -1,7 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Linq;
-using System.Threading.Tasks;
 using static DiscordBot.Program;
 
 namespace DiscordBot
@@ -13,7 +12,7 @@ namespace DiscordBot
 
 
         private List<Activity> afterActivity;
-    
+
         private List<Activity> newActivity;
 
 
@@ -21,15 +20,15 @@ namespace DiscordBot
         {
             try
             {
-               
+
                 afterActivity = new();
                 newActivity = new();
                 settings = Functions.ReadJson<BotSettings>("BotSettings");
-              
+
 
                 GetGuildActivityNew();
-               
-                
+
+
 
                 if (settings.LastGuildActiveTime != 0)
                 {
@@ -51,7 +50,7 @@ namespace DiscordBot
                         if (newActivity.Count != 0)
                         {
                             var last = newActivity.Max(after => after.Time);
-                           
+
                             settings.LastGuildActiveTime = last;
                             Functions.WriteJSon(settings, "BotSettings");
                             return newActivity;
@@ -63,9 +62,9 @@ namespace DiscordBot
                 else
                 {
                     var last = afterActivity.Max(after => after.Time);
-                   
+
                     settings.LastGuildActiveTime = last;
-                   
+
                     Functions.WriteJSon(settings, "BotSettings");
                     return null;
                 }
@@ -85,7 +84,7 @@ namespace DiscordBot
 
         private void GetGuildActivityNew()
         {
-            GuildActivitys activity = Functions.GetWebJson<GuildActivitys>($"https://eu.api.blizzard.com/data/wow/guild/{settings.RealmSlug}/{settings.Guild.ToLower().Replace(" ", "-")}/activity?namespace=profile-eu&locale=ru_RU&access_token=" + tokenWow);
+            GuildActivitys activity = Functions.GetWebJson<GuildActivitys>($"https://eu.api.blizzard.com/data/wow/guild/{settings.RealmSlug}/{settings.GuildName.ToLower().Replace(" ", "-")}/activity?namespace=profile-eu&locale=ru_RU&access_token=" + tokenWow);
 
             if (activity != null)
             {
@@ -114,7 +113,7 @@ namespace DiscordBot
                                         foreach (Asset asset in activityMedia.assets)
                                         {
                                             activNew.Icon = asset.value;
-                                          //  afterActivity.Add(new Activity() { Name = name, Mode = achivname, Time = time, Icon = asset.value, Award = award, Categor = category, Type = type });
+                                            //  afterActivity.Add(new Activity() { Name = name, Mode = achivname, Time = time, Icon = asset.value, Award = award, Categor = category, Type = type });
 
                                         }
                                     }
@@ -131,7 +130,7 @@ namespace DiscordBot
                                     activNew.Icon = null;
                                     //afterActivity.Add(new Activity() { Name = name, Mode = achivname, Time = time, Icon = null, Award = null, Categor = null, Type = type });
                                 }
-                               // GetGuildActivityInfo(activity.activities[i].character_achievement.character.name, activity.activities[i].character_achievement.achievement.name, Convert.ToInt64(activity.activities[i].timestamp), activity.activities[i].character_achievement.achievement.key.href, "CHARACTER_ACHIEVEMENT");
+                                // GetGuildActivityInfo(activity.activities[i].character_achievement.character.name, activity.activities[i].character_achievement.achievement.name, Convert.ToInt64(activity.activities[i].timestamp), activity.activities[i].character_achievement.achievement.key.href, "CHARACTER_ACHIEVEMENT");
 
                             }
                             else if (activity.activities[i].activity.type == "ENCOUNTER")
@@ -173,16 +172,16 @@ namespace DiscordBot
 
                             }
                             afterActivity.Add(activNew);
-                        }                        
-                          
-                               
-                           
-                        
+                        }
+
+
+
+
 
                     }
 
                 }
-                
+
             }
             else
             {
