@@ -22,6 +22,7 @@
         public string Stats { get; set; }
         public string LinkBnet { get; set; }
         public string SetcountItem { get; set; }
+        public string SetNameItem { get; set; }
 
         public CharInfoAll()
         {
@@ -43,6 +44,7 @@
             Error = false;
             LinkBnet = "";
             SetcountItem = "";
+            SetNameItem = "Комплекты:\n";
         }
 
     }

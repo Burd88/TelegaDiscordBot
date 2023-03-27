@@ -53,14 +53,21 @@ namespace DiscordBot
                 }
                 else if (str == "Down")
                 {
-                    settings.RealmStatusType = wowRealmStatus.RealnStatusType;
+                    try
+                    {
+                        settings.RealmStatusType = wowRealmStatus.RealnStatusType;
                     Functions.WriteJSon(settings, "BotSettings");
                     string[] str1 = new string[2];
                     str1[0] = "**Техническое обслуживание началось!**";
                     str1[1] = $"Игровой мир: **{wowRealmStatus.RealmName}** не работает!\u274c";
 
                     return str1;
-
+                    }
+                    catch (Exception e)
+                    {
+                        Console.WriteLine(e.Message);
+                        return null;
+                    }
                 }
                 else if (str == "No work")
                 {

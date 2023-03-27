@@ -77,7 +77,7 @@ namespace DiscordBot
                             .AddField("Уровень\nпредметов:", fullInfo.ILvl, true)
                             .WithImageUrl(fullInfo.ImageCharInset)
                             .AddField("Класс:", fullInfo.Class, true).AddField("Специализация:", fullInfo.Spec, true)
-                            .AddField("Ковенант:", fullInfo.Coven, true).AddField("Медиум:", fullInfo.CovenSoul, true)
+                            //.AddField("Ковенант:", fullInfo.Coven, true).AddField("Медиум:", fullInfo.CovenSoul, true)
                             .AddField("Рейд прогресс:", fullInfo.RaidProgress, true).AddField("Счет Мифик+:", fullInfo.MythicPlus, true);
                         if (settings.TelegramNotificationEnable)
                         {

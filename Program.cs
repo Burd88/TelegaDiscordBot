@@ -54,12 +54,16 @@ namespace DiscordBot
                 $"EnablePoolRT : {settings.EnablePoolRT}\n" +
                 $"EnableAddtionalRT : {settings.EnableAddtionalRT}\n");
             Console.WriteLine(textAll.ToString());
-
+            
             Functions.WriteJSon(settings, "BotSettings");
             if (settings.DiscordBotToken != "0")
             {
+                var config = new DiscordSocketConfig()
+                {
 
-                discordClient = new DiscordSocketClient();
+                    GatewayIntents = GatewayIntents.All
+                };
+                discordClient = new DiscordSocketClient(config);
                 discordClient.MessageReceived += DiscordTextCommands.CommandsHandler;
                 discordClient.Log += Log;
                 discordClient.Ready += SlashCommandHandler.Client_Ready;
@@ -80,8 +84,11 @@ namespace DiscordBot
 
 
             TimerCallback tmCheckReboot = new(CheckReboot.OnTimerHandlerCheckReboot);
-            Timer timerheckReboot = new(tmCheckReboot, null, 15000, 10000);
+            Timer timerheckReboot = new(tmCheckReboot, null, 15000, 1000);
 
+
+            TimerCallback tmCheckTokenWoW = new(CheckTokenWow.OnTimerHandlerCheckTokenWow);
+            Timer timerheckTokenWoW = new(tmCheckTokenWoW, null, 15000, 600000);
 
             TimerCallback tmCheckAffix = new(CheckAffix.OnTimerHandlerCheckAffix);
             Timer timerheckAffix = new(tmCheckAffix, null, 15000, 1000);
@@ -93,18 +100,6 @@ namespace DiscordBot
 
             TimerCallback tmlog = new(CheckLog.OnTimerHandlerCheckLog);
             Timer timerlog = new(tmlog, null, 15000, 15000);
-
-            TimerCallback tmevents = new(WarframeCheckEvents.OnTimerHandlerCheckWarframeEvents);
-            Timer timerevents = new(tmevents, null, 10000, 35000);
-
-            TimerCallback tmevinvas = new(WarframeCheckInvasions.OnTimerHandlerCheckWarframeInvasions);
-            Timer timerinvasions = new(tmevinvas, null, 11000, 30000);
-
-            TimerCallback tmevtrader = new(WarframeCheckVoidTrader.OnTimerHandlerCheckWarframeVoidTrader);
-            Timer timertrader = new(tmevtrader, null, 15000, 25000);
-
-            TimerCallback tmevNightWave = new(WarframeCheckNightWave.OnTimerHandlerCheckWarframeNightWave);
-            Timer timerNightWave = new(tmevNightWave, null, 13000, 25000);
 
             TimerCallback tmachieve = new(CheckAchievements.OnTimerHandlerCheckAchievements);
             Timer timerAchievements = new(tmachieve, null, 15000, 30000);
@@ -121,6 +116,19 @@ namespace DiscordBot
 
             //TimerCallback tmUpdateStatic = new(UpdateStatic.OnTimerHandlerUpdateStatic);
             //Timer timerUpdateStatic = new(tmUpdateStatic, null, 10000, 60000 * 20);
+
+
+            TimerCallback tmevents = new(WarframeCheckEvents.OnTimerHandlerCheckWarframeEvents);
+            Timer timerevents = new(tmevents, null, 10000, 35000);
+
+            TimerCallback tmevinvas = new(WarframeCheckInvasions.OnTimerHandlerCheckWarframeInvasions);
+            Timer timerinvasions = new(tmevinvas, null, 11000, 30000);
+
+            TimerCallback tmevtrader = new(WarframeCheckVoidTrader.OnTimerHandlerCheckWarframeVoidTrader);
+            Timer timertrader = new(tmevtrader, null, 15000, 25000);
+
+            TimerCallback tmevNightWave = new(WarframeCheckNightWave.OnTimerHandlerCheckWarframeNightWave);
+            Timer timerNightWave = new(tmevNightWave, null, 13000, 25000);
 
             if (settings.TelegramBotToken != "0")
             {

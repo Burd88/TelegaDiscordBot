@@ -19,14 +19,14 @@ namespace DiscordBot
             {
                 var builder = new EmbedBuilder()
                      .WithTitle($"{fullInfo.Name}({fullInfo.Lvl} уровень) {fullInfo.Race}")
-                     .WithUrl(fullInfo.LinkBnet).WithDescription($"Информация о персонаже  :")
+                     .WithUrl(fullInfo.LinkBnet).WithDescription($"Информация о персонаже  : \n{fullInfo.SetNameItem}")
                      .WithColor(Discord.Color.DarkRed).AddField("Уровень\nпредметов:", fullInfo.ILvl, true)
                      .WithImageUrl(fullInfo.ImageCharMainRaw)
                      .AddField("Класс:", fullInfo.Class, true)
                      .AddField("Специализация:", fullInfo.Spec, true)
                      .AddField("Гильдия:", fullInfo.Guild, true)
-                     .AddField("Ковенант:", fullInfo.Coven, true)
-                     .AddField("Медиум:", fullInfo.CovenSoul, true)
+                     //.AddField("Ковенант:", fullInfo.Coven, true)
+                   //  .AddField("Медиум:", fullInfo.CovenSoul, true)
                      .AddField("Рейд прогресс:", fullInfo.RaidProgress, true)
                      .AddField("Счет Мифик+:", fullInfo.MythicPlus, true)
                      .AddField("Статы:", fullInfo.Stats, true).AddField("В игре:", fullInfo.LastLogin, true);

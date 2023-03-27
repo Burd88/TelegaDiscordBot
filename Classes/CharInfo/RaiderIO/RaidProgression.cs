@@ -12,5 +12,9 @@ namespace DiscordBot
 
         [JsonProperty("sepulcher-of-the-first-ones")]
         public SepulcherOfTheFirstOnes SepulcherOfTheFirstOnes { get; set; }
+
+        [JsonProperty("vault-of-the-incarnates")]
+        public VaultOfTheIncarnates VaultOfTheIncarnates { get; set; }
+
     }
 }

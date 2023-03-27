@@ -77,12 +77,12 @@ namespace DiscordBot
                     _charInfo.Coven = character.covenant_progress.chosen_covenant.name + " (" + character.covenant_progress.renown_level.ToString() + ")";
                 }
 
-                string soulbindsLink = $"https://eu.api.blizzard.com/profile/wow/character/{realm}/{name.ToLower()}/soulbinds?namespace=profile-eu&locale={settings.Locale}&access_token={tokenWow}";
+                //string soulbindsLink = $"https://eu.api.blizzard.com/profile/wow/character/{realm}/{name.ToLower()}/soulbinds?namespace=profile-eu&locale={settings.Locale}&access_token={tokenWow}";
                 string raidLink = $"https://raider.io/api/v1/characters/profile?region=eu&realm={realm}&name={Char.ToUpper(name[0]) + name.Substring(1).ToLower()}&fields=mythic_plus_scores%2Craid_progression";
                 string mediaLink = $"https://eu.api.blizzard.com/profile/wow/character/{realm}/{name.ToLower()}/character-media?namespace=profile-eu&locale={settings.Locale}&access_token={tokenWow}";
                 string setLink = $"https://eu.api.blizzard.com/profile/wow/character/{realm}/{name.ToLower()}/equipment?namespace=profile-eu&locale={settings.Locale}&access_token={tokenWow}";
                 string statsLink = $"https://eu.api.blizzard.com/profile/wow/character/{realm}/{name.ToLower()}/statistics?namespace=profile-eu&locale={settings.Locale}&access_token={tokenWow}";
-                GetSoulbindsCharacter(soulbindsLink);
+                //GetSoulbindsCharacter(soulbindsLink);
                 Character_raid_progress(raidLink);
                 GetCharMedia(mediaLink, realm, name);
                 GetCharSet(setLink);
@@ -117,7 +117,7 @@ namespace DiscordBot
             RaiderIOCharInfo character = GetWebJson<RaiderIOCharInfo>(link);
             if (character != null)
             {
-                _charInfo.RaidProgress = character.raid_progression.SepulcherOfTheFirstOnes.summary;
+                _charInfo.RaidProgress = character.raid_progression.VaultOfTheIncarnates.summary;
                 _charInfo.MythicPlus = character.mythic_plus_scores.all;
             }
 
@@ -155,8 +155,11 @@ namespace DiscordBot
                         if (setequip.display_string.Contains("/5)"))
                         {
                             _charInfo.SetcountItem = "Set:**" + setequip.display_string.Replace(setequip.item_set.name, "") + "**";
+                            _charInfo.SetNameItem += $"**{setequip.display_string}**\n";
                         }
+                        
                     }
+                   
                 }
             }
         }

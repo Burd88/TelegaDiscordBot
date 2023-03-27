@@ -2,6 +2,8 @@
 {
     public class BotSettings
     {
+        
+
         public string DiscordBotToken { get; set; }
         public string TelegramBotToken { get; set; }
         public string BatNetToken { get; set; }
@@ -20,7 +22,7 @@
         public bool EnableCheckRoster { get; set; }
         public bool EnableCheckDiscordRole { get; set; }
         public bool EnableAddtionalRT { get; set; }
-
+        public bool EnableCheckTokenWow { get; set; }
         public ulong DiscordChatId { get; set; }
         public ulong DiscordTestChatId { get; set; }
         public ulong DiscordMainChannelId { get; set; }
@@ -33,6 +35,8 @@
         public ulong DiscordStaticChannelId { get; set; }
         public ulong DiscordLogMessageId { get; set; }
         public ulong DiscordStaticMessageId { get; set; }
+        public ulong DiscordTokenWowChannelId { get; set; }
+        public ulong DiscordTokenWowMessageId { get; set; }
         public ulong DiscordTestMainChannelId { get; set; }
         public long TelegramChatID { get; set; }
         public long TelegramTestChatID { get; set; }
@@ -49,6 +53,6 @@
         public ulong DiscordWarframeVoidTraderMessageId { get; set; }
         public ulong DiscordWarframeNightWaveChannelId { get; set; }
         public ulong DiscordWarframeNightWaveMessageId { get; set; }
-
+        
     }
 }
