@@ -152,7 +152,7 @@ namespace DiscordBot
 
 
             Console.ReadLine();
-            // cts.Cancel();
+            
         }
 
 

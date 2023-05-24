@@ -66,7 +66,7 @@ namespace DiscordBot
                 var fullInfo = pers.GetCharInfo(inv.Name);
                 if (fullInfo != null)
                 {
-                    if (Convert.ToInt32(inv.LVL) == 60)
+                    if (Convert.ToInt32(inv.LVL) == 70)
                     {
 
                         builder = new EmbedBuilder()
@@ -90,7 +90,7 @@ namespace DiscordBot
                             , parseMode: ParseMode.Html);
                         }
                     }
-                    else if (Convert.ToInt32(inv.LVL) < 60)
+                    else if (Convert.ToInt32(inv.LVL) < 70)
                     {
                         builder = new EmbedBuilder().WithTitle($"**{fullInfo.Name}**({inv.LVL} уровень) {fullInfo.Race}").WithUrl(fullInfo.LinkBnet).WithDescription($"**{text}**").WithColor(Discord.Color.DarkRed).AddField("Уровень\nпредметов:", fullInfo.ILvl, true).WithImageUrl(fullInfo.ImageCharInset)
                           .AddField("Класс:", fullInfo.Class, true).AddField("Специализация:", fullInfo.Spec, true);
