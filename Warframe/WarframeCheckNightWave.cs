@@ -1,10 +1,6 @@
 ﻿using Discord;
 using System;
-using System.Collections.Generic;
-using System.Linq;
 using System.Net;
-using System.Text;
-using System.Threading.Tasks;
 using static DiscordBot.Program;
 
 namespace DiscordBot
@@ -18,7 +14,7 @@ namespace DiscordBot
             {
 
                 NightWave nightWave = Functions.GetWebJson<NightWave>($"https://api.warframestat.us/pc/ru/nightwave");
-                
+
                 string nameSeasonWave = "";
                 string endTimeSeasonWave = "";
                 string dailyWave = "";
@@ -29,10 +25,10 @@ namespace DiscordBot
                     nameSeasonWave = $"{nightWave.tag} ({nightWave.season} сезон";
                     TimeSpan ex = (nightWave.expiry - DateTime.UtcNow);
                     endTimeSeasonWave = $"Закончиться через : **{ex.Days}д {ex.Hours}ч {ex.Minutes}м**";
-                   
+
                     if (nightWave.active)
                     {
-                        foreach(ActiveChallenge activeWave in nightWave.activeChallenges)
+                        foreach (ActiveChallenge activeWave in nightWave.activeChallenges)
                         {
                             TimeSpan exptime = (activeWave.expiry - DateTime.UtcNow);
                             if (activeWave.isDaily)
@@ -51,11 +47,11 @@ namespace DiscordBot
                                     weeklyWave += $"     **Название:** {activeWave.title} (**{exptime.Days}д {exptime.Hours}ч {exptime.Minutes}м**)\n      **Описание**: {activeWave.desc}\n       **Награда**: {activeWave.reputation}\n\n";
                                 }
                             }
-                        }  
+                        }
                     }
                     else
                     {
-                        
+
                     }
 
 
@@ -64,10 +60,10 @@ namespace DiscordBot
 
                          .WithTitle($"Ночная Волна : {nameSeasonWave}")
                          .WithDescription($"{endTimeSeasonWave}\n\n")
-                         .AddField($"**Ежедневные:**", dailyWave,false)
+                         .AddField($"**Ежедневные:**", dailyWave, false)
                          .AddField($"**Еженедельные:**", weeklyWave, false)
                          .AddField($"**Еженедельные(Elite):**", weeklyWaveElite, false)
-                         
+
                          .WithColor(Discord.Color.DarkRed).WithFooter(footer => footer.Text = $"Обновлено: {DateTime.Now} (+4 Мск) ");
                     /* foreach (SetInvasions str in invasionsList)
                      {

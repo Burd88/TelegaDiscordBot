@@ -66,11 +66,9 @@ namespace DiscordBot
                 var fullInfo = pers.GetCharInfo(inv.Name);
                 if (fullInfo != null)
                 {
-                    if (Convert.ToInt32(inv.LVL) == 70)
-                    {
-
+                  
                         builder = new EmbedBuilder()
-                            .WithTitle($"**{fullInfo.Name}**({inv.LVL} уровень) {fullInfo.Race}")
+                            .WithTitle($"**{fullInfo.Name}**({fullInfo.Lvl} уровень) {fullInfo.Race}")
                             .WithUrl(fullInfo.LinkBnet)
                             .WithDescription($"**{text}**")
                             .WithColor(Discord.Color.DarkRed)
@@ -82,28 +80,14 @@ namespace DiscordBot
                         if (settings.TelegramNotificationEnable)
                         {
                             await telegramClient.SendPhotoAsync(
-                            photo: fullInfo.ImageCharInset,
+                            photo: null,//fullInfo.ImageCharInset,
                             chatId: settings.TelegramChatID,
-                            caption: $"{fullInfo.Name}({inv.LVL} уровень) {fullInfo.Race}\n{text}\nУровень предметов: {fullInfo.ILvl}\nКласс: {fullInfo.Class}\nСпециализация: {fullInfo.Spec}" +
-                            $"\nКовенант: {fullInfo.Coven}\nМедиум: {fullInfo.CovenSoul}" +
+                            caption: $"{fullInfo.Name}({fullInfo.Lvl} уровень) {fullInfo.Race}\n{text}\nУровень предметов: {fullInfo.ILvl}\nКласс: {fullInfo.Class}\nСпециализация: {fullInfo.Spec}" +
+                            // $"\nКовенант: {fullInfo.Coven}\nМедиум: {fullInfo.CovenSoul}" +
                             $"\nРейд прогресс: {fullInfo.RaidProgress}\nСчет Мифик+: {fullInfo.MythicPlus}"
                             , parseMode: ParseMode.Html);
                         }
-                    }
-                    else if (Convert.ToInt32(inv.LVL) < 70)
-                    {
-                        builder = new EmbedBuilder().WithTitle($"**{fullInfo.Name}**({inv.LVL} уровень) {fullInfo.Race}").WithUrl(fullInfo.LinkBnet).WithDescription($"**{text}**").WithColor(Discord.Color.DarkRed).AddField("Уровень\nпредметов:", fullInfo.ILvl, true).WithImageUrl(fullInfo.ImageCharInset)
-                          .AddField("Класс:", fullInfo.Class, true).AddField("Специализация:", fullInfo.Spec, true);
-                        if (settings.TelegramNotificationEnable)
-                        {
-                            await telegramClient.SendPhotoAsync(
-                            photo: fullInfo.ImageCharInset,
-                            chatId: settings.TelegramChatID,
-                            caption: $"{fullInfo.Name}({inv.LVL} уровень) {fullInfo.Race}\n{text}\nУровень предметов: {fullInfo.ILvl}\nКласс: {fullInfo.Class}\nСпециализация: {fullInfo.Spec}",
-                            parseMode: ParseMode.Html);
-                        }
-
-                    }
+                    
                     _mainChat = discordClient.GetGuild(settings.DiscordChatId);
                     var chan = _mainChat.GetChannel(settings.DiscordRosterChannelId) as IMessageChannel;
                     var embed = builder.Build();

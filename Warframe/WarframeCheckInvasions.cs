@@ -3,7 +3,6 @@ using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Net;
-using System.Threading.Tasks;
 using static DiscordBot.Program;
 namespace DiscordBot
 
@@ -21,10 +20,60 @@ namespace DiscordBot
                 {
                     if (!invas.completed)
                     {
-                     //   Console.WriteLine(invas.attackerReward.itemString +" "+ invas.defenderReward.itemString);
+                        //   Console.WriteLine(invas.attackerReward.itemString +" "+ invas.defenderReward.itemString);
                         if (invasionsList.Count == 0)
                         {
-                          
+
+                            invasionsList.Add(new SortRewardInvasion
+                            {
+                                RewardAttack = invas.attackerReward.itemString,
+                                RewardDef = invas.defenderReward.itemString,
+                                RewardAttackLink = invas.attackerReward.thumbnail,
+                                RewardDefLink = invas.defenderReward.thumbnail,
+                                listInvasions = new List<SetInvasions>() { new SetInvasions{NameInvasions = invas.node.Replace(")", "").Substring(invas.node.IndexOf("(")+1) + " (" + invas.desc + ")" ,AttackerName = invas.attackingFaction
+                            , Attackpersent= Math.Round(invas.completion,2) , DefenderNmae = invas.defendingFaction, Defpersent = Math.Round(100 - Math.Round(invas.completion, 2),2),
+                            ETA = invas.eta, RewardAttacker = $"\n[{invas.attackerReward.itemString}]({invas.attackerReward.thumbnail})"    , RewardDeffenser = $"\n[{invas.defenderReward.itemString}]({invas.defenderReward.thumbnail})" }   }
+                            });
+
+                        }
+                        else
+                        {
+                            bool add = false;
+                            foreach (SortRewardInvasion srt in invasionsList.ToList())
+                            {
+
+                                if (invas.attackerReward.itemString.ToLower() == srt.RewardAttack.ToLower() && invas.defenderReward.itemString.ToLower() == srt.RewardDef.ToLower())
+                                {
+
+                                    srt.listInvasions.Add(new SetInvasions
+                                    {
+                                        NameInvasions = invas.node.Replace(")", "").Substring(invas.node.IndexOf("(") + 1) + " (" + invas.desc + ")",
+                                        AttackerName = invas.attackingFaction
+                            ,
+                                        Attackpersent = Math.Round(invas.completion, 2),
+                                        DefenderNmae = invas.defendingFaction,
+                                        Defpersent = Math.Round(100 - Math.Round(invas.completion, 2), 2),
+                                        ETA = invas.eta,
+                                        RewardAttacker = $"\n[{invas.attackerReward.itemString}]({invas.attackerReward.thumbnail})",
+                                        RewardDeffenser = $"\n[{invas.defenderReward.itemString}]({invas.defenderReward.thumbnail})"
+                                    });
+                                    add = false;
+                                    break;
+
+                                }
+
+                                else
+                                {
+                                    add = true;
+                                }
+
+
+                            }
+                            if (add)
+                            {
+
+
+
                                 invasionsList.Add(new SortRewardInvasion
                                 {
                                     RewardAttack = invas.attackerReward.itemString,
@@ -35,60 +84,10 @@ namespace DiscordBot
                             , Attackpersent= Math.Round(invas.completion,2) , DefenderNmae = invas.defendingFaction, Defpersent = Math.Round(100 - Math.Round(invas.completion, 2),2),
                             ETA = invas.eta, RewardAttacker = $"\n[{invas.attackerReward.itemString}]({invas.attackerReward.thumbnail})"    , RewardDeffenser = $"\n[{invas.defenderReward.itemString}]({invas.defenderReward.thumbnail})" }   }
                                 });
-                           
+
+
+                            }
                         }
-                        else
-                        {
-                            bool add = false;
-                            foreach (SortRewardInvasion srt in invasionsList.ToList())
-                            {
-                               
-                                    if (invas.attackerReward.itemString.ToLower() == srt.RewardAttack.ToLower() && invas.defenderReward.itemString.ToLower() == srt.RewardDef.ToLower())
-                                    {
-
-                                        srt.listInvasions.Add(new SetInvasions
-                                        {
-                                            NameInvasions = invas.node.Replace(")", "").Substring(invas.node.IndexOf("(") + 1) + " (" + invas.desc + ")",
-                                            AttackerName = invas.attackingFaction
-                                ,
-                                            Attackpersent = Math.Round(invas.completion, 2),
-                                            DefenderNmae = invas.defendingFaction,
-                                            Defpersent = Math.Round(100 - Math.Round(invas.completion, 2), 2),
-                                            ETA = invas.eta,
-                                            RewardAttacker = $"\n[{invas.attackerReward.itemString}]({invas.attackerReward.thumbnail})",
-                                            RewardDeffenser = $"\n[{invas.defenderReward.itemString}]({invas.defenderReward.thumbnail})"
-                                        });
-                                        add = false;
-                                    break;
-                                        
-                                    }
-
-                                    else
-                                    {
-                                        add = true;
-                                    }
-                               
-                                
-                            }
-                            if (add)
-                            {
-
-
-                               
-                                    invasionsList.Add(new SortRewardInvasion
-                                    {
-                                        RewardAttack = invas.attackerReward.itemString,
-                                        RewardDef = invas.defenderReward.itemString,
-                                        RewardAttackLink = invas.attackerReward.thumbnail,
-                                        RewardDefLink = invas.defenderReward.thumbnail,
-                                        listInvasions = new List<SetInvasions>() { new SetInvasions{NameInvasions = invas.node.Replace(")", "").Substring(invas.node.IndexOf("(")+1) + " (" + invas.desc + ")" ,AttackerName = invas.attackingFaction
-                            , Attackpersent= Math.Round(invas.completion,2) , DefenderNmae = invas.defendingFaction, Defpersent = Math.Round(100 - Math.Round(invas.completion, 2),2),
-                            ETA = invas.eta, RewardAttacker = $"\n[{invas.attackerReward.itemString}]({invas.attackerReward.thumbnail})"    , RewardDeffenser = $"\n[{invas.defenderReward.itemString}]({invas.defenderReward.thumbnail})" }   }
-                                    });
-                               
-                               
-                            }
-                        }                
                     }
                 }
 
@@ -105,12 +104,12 @@ namespace DiscordBot
             try
             {
 
-               GetInvasions(); 
-                
-                
+                GetInvasions();
+
+
                 if (invasionsList != null)
                 {
-                   // Console.WriteLine(invasionsList.Count());
+                    // Console.WriteLine(invasionsList.Count());
                     string str1 = "";
                     foreach (SortRewardInvasion inv in invasionsList)
                     {
@@ -128,8 +127,8 @@ namespace DiscordBot
                             str1 += $"**{sinv.NameInvasions}** : {sinv.AttackerName}({sinv.Attackpersent}%) vs {sinv.DefenderNmae} ({sinv.Defpersent}%) \n";// Ожидаю завершения через: {sinv.ETA.Replace("d", "д").Replace("h", "ч").Replace("m", "м").Replace("s", "с")}\n";
                         }
                         str1 += "\n";
-                        
-                     }
+
+                    }
 
                     var builder = new EmbedBuilder()
                         .WithThumbnailUrl("https://cdn.discordapp.com/icons/640231332735090698/053d253f7c60097ceaba5317830f6518.webp?size=100")
@@ -152,46 +151,46 @@ namespace DiscordBot
                      }*/
 
                     // .WithFooter(footer => footer.Text = $"Гильдия \"Сердце греха\".\nОбновлено: {DateTime.Now} (+4 Мск) ");
-                   // await discordClient.GetGuild(373317758634557451).GetTextChannel(373317758634557453).ModifyMessageAsync(1017003311649529926, msg => msg.Embed = builder.Build());
+                    // await discordClient.GetGuild(373317758634557451).GetTextChannel(373317758634557453).ModifyMessageAsync(1017003311649529926, msg => msg.Embed = builder.Build());
                     // _mainChat = discordClient.GetGuild(373317758634557451);
                     //  
                     //  var chan = _mainChat.GetChannel(373317758634557453) as IMessageChannel;
 
                     // var mess = chan.SendMessageAsync(null, false, embed: builder.Build()).Result;
 
-                     if (settings != null && builder != null)
-                         {
-                             if (settings.DiscordWarframeInvasionsChannelId != 0)
-                             {
-                                 if (settings.DiscordWarframeInvasionsMessageId != 0)
-                                 {
-                                     if (discordClient.GetGuild(settings.DiscordWarframeChatId).GetTextChannel(settings.DiscordWarframeInvasionsChannelId).GetMessageAsync(settings.DiscordWarframeInvasionsMessageId).Result != null)
-                                     {
-                                         await discordClient.GetGuild(settings.DiscordWarframeChatId).GetTextChannel(settings.DiscordWarframeInvasionsChannelId).ModifyMessageAsync(settings.DiscordWarframeInvasionsMessageId, msg => msg.Embed = builder.Build());
-                                     }
-                                     else
-                                     {
-                                         _mainChat = discordClient.GetGuild(settings.DiscordWarframeChatId);
-                                         var chan = _mainChat.GetChannel(settings.DiscordWarframeInvasionsChannelId) as IMessageChannel;
-                                         var mess = chan.SendMessageAsync(null, false, embed: builder.Build()).Result;
-                                         settings.DiscordWarframeInvasionsMessageId = mess.Id;
-                                         Functions.WriteJSon(settings, "BotSettings");
-                                     }
+                    if (settings != null && builder != null)
+                    {
+                        if (settings.DiscordWarframeInvasionsChannelId != 0)
+                        {
+                            if (settings.DiscordWarframeInvasionsMessageId != 0)
+                            {
+                                if (discordClient.GetGuild(settings.DiscordWarframeChatId).GetTextChannel(settings.DiscordWarframeInvasionsChannelId).GetMessageAsync(settings.DiscordWarframeInvasionsMessageId).Result != null)
+                                {
+                                    await discordClient.GetGuild(settings.DiscordWarframeChatId).GetTextChannel(settings.DiscordWarframeInvasionsChannelId).ModifyMessageAsync(settings.DiscordWarframeInvasionsMessageId, msg => msg.Embed = builder.Build());
+                                }
+                                else
+                                {
+                                    _mainChat = discordClient.GetGuild(settings.DiscordWarframeChatId);
+                                    var chan = _mainChat.GetChannel(settings.DiscordWarframeInvasionsChannelId) as IMessageChannel;
+                                    var mess = chan.SendMessageAsync(null, false, embed: builder.Build()).Result;
+                                    settings.DiscordWarframeInvasionsMessageId = mess.Id;
+                                    Functions.WriteJSon(settings, "BotSettings");
+                                }
 
-                                 }
-                                 else
-                                 {
-                                     _mainChat = discordClient.GetGuild(settings.DiscordWarframeChatId);
-                                     var chan = _mainChat.GetChannel(settings.DiscordWarframeInvasionsChannelId) as IMessageChannel;
-                                     var mess = chan.SendMessageAsync(null, false, embed: builder.Build()).Result;
-                                     settings.DiscordWarframeInvasionsMessageId = mess.Id;
-                                     Functions.WriteJSon(settings, "BotSettings");
-                                 }
+                            }
+                            else
+                            {
+                                _mainChat = discordClient.GetGuild(settings.DiscordWarframeChatId);
+                                var chan = _mainChat.GetChannel(settings.DiscordWarframeInvasionsChannelId) as IMessageChannel;
+                                var mess = chan.SendMessageAsync(null, false, embed: builder.Build()).Result;
+                                settings.DiscordWarframeInvasionsMessageId = mess.Id;
+                                Functions.WriteJSon(settings, "BotSettings");
+                            }
 
-                             }
-                             //  await discordClient.GetGuild(settings.DiscordChatId).GetTextChannel(settings.DiscordLogChannelId).ModifyMessageAsync(958994640487481396, msg => msg.Embed = builder.Build());
+                        }
+                        //  await discordClient.GetGuild(settings.DiscordChatId).GetTextChannel(settings.DiscordLogChannelId).ModifyMessageAsync(958994640487481396, msg => msg.Embed = builder.Build());
 
-                         }
+                    }
 
                 }
             }

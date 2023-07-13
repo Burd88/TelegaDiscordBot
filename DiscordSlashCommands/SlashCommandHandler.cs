@@ -28,9 +28,9 @@ namespace DiscordBot
 
             try
             {
-               
+
                 await guild.CreateApplicationCommandAsync(affix.Build());
-               await discordClient.Rest.CreateGuildCommand(charcommand.Build(), settings.DiscordChatId);
+                await discordClient.Rest.CreateGuildCommand(charcommand.Build(), settings.DiscordChatId);
             }
             catch (CommandException exception)
             {

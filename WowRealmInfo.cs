@@ -56,12 +56,12 @@ namespace DiscordBot
                     try
                     {
                         settings.RealmStatusType = wowRealmStatus.RealnStatusType;
-                    Functions.WriteJSon(settings, "BotSettings");
-                    string[] str1 = new string[2];
-                    str1[0] = "**Техническое обслуживание началось!**";
-                    str1[1] = $"Игровой мир: **{wowRealmStatus.RealmName}** не работает!\u274c";
+                        Functions.WriteJSon(settings, "BotSettings");
+                        string[] str1 = new string[2];
+                        str1[0] = "**Техническое обслуживание началось!**";
+                        str1[1] = $"Игровой мир: **{wowRealmStatus.RealmName}** не работает!\u274c";
 
-                    return str1;
+                        return str1;
                     }
                     catch (Exception e)
                     {

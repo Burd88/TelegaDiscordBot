@@ -54,7 +54,7 @@ namespace DiscordBot
                                         {
 
                                             var nick = rosterGuild.Find(x => us.Nickname.ToLower().Contains(x.Name.ToLower()));
-
+                                            
                                             if (nick != null)
                                             {
 
@@ -81,7 +81,7 @@ namespace DiscordBot
                                                             await us.RemoveRolesAsync(roleList);
                                                             await us.AddRoleAsync(roleList[nick.Rank]);
                                                             Console.ForegroundColor = ConsoleColor.Green;
-                                                            Console.WriteLine($"Изменение роли на сервере для Username: {us.Username}, Nickname: {us.Nickname}, назначаемая роль: {discordClient.GetGuild(settings.DiscordChatId).GetRole(roleList[nick.Rank]).Name}");
+                                                            Console.WriteLine($"Изменение роли на сервере для Username: {us.DisplayName}, Nickname: {us.Nickname}, назначаемая роль: {discordClient.GetGuild(settings.DiscordChatId).GetRole(roleList[nick.Rank]).Name}");
 
                                                         }
                                                     }
@@ -127,6 +127,96 @@ namespace DiscordBot
                                                     await us.AddRoleAsync(roleList[nick.Rank]);
                                                     Console.ForegroundColor = ConsoleColor.Green;
                                                     Console.WriteLine($"Изменение роли на сервере для Username: {us.Username}, Nickname: {us.Nickname}, назначаемая роль: {discordClient.GetGuild(settings.DiscordChatId).GetRole(roleList[nick.Rank]).Name}");
+                                                }
+
+                                            }
+                                            else
+                                            {
+                                                if (us.RoleIds.Count != 1)
+                                                {
+                                                    Console.ForegroundColor = ConsoleColor.White;
+                                                    Console.WriteLine("Пользователь не в гильдии!  Ник: " + us.Nickname + " Имя: " + us.Username + " ID: " + us.Id);
+                                                    await us.RemoveRolesAsync(roleList);
+                                                }
+
+                                            }
+                                        }
+                                        else if (us.DisplayName != null)
+                                        {
+
+                                            var displayName = rosterGuild.Find(x => us.DisplayName.ToLower().Contains(x.Name.ToLower()));
+                                            if (displayName != null)
+                                            {
+
+                                                if (us.RoleIds.Count != 1)
+                                                {
+
+                                                    //Console.WriteLine(us.RoleIds.Count);
+                                                    if (us.RoleIds.Count > 2)
+                                                    {
+
+                                                        bool admin = false;
+                                                        foreach (var role in us.RoleIds)
+                                                        {
+                                                            if (role == roleAdmin)
+                                                            {
+
+                                                                admin = true;
+                                                                // Console.WriteLine($"Изменение роли на сервере для Username: {us.Username}, Nickname: {us.Nickname}, Admin");
+                                                            }
+                                                        }
+                                                        if (!admin)
+                                                        {
+
+                                                            await us.RemoveRolesAsync(roleList);
+                                                            await us.AddRoleAsync(roleList[displayName.Rank]);
+                                                            Console.ForegroundColor = ConsoleColor.Green;
+                                                            Console.WriteLine($"Изменение роли на сервере для Username: {us.DisplayName}, Nickname: {us.Nickname}, назначаемая роль: {discordClient.GetGuild(settings.DiscordChatId).GetRole(roleList[displayName.Rank]).Name}");
+
+                                                        }
+                                                    }
+                                                    else if (us.RoleIds.Count == 2)
+                                                    {
+                                                        bool admin = false;
+                                                        foreach (var role in us.RoleIds)
+                                                        {
+                                                            if (role == roleAdmin)
+                                                            {
+                                                                admin = true;
+                                                                //   Console.WriteLine($"Изменение роли на сервере для Username: {us.Username}, Nickname: {us.Nickname}, Admin");
+                                                            }
+                                                        }
+                                                        if (!admin)
+                                                        {
+                                                            //   Console.WriteLine($"Изменение роли на сервере для Username: {us.Username}, Nickname: {us.Nickname}, {client.GetGuild(settings.DiscordMainChatId).GetRole(us.RoleIds.ElementAt(1)).Id}    1  {roleNewbie}   2 {nick.Rank}   {roleList[nick.Rank]}    3   {roleList[7]}");
+
+                                                            if (us.RoleIds.ElementAt(1) != roleList[displayName.Rank])
+                                                            {
+
+                                                                await us.RemoveRolesAsync(roleList);
+                                                                await us.AddRoleAsync(roleList[displayName.Rank]);
+                                                                Console.ForegroundColor = ConsoleColor.Green;
+                                                                Console.WriteLine($"Изменение роли на сервере для Username: {us.Username}, Nickname: {us.Nickname}, назначаемая роль: {discordClient.GetGuild(settings.DiscordChatId).GetRole(roleList[displayName.Rank]).Name}");
+
+                                                            }
+
+                                                        }
+                                                        else
+                                                        {
+                                                            await us.AddRoleAsync(roleList[displayName.Rank]);
+                                                            Console.ForegroundColor = ConsoleColor.Green;
+                                                            Console.WriteLine($"Изменение роли на сервере для Username: {us.Username}, Nickname: {us.Nickname}, назначаемая роль: {discordClient.GetGuild(settings.DiscordChatId).GetRole(roleList[displayName.Rank]).Name}");
+                                                        }
+
+                                                    }
+
+                                                }
+                                                else
+                                                {
+
+                                                    await us.AddRoleAsync(roleList[displayName.Rank]);
+                                                    Console.ForegroundColor = ConsoleColor.Green;
+                                                    Console.WriteLine($"Изменение роли на сервере для Username: {us.Username}, Nickname: {us.Nickname}, назначаемая роль: {discordClient.GetGuild(settings.DiscordChatId).GetRole(roleList[displayName.Rank]).Name}");
                                                 }
 
                                             }

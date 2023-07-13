@@ -148,7 +148,7 @@ namespace DiscordBot
                                     {
                                         await telegramClient.SendPhotoAsync(
                                       chatId: settings.TelegramChatID,
-                                     photo: activ.Icon,
+                                     photo: null,//activ.Icon,
                                      caption: $"<b>Гильдия одержала победу!</b>\nРейд: <b>{activ.Categor}</b>\nБосс: <b>{activ.Name}</b>\nРежим: <b>{activ.Mode}</b>"
                                       , parseMode: ParseMode.Html
                                       );

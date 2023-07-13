@@ -15,7 +15,7 @@ namespace DiscordBot
             List<Events> events = Functions.GetWebJson<List<Events>>($"https://api.warframestat.us/pc/ru/events");
             if (events != null)
             {
-                if(events.Count != 0)
+                if (events.Count != 0)
                 {
                     foreach (Events evnt in events)
                     {
@@ -46,7 +46,7 @@ namespace DiscordBot
 
 
             }
-            
+
 
 
 
@@ -82,40 +82,40 @@ namespace DiscordBot
 
                     //   var mess = chan.SendMessageAsync(null, false, embed: builder.Build()).Result;
 
-                     if (settings != null && builder != null)
-                         {
-                             if (settings.DiscordWarframeEventsChannelId != 0)
-                             {
-                                 if (settings.DiscordWarframeEventsMessageId != 0)
-                                 {
-                                     if (discordClient.GetGuild(settings.DiscordWarframeChatId).GetTextChannel(settings.DiscordWarframeEventsChannelId).GetMessageAsync(settings.DiscordWarframeEventsMessageId).Result != null)
-                                     {
-                                         await discordClient.GetGuild(settings.DiscordWarframeChatId).GetTextChannel(settings.DiscordWarframeEventsChannelId).ModifyMessageAsync(settings.DiscordWarframeEventsMessageId, msg => msg.Embed = builder.Build());
-                                     }
-                                     else
-                                     {
-                                         _mainChat = discordClient.GetGuild(settings.DiscordWarframeChatId);
-                                         var chan = _mainChat.GetChannel(settings.DiscordWarframeEventsChannelId) as IMessageChannel;
-                                         var mess = chan.SendMessageAsync(null, false, embed: builder.Build()).Result;
-                                         settings.DiscordWarframeEventsMessageId = mess.Id;
-                                         Functions.WriteJSon(settings, "BotSettings");
-                                     }
+                    if (settings != null && builder != null)
+                    {
+                        if (settings.DiscordWarframeEventsChannelId != 0)
+                        {
+                            if (settings.DiscordWarframeEventsMessageId != 0)
+                            {
+                                if (discordClient.GetGuild(settings.DiscordWarframeChatId).GetTextChannel(settings.DiscordWarframeEventsChannelId).GetMessageAsync(settings.DiscordWarframeEventsMessageId).Result != null)
+                                {
+                                    await discordClient.GetGuild(settings.DiscordWarframeChatId).GetTextChannel(settings.DiscordWarframeEventsChannelId).ModifyMessageAsync(settings.DiscordWarframeEventsMessageId, msg => msg.Embed = builder.Build());
+                                }
+                                else
+                                {
+                                    _mainChat = discordClient.GetGuild(settings.DiscordWarframeChatId);
+                                    var chan = _mainChat.GetChannel(settings.DiscordWarframeEventsChannelId) as IMessageChannel;
+                                    var mess = chan.SendMessageAsync(null, false, embed: builder.Build()).Result;
+                                    settings.DiscordWarframeEventsMessageId = mess.Id;
+                                    Functions.WriteJSon(settings, "BotSettings");
+                                }
 
-                                 }
-                                 else
-                                 {
-                                     _mainChat = discordClient.GetGuild(settings.DiscordWarframeChatId);
-                                     var chan = _mainChat.GetChannel(settings.DiscordWarframeEventsChannelId) as IMessageChannel;
-                                     var mess = chan.SendMessageAsync(null, false, embed: builder.Build()).Result;
-                                     settings.DiscordWarframeEventsMessageId = mess.Id;
-                                     Functions.WriteJSon(settings, "BotSettings");
-                                 }
+                            }
+                            else
+                            {
+                                _mainChat = discordClient.GetGuild(settings.DiscordWarframeChatId);
+                                var chan = _mainChat.GetChannel(settings.DiscordWarframeEventsChannelId) as IMessageChannel;
+                                var mess = chan.SendMessageAsync(null, false, embed: builder.Build()).Result;
+                                settings.DiscordWarframeEventsMessageId = mess.Id;
+                                Functions.WriteJSon(settings, "BotSettings");
+                            }
 
-                             }
-                             //  await discordClient.GetGuild(settings.DiscordChatId).GetTextChannel(settings.DiscordLogChannelId).ModifyMessageAsync(958994640487481396, msg => msg.Embed = builder.Build());
+                        }
+                        //  await discordClient.GetGuild(settings.DiscordChatId).GetTextChannel(settings.DiscordLogChannelId).ModifyMessageAsync(958994640487481396, msg => msg.Embed = builder.Build());
 
-                         }
-                    
+                    }
+
                 }
             }
             catch (WebException e)

@@ -11,7 +11,7 @@ namespace DiscordBot
             try
             {
                 Static updatestatic = new();
-                updatestatic.UpdateStaticRoster();
+                Static.UpdateStaticRoster();
 
                 var builder = new EmbedBuilder()
                         .WithThumbnailUrl("https://cdn.discordapp.com/avatars/931442555332198400/bb4f0a2c3f5534cc199b54cc6b805d1a.webp?size=100")

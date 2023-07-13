@@ -7,7 +7,7 @@ namespace DiscordBot
 {
     class CheckTokenWow
     {
-       
+
         public static async void OnTimerHandlerCheckTokenWow(object obj)
         {
             if (settings.EnableCheckTokenWow)
@@ -18,7 +18,7 @@ namespace DiscordBot
                     var tokenprice = Functions.GetWebJson<TokenWarcraft>("https://eu.api.blizzard.com/data/wow/token/index?namespace=dynamic-eu&locale={settings.Locale}&access_token=" + Program.tokenWow);
                     if (tokenprice != null)
                     {
-                       
+
                         var builder = new EmbedBuilder()
                             .WithThumbnailUrl("https://wowtokenprices.com/assets/wowtoken-compressed.png")
                              .WithTitle($"**Жетон WoW**")

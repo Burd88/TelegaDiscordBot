@@ -24,7 +24,7 @@ namespace DiscordBot
         }
         private void GetLinkForChar(string text)
         {
-            if (text.Contains("-"))
+            if (text.Contains('-'))
             {
                 string[] str = text.Split("-");
                 foreach (RealmList rlm in Functions.Realms)
@@ -78,7 +78,7 @@ namespace DiscordBot
                 }
 
                 //string soulbindsLink = $"https://eu.api.blizzard.com/profile/wow/character/{realm}/{name.ToLower()}/soulbinds?namespace=profile-eu&locale={settings.Locale}&access_token={tokenWow}";
-                string raidLink = $"https://raider.io/api/v1/characters/profile?region=eu&realm={realm}&name={Char.ToUpper(name[0]) + name.Substring(1).ToLower()}&fields=mythic_plus_scores%2Craid_progression";
+                string raidLink = $"https://raider.io/api/v1/characters/profile?region=eu&realm={realm}&name={Char.ToUpper(name[0]) + name[1..].ToLower()}&fields=mythic_plus_scores%2Craid_progression";
                 string mediaLink = $"https://eu.api.blizzard.com/profile/wow/character/{realm}/{name.ToLower()}/character-media?namespace=profile-eu&locale={settings.Locale}&access_token={tokenWow}";
                 string setLink = $"https://eu.api.blizzard.com/profile/wow/character/{realm}/{name.ToLower()}/equipment?namespace=profile-eu&locale={settings.Locale}&access_token={tokenWow}";
                 string statsLink = $"https://eu.api.blizzard.com/profile/wow/character/{realm}/{name.ToLower()}/statistics?namespace=profile-eu&locale={settings.Locale}&access_token={tokenWow}";
@@ -94,30 +94,30 @@ namespace DiscordBot
             }
         }
 
-        private void GetSoulbindsCharacter(string link)
-        {
-            CharacterSoulbinds allSoulbinds = GetWebJson<CharacterSoulbinds>(link);
-            if (allSoulbinds != null)
+        /*    private void GetSoulbindsCharacter(string link)
             {
-                if (allSoulbinds.soulbinds != null)
+                CharacterSoulbinds allSoulbinds = GetWebJson<CharacterSoulbinds>(link);
+                if (allSoulbinds != null)
                 {
-                    foreach (Soulbinds soulbinds in allSoulbinds.soulbinds)
+                    if (allSoulbinds.soulbinds != null)
                     {
-                        if (soulbinds.is_active == true)
+                        foreach (Soulbinds soulbinds in allSoulbinds.soulbinds)
                         {
-                            _charInfo.CovenSoul = soulbinds.soulbind.name;
+                            if (soulbinds.is_active == true)
+                            {
+                                _charInfo.CovenSoul = soulbinds.soulbind.name;
+                            }
                         }
                     }
                 }
-            }
-        }
+            }*/
         private void Character_raid_progress(string link)
         {
 
             RaiderIOCharInfo character = GetWebJson<RaiderIOCharInfo>(link);
             if (character != null)
             {
-                _charInfo.RaidProgress = character.raid_progression.VaultOfTheIncarnates.summary;
+                _charInfo.RaidProgress = character.raid_progression.aberrustheshadowedcrucible.summary;
                 _charInfo.MythicPlus = character.mythic_plus_scores.all;
             }
 
@@ -129,7 +129,8 @@ namespace DiscordBot
             {
                 foreach (Asset media in charMedia.assets)
                 {
-                    // Console.WriteLine(media.key);
+                    //   Console.WriteLine(media.key);
+                    //  Console.WriteLine(media.value);
                     if (media.key == "main-raw")
                         _charInfo.ImageCharMainRaw = media.value;
                     else if (media.key == "main")
@@ -157,9 +158,9 @@ namespace DiscordBot
                             _charInfo.SetcountItem = "Set:**" + setequip.display_string.Replace(setequip.item_set.name, "") + "**";
                             _charInfo.SetNameItem += $"**{setequip.display_string}**\n";
                         }
-                        
+
                     }
-                   
+
                 }
             }
         }

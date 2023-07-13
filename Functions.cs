@@ -8,7 +8,7 @@ using static DiscordBot.Program;
 
 namespace DiscordBot
 {
-    class Functions
+    partial class Functions
     {
 
         public static DateTime FromUnixTimeStampToDateTime(string unixTimeStamp) // конверстация времени
@@ -164,6 +164,10 @@ namespace DiscordBot
 
 
         }
+        [GeneratedRegex("\\P{IsBasicLatin}")]
+        private static partial Regex RegexLatin();
+        [GeneratedRegex("\\P{IsCyrillic}")]
+        private static partial Regex RegexCyrillic();
         public static EncounterLang GetEncounter(string text)
         {
             try
@@ -173,7 +177,7 @@ namespace DiscordBot
                 {
                     foreach (EncounterLang enc in enconterAll)
                     {
-                        if (!Regex.IsMatch(text, @"\P{IsBasicLatin}"))
+                        if (!RegexLatin().IsMatch(text))
                         {
                             if (enc.EncounterEN != null && enc.EncounterEN.ToLower() == text.Trim().ToLower())
                             {
@@ -184,7 +188,7 @@ namespace DiscordBot
 
                             }
                         }
-                        else if (!Regex.IsMatch(text, @"\P{IsCyrillic}"))
+                        else if (!RegexCyrillic().IsMatch(text))
                         {
                             if (enc.EncounterRU != null && enc.EncounterRU.ToLower() == text.Trim().ToLower())
                             {
@@ -214,7 +218,7 @@ namespace DiscordBot
                 List<InstanceLang> instanceAll = ReadJson<List<InstanceLang>>("InstanceList");
                 foreach (InstanceLang inst in instanceAll)
                 {
-                    if (!Regex.IsMatch(text, @"\P{IsBasicLatin}"))
+                    if (!RegexLatin().IsMatch(text))
                     {
                         if (inst.InstanceEN != null && inst.InstanceEN.ToLower() == text.Trim().ToLower())
                         {
@@ -222,7 +226,7 @@ namespace DiscordBot
                             return inst;
                         }
                     }
-                    else if (!Regex.IsMatch(text, @"\P{IsCyrillic}"))
+                    else if (!RegexCyrillic().IsMatch(text))
                     {
                         if (inst.InstanceRU != null && inst.InstanceRU.ToLower() == text.Trim().ToLower())
                         {
@@ -283,9 +287,10 @@ namespace DiscordBot
             {
 
                 using StreamWriter file = File.CreateText(writePathJSON);
-                Newtonsoft.Json.JsonSerializer serializer = new();
-
-                serializer.Formatting = Formatting.Indented;
+                Newtonsoft.Json.JsonSerializer serializer = new()
+                {
+                    Formatting = Formatting.Indented
+                };
 
                 serializer.Serialize(file, data);
 
@@ -351,10 +356,10 @@ namespace DiscordBot
             {
 
 
-                WebRequest requesta = WebRequest.Create(link);
-                WebResponse responcea = requesta.GetResponse();
+                WebRequest request = WebRequest.Create(link);
+                WebResponse responce = request.GetResponse();
 
-                using Stream stream = responcea.GetResponseStream();
+                using Stream stream = responce.GetResponseStream();
                 using StreamReader reader = new(stream);
 
                 string line = reader.ReadToEnd();

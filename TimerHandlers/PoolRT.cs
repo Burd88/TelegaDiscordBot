@@ -81,7 +81,7 @@ namespace DiscordBot
                                 options[0] = "Да";
                                 options[1] = "Нет";
                                 options[2] = "Опоздаю";
-                                telegrammessagepool = await telegramClient.SendPollAsync(settings.TelegramChatID, "Через час идем в рейд \"Гробница Предвечных\"! Тебя ждать?", options, false);
+                                telegrammessagepool = await telegramClient.SendPollAsync(settings.TelegramChatID, "Через час идем в рейд \"Гробница Предвечных\"! Тебя ждать?", options, 0, false);
                                 poolready = true;
                             }
 
@@ -169,7 +169,7 @@ namespace DiscordBot
                                 options[0] = "Да";
                                 options[1] = "Нет";
                                 options[2] = "Опоздаю";
-                                telegrammessagepool = await telegramClient.SendPollAsync(settings.TelegramChatID, "Через час идем в рейд \"Гробница Предвечных\"! Тебя ждать?", options, false);
+                                telegrammessagepool = await telegramClient.SendPollAsync(settings.TelegramChatID, "Через час идем в рейд \"Гробница Предвечных\"! Тебя ждать?", options, 0, false);
                                 poolready = true;
                             }
 

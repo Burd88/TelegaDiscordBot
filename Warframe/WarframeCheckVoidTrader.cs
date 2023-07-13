@@ -1,17 +1,14 @@
 ﻿using Discord;
 using System;
-using System.Collections.Generic;
-using System.Linq;
 using System.Net;
-using System.Threading.Tasks;
 using static DiscordBot.Program;
 namespace DiscordBot
 
 {
     class WarframeCheckVoidTrader
     {
-       
-      
+
+
         public static async void OnTimerHandlerCheckWarframeVoidTrader(object obj)
         {
 
@@ -20,10 +17,10 @@ namespace DiscordBot
 
                 VoidTrader voidTrader = Functions.GetWebJson<VoidTrader>($"https://api.warframestat.us/pc/ru/voidTrader");
 
-                
+
                 if (voidTrader != null)
                 {
-                 
+
                     string str1 = "";
                     if (voidTrader.active)
                     {
@@ -33,7 +30,7 @@ namespace DiscordBot
                         foreach (Inventory inv in voidTrader.inventory)
                         {
                             str1 += $"**{inv.item}**({inv.ducats}/{inv.credits})\n";
-}
+                        }
                     }
                     else
                     {
@@ -41,7 +38,7 @@ namespace DiscordBot
                            $"Локация: **{voidTrader.location}**\n" +
                            $"Появится через: **{voidTrader.startString.Replace("d", "д").Replace("h", "ч").Replace("m", "м").Replace("s", "с")}**";
                     }
-                    
+
 
                     var builder = new EmbedBuilder()
                         .WithThumbnailUrl("https://cdn.discordapp.com/icons/640231332735090698/053d253f7c60097ceaba5317830f6518.webp?size=100")
@@ -64,46 +61,46 @@ namespace DiscordBot
                      }*/
 
                     // .WithFooter(footer => footer.Text = $"Гильдия \"Сердце греха\".\nОбновлено: {DateTime.Now} (+4 Мск) ");
-                   // await discordClient.GetGuild(373317758634557451).GetTextChannel(373317758634557453).ModifyMessageAsync(1017003311649529926, msg => msg.Embed = builder.Build());
+                    // await discordClient.GetGuild(373317758634557451).GetTextChannel(373317758634557453).ModifyMessageAsync(1017003311649529926, msg => msg.Embed = builder.Build());
                     // _mainChat = discordClient.GetGuild(373317758634557451);
                     //  
                     //  var chan = _mainChat.GetChannel(373317758634557453) as IMessageChannel;
 
                     // var mess = chan.SendMessageAsync(null, false, embed: builder.Build()).Result;
 
-                     if (settings != null && builder != null)
-                         {
-                             if (settings.DiscordWarframeVoidTraderChannelId != 0)
-                             {
-                                 if (settings.DiscordWarframeVoidTraderMessageId != 0)
-                                 {
-                                     if (discordClient.GetGuild(settings.DiscordWarframeChatId).GetTextChannel(settings.DiscordWarframeVoidTraderChannelId).GetMessageAsync(settings.DiscordWarframeVoidTraderMessageId).Result != null)
-                                     {
-                                         await discordClient.GetGuild(settings.DiscordWarframeChatId).GetTextChannel(settings.DiscordWarframeVoidTraderChannelId).ModifyMessageAsync(settings.DiscordWarframeVoidTraderMessageId, msg => msg.Embed = builder.Build());
-                                     }
-                                     else
-                                     {
-                                         _mainChat = discordClient.GetGuild(settings.DiscordWarframeChatId);
-                                         var chan = _mainChat.GetChannel(settings.DiscordWarframeVoidTraderChannelId) as IMessageChannel;
-                                         var mess = chan.SendMessageAsync(null, false, embed: builder.Build()).Result;
-                                         settings.DiscordWarframeVoidTraderMessageId = mess.Id;
-                                         Functions.WriteJSon(settings, "BotSettings");
-                                     }
+                    if (settings != null && builder != null)
+                    {
+                        if (settings.DiscordWarframeVoidTraderChannelId != 0)
+                        {
+                            if (settings.DiscordWarframeVoidTraderMessageId != 0)
+                            {
+                                if (discordClient.GetGuild(settings.DiscordWarframeChatId).GetTextChannel(settings.DiscordWarframeVoidTraderChannelId).GetMessageAsync(settings.DiscordWarframeVoidTraderMessageId).Result != null)
+                                {
+                                    await discordClient.GetGuild(settings.DiscordWarframeChatId).GetTextChannel(settings.DiscordWarframeVoidTraderChannelId).ModifyMessageAsync(settings.DiscordWarframeVoidTraderMessageId, msg => msg.Embed = builder.Build());
+                                }
+                                else
+                                {
+                                    _mainChat = discordClient.GetGuild(settings.DiscordWarframeChatId);
+                                    var chan = _mainChat.GetChannel(settings.DiscordWarframeVoidTraderChannelId) as IMessageChannel;
+                                    var mess = chan.SendMessageAsync(null, false, embed: builder.Build()).Result;
+                                    settings.DiscordWarframeVoidTraderMessageId = mess.Id;
+                                    Functions.WriteJSon(settings, "BotSettings");
+                                }
 
-                                 }
-                                 else
-                                 {
-                                     _mainChat = discordClient.GetGuild(settings.DiscordWarframeChatId);
-                                     var chan = _mainChat.GetChannel(settings.DiscordWarframeVoidTraderChannelId) as IMessageChannel;
-                                     var mess = chan.SendMessageAsync(null, false, embed: builder.Build()).Result;
-                                     settings.DiscordWarframeVoidTraderMessageId = mess.Id;
-                                     Functions.WriteJSon(settings, "BotSettings");
-                                 }
+                            }
+                            else
+                            {
+                                _mainChat = discordClient.GetGuild(settings.DiscordWarframeChatId);
+                                var chan = _mainChat.GetChannel(settings.DiscordWarframeVoidTraderChannelId) as IMessageChannel;
+                                var mess = chan.SendMessageAsync(null, false, embed: builder.Build()).Result;
+                                settings.DiscordWarframeVoidTraderMessageId = mess.Id;
+                                Functions.WriteJSon(settings, "BotSettings");
+                            }
 
-                             }
-                             //  await discordClient.GetGuild(settings.DiscordChatId).GetTextChannel(settings.DiscordLogChannelId).ModifyMessageAsync(958994640487481396, msg => msg.Embed = builder.Build());
+                        }
+                        //  await discordClient.GetGuild(settings.DiscordChatId).GetTextChannel(settings.DiscordLogChannelId).ModifyMessageAsync(958994640487481396, msg => msg.Embed = builder.Build());
 
-                         }
+                    }
 
                 }
             }

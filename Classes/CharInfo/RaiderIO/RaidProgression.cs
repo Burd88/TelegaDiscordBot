@@ -16,5 +16,9 @@ namespace DiscordBot
         [JsonProperty("vault-of-the-incarnates")]
         public VaultOfTheIncarnates VaultOfTheIncarnates { get; set; }
 
+        [JsonProperty("aberrus-the-shadowed-crucible")]
+        public AberrusTheShadowedCrucible aberrustheshadowedcrucible { get; set; }
+
+
     }
 }

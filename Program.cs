@@ -54,13 +54,13 @@ namespace DiscordBot
                 $"EnablePoolRT : {settings.EnablePoolRT}\n" +
                 $"EnableAddtionalRT : {settings.EnableAddtionalRT}\n");
             Console.WriteLine(textAll.ToString());
-            
+
             Functions.WriteJSon(settings, "BotSettings");
             if (settings.DiscordBotToken != "0")
             {
                 var config = new DiscordSocketConfig()
                 {
-
+                    UseInteractionSnowflakeDate = false,
                     GatewayIntents = GatewayIntents.All
                 };
                 discordClient = new DiscordSocketClient(config);
@@ -75,8 +75,8 @@ namespace DiscordBot
             }
 
 
-            // TimerCallback tmAutoriz = new(AutorizationBattleNet.OnTimerHandlerAutorizationBattleNet);
-            // Timer timerAutoriz = new(tmAutoriz, null, 3000, 1000 * 60 * 60);
+            //TimerCallback tmAutoriz = new(AutorizationBattleNet.OnTimerHandlerAutorizationBattleNet);
+            //Timer timerAutoriz = new(tmAutoriz, null, 3000, 1000 * 60 * 60);
 
 
             TimerCallback tmPoolRT = new(PoolRT.OnTimerHandlerPoolRT);
@@ -114,8 +114,8 @@ namespace DiscordBot
 
 
 
-            //TimerCallback tmUpdateStatic = new(UpdateStatic.OnTimerHandlerUpdateStatic);
-            //Timer timerUpdateStatic = new(tmUpdateStatic, null, 10000, 60000 * 20);
+            // TimerCallback tmUpdateStatic = new(UpdateStatic.OnTimerHandlerUpdateStatic);
+            //  Timer timerUpdateStatic = new(tmUpdateStatic, null, 10000, 60000 * 20);
 
 
             TimerCallback tmevents = new(WarframeCheckEvents.OnTimerHandlerCheckWarframeEvents);
@@ -152,7 +152,7 @@ namespace DiscordBot
 
 
             Console.ReadLine();
-            
+
         }
 
 

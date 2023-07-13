@@ -14,11 +14,11 @@ namespace DiscordBot
             {
                 if (DateTime.Now.DayOfWeek == DayOfWeek.Wednesday)
                 {
-                    
+
                     WowRealmInfo realmcheck = new();
-                    
+
                     string[] text = realmcheck.GetRealmInfoForTimer();
-                    
+
                     if (text != null)
                     {
                         _mainChat = discordClient.GetGuild(settings.DiscordChatId);

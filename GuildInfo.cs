@@ -69,12 +69,12 @@ namespace DiscordBot
             GuildRaiderIO rio_guild = Functions.GetWebJson<GuildRaiderIO>($"https://raider.io/api/v1/guilds/profile?region=eu&realm={settings.RealmSlug}&name={settings.GuildName.ToLower()}&fields=raid_progression%2Craid_rankings");
             if (rio_guild != null)
             {
-                _guildInfoFull.RaidProgress = rio_guild.raid_progression.SepulcherOfTheFirstOnes.summary;
-                if (rio_guild.raid_rankings.SepulcherOfTheFirstOnes.mythic.world == 0)
+                _guildInfoFull.RaidProgress = rio_guild.raid_progression.aberrustheshadowedcrucible.summary;
+                if (rio_guild.raid_rankings.aberrustheshadowedcrucible.mythic.world == 0)
                 {
-                    if (rio_guild.raid_rankings.SepulcherOfTheFirstOnes.heroic.world == 0)
+                    if (rio_guild.raid_rankings.aberrustheshadowedcrucible.heroic.world == 0)
                     {
-                        if (rio_guild.raid_rankings.SepulcherOfTheFirstOnes.normal.world == 0)
+                        if (rio_guild.raid_rankings.aberrustheshadowedcrucible.normal.world == 0)
                         {
                             _guildInfoFull.RaidRankName = "**Сложность**: Обычный";
                             _guildInfoFull.RaidRankWorld = "**Мир**: -";
@@ -85,9 +85,9 @@ namespace DiscordBot
                         else
                         {
                             _guildInfoFull.RaidRankName = "**Сложность**: Обычный";
-                            _guildInfoFull.RaidRankWorld = $"**Мир**: {rio_guild.raid_rankings.SepulcherOfTheFirstOnes.normal.world} место";
-                            _guildInfoFull.RaidRankRegion = $"**Регион**: {rio_guild.raid_rankings.SepulcherOfTheFirstOnes.normal.region} место";
-                            _guildInfoFull.RaidRankRealm = $"**Сервер**: {rio_guild.raid_rankings.SepulcherOfTheFirstOnes.normal.realm} место";
+                            _guildInfoFull.RaidRankWorld = $"**Мир**: {rio_guild.raid_rankings.aberrustheshadowedcrucible.normal.world} место";
+                            _guildInfoFull.RaidRankRegion = $"**Регион**: {rio_guild.raid_rankings.aberrustheshadowedcrucible.normal.region} место";
+                            _guildInfoFull.RaidRankRealm = $"**Сервер**: {rio_guild.raid_rankings.aberrustheshadowedcrucible.normal.realm} место";
                         }
 
 
@@ -95,20 +95,20 @@ namespace DiscordBot
                     else
                     {
                         _guildInfoFull.RaidRankName = "**Сложность**: Героический";
-                        _guildInfoFull.RaidRankWorld = $"**Мир**: {rio_guild.raid_rankings.SepulcherOfTheFirstOnes.heroic.world} место";
-                        _guildInfoFull.RaidRankRegion = $"**Регион**: {rio_guild.raid_rankings.SepulcherOfTheFirstOnes.heroic.region} место";
-                        _guildInfoFull.RaidRankRealm = $"**Сервер**: {rio_guild.raid_rankings.SepulcherOfTheFirstOnes.heroic.realm} место";
+                        _guildInfoFull.RaidRankWorld = $"**Мир**: {rio_guild.raid_rankings.aberrustheshadowedcrucible.heroic.world} место";
+                        _guildInfoFull.RaidRankRegion = $"**Регион**: {rio_guild.raid_rankings.aberrustheshadowedcrucible.heroic.region} место";
+                        _guildInfoFull.RaidRankRealm = $"**Сервер**: {rio_guild.raid_rankings.aberrustheshadowedcrucible.heroic.realm} место";
                     }
 
                 }
                 else
                 {
                     _guildInfoFull.RaidRankName = "**Сложность**: Мифический";
-                    _guildInfoFull.RaidRankWorld = $"**Мир**: {rio_guild.raid_rankings.SepulcherOfTheFirstOnes.mythic.world} место";
-                    _guildInfoFull.RaidRankRegion = $"**Регион**: {rio_guild.raid_rankings.SepulcherOfTheFirstOnes.mythic.region} место";
-                    _guildInfoFull.RaidRankRealm = $"**Сервер**: {rio_guild.raid_rankings.SepulcherOfTheFirstOnes.mythic.realm} место";
+                    _guildInfoFull.RaidRankWorld = $"**Мир**: {rio_guild.raid_rankings.aberrustheshadowedcrucible.mythic.world} место";
+                    _guildInfoFull.RaidRankRegion = $"**Регион**: {rio_guild.raid_rankings.aberrustheshadowedcrucible.mythic.region} место";
+                    _guildInfoFull.RaidRankRealm = $"**Сервер**: {rio_guild.raid_rankings.aberrustheshadowedcrucible.mythic.realm} место";
                 }
-                _guildInfoFull.RAidFull = $"{_guildInfoFull.RaidProgress}\n{ _guildInfoFull.RaidRankWorld}\n{ _guildInfoFull.RaidRankRegion}\n{ _guildInfoFull.RaidRankRealm}";
+                _guildInfoFull.RAidFull = $"{_guildInfoFull.RaidProgress}\n{_guildInfoFull.RaidRankWorld}\n{_guildInfoFull.RaidRankRegion}\n{_guildInfoFull.RaidRankRealm}";
 
             }
             else

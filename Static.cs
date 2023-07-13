@@ -14,7 +14,7 @@ namespace DiscordBot
         public static string middleIlvl = "";
         public static string description = "";
 
-        public void UpdateStaticRoster()
+        public static void UpdateStaticRoster()
         {
             var roster = Functions.ReadJson<StaticRoster>("Static");
             if (roster != null)
@@ -28,7 +28,7 @@ namespace DiscordBot
 
         }
 
-        public void AddMemberStaticRoster(string name)
+        public static void AddMemberStaticRoster(string name)
         {
             string[] str = name.Split("-");
             var roster = Functions.ReadJson<StaticRoster>("Static");
@@ -44,7 +44,7 @@ namespace DiscordBot
             }
 
         }
-        public void DeleteMemberStaticRoster(string name)
+        public static void DeleteMemberStaticRoster(string name)
         {
 
             var roster = Functions.ReadJson<StaticRoster>("Static");
@@ -58,7 +58,7 @@ namespace DiscordBot
             }
 
         }
-        public void GetStaticRoster(StaticRoster roster)
+        public static void GetStaticRoster(StaticRoster roster)
         {
 
             tank = "";
@@ -104,9 +104,11 @@ namespace DiscordBot
 
             }
             middleIlvl = (everage / newroster.Count).ToString();
-            StaticRoster newstaticroster = new();
-            newstaticroster.Static = newroster;
-            newstaticroster.Description = description;
+            StaticRoster newstaticroster = new()
+            {
+                Static = newroster,
+                Description = description
+            };
             Functions.WriteJSon<StaticRoster>(newstaticroster, "Static");
         }
 

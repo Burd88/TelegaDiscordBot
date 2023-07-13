@@ -1,12 +1,9 @@
 ﻿using System;
 using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 
-namespace DiscordBot 
+namespace DiscordBot
 {
-  public  class VoidTrader
+    public class VoidTrader
     {
         public string id { get; set; }
         public DateTime activation { get; set; }

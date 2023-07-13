@@ -2,7 +2,7 @@
 {
     public class BotSettings
     {
-        
+
 
         public string DiscordBotToken { get; set; }
         public string TelegramBotToken { get; set; }
@@ -53,6 +53,6 @@
         public ulong DiscordWarframeVoidTraderMessageId { get; set; }
         public ulong DiscordWarframeNightWaveChannelId { get; set; }
         public ulong DiscordWarframeNightWaveMessageId { get; set; }
-        
+
     }
 }

@@ -354,7 +354,7 @@ namespace DiscordBot
                     case "!update":
                         {
                             Static updatestatic = new();
-                            updatestatic.UpdateStaticRoster();
+                            Static.UpdateStaticRoster();
 
                             var builder = new EmbedBuilder()
                                     .WithThumbnailUrl("https://cdn.discordapp.com/avatars/931442555332198400/bb4f0a2c3f5534cc199b54cc6b805d1a.webp?size=100")
@@ -381,7 +381,7 @@ namespace DiscordBot
 
                             string name = messege.Replace("!del ", "").Trim();
                             Static updatestatic = new();
-                            updatestatic.DeleteMemberStaticRoster(name);
+                            Static.DeleteMemberStaticRoster(name);
 
                             var builder = new EmbedBuilder()
                                     .WithThumbnailUrl("https://cdn.discordapp.com/avatars/931442555332198400/bb4f0a2c3f5534cc199b54cc6b805d1a.webp?size=100")
@@ -408,7 +408,7 @@ namespace DiscordBot
 
                             string name = messege.Replace("!add ", "").Trim();
                             Static updatestatic = new();
-                            updatestatic.AddMemberStaticRoster(name);
+                            Static.AddMemberStaticRoster(name);
 
                             var builder = new EmbedBuilder()
                                     .WithThumbnailUrl("https://cdn.discordapp.com/avatars/931442555332198400/bb4f0a2c3f5534cc199b54cc6b805d1a.webp?size=100")
