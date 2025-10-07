@@ -41,10 +41,10 @@ namespace DiscordBot
                                         if (activ.Categor != "Рейды Legion" && activ.Categor != "Рейды Azeroth" && activ.Categor != "Рейды Draenor" && activ.Categor != "Рейды Pandaria")
                                         {
 
-                                            await telegramClient.SendTextMessageAsync(
+                                            await telegramClient.SendMessage(
                                              chatId: settings.TelegramChatID,
                                              text: $"Всё збс, это <b>Достижение</b>!\n<a href =\"https://www.youtube.com/watch?v=d-diB65scQU&ab_channel=BobbyMcFerrinVEVO\">Don't Worry Be Happy</a>\nПолучил(а): <b>{activ.Name}</b>\nНазвание: <b>{activ.Mode}</b>",
-                                             parseMode: ParseMode.Html, disableWebPagePreview: true);
+                                             parseMode: ParseMode.Html);
                                         }
                                     }
 
@@ -69,10 +69,10 @@ namespace DiscordBot
                                             if (activ.Categor != "Рейды Legion" && activ.Categor != "Рейды Azeroth" && activ.Categor != "Рейды Draenor" && activ.Categor != "Рейды Pandaria")
                                             {
 
-                                                await telegramClient.SendTextMessageAsync(
+                                                await telegramClient.SendMessage(
                                            chatId: settings.TelegramChatID,
                                            text: $"Всё збс, это <b>Достижение</b>!\n<a href =\"https://www.youtube.com/watch?v=d-diB65scQU&ab_channel=BobbyMcFerrinVEVO\">Don't Worry Be Happy</a>\nПолучил(а): <b>{activ.Name}</b>\nНазвание: <b>{activ.Mode}</b>\nКатегоря: <b>{activ.Categor}</b>",
-                                           parseMode: ParseMode.Html, disableWebPagePreview: true);
+                                           parseMode: ParseMode.Html);
                                             }
                                         }
                                     }
@@ -96,10 +96,10 @@ namespace DiscordBot
                                             if (activ.Categor != "Рейды Legion" && activ.Categor != "Рейды Azeroth" && activ.Categor != "Рейды Draenor" && activ.Categor != "Рейды Pandaria")
                                             {
 
-                                                await telegramClient.SendTextMessageAsync(
+                                                await telegramClient.SendMessage(
                                            chatId: settings.TelegramChatID,
                                            text: $"Всё збс, это <b>Достижение</b>!\n<a href =\"https://www.youtube.com/watch?v=d-diB65scQU&ab_channel=BobbyMcFerrinVEVO\">Don't Worry Be Happy</a>\nПолучил(а): <b>{activ.Name}</b>\nНазвание: <b>{activ.Mode}</b>\nКатегоря: <b>{activ.Categor}</b>\nНаграда: <b>{activ.Award}</b>",
-                                           parseMode: ParseMode.Html, disableWebPagePreview: true);
+                                           parseMode: ParseMode.Html);
                                             }
                                         }
                                     }
@@ -123,11 +123,10 @@ namespace DiscordBot
                                     await chan.SendMessageAsync(null, false, embed);
                                     if (settings.TelegramNotificationEnable)
                                     {
-                                        await telegramClient.SendTextMessageAsync(
+                                        await telegramClient.SendMessage(
                                        chatId: settings.TelegramChatID,
                                        text: $"<b>Гильдия одержала победу!</b>\nБосс: {activ.Mode}\nРежим: {activ.Categor}"
-                                       , parseMode: ParseMode.Html, disableWebPagePreview: true
-                                       );
+                                       , parseMode: ParseMode.Html);
                                     }
                                 }
                                 else if (activ.Icon != null)
@@ -146,7 +145,7 @@ namespace DiscordBot
                                     await chan.SendMessageAsync(null, false, embed);
                                     if (settings.TelegramNotificationEnable)
                                     {
-                                        await telegramClient.SendPhotoAsync(
+                                        await telegramClient.SendPhoto(
                                       chatId: settings.TelegramChatID,
                                      photo: null,//activ.Icon,
                                      caption: $"<b>Гильдия одержала победу!</b>\nРейд: <b>{activ.Categor}</b>\nБосс: <b>{activ.Name}</b>\nРежим: <b>{activ.Mode}</b>"

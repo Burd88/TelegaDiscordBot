@@ -34,7 +34,7 @@ namespace DiscordBot
                             await chan.SendMessageAsync(null, false, embed);
                             if (settings.TelegramNotificationEnable)
                             {
-                                await telegramClient.SendTextMessageAsync(
+                                await telegramClient.SendMessage(
                                      chatId: settings.TelegramChatID,
 
                                     $"<b>Гильдия получила достижение!!</b>\nНазвание: {achieve.Name}\nКатегоря: {achieve.Category}"

@@ -27,7 +27,9 @@ namespace DiscordBot
 
         private void GetGuildRosterInfo()
         {
+            Console.WriteLine($"https://eu.api.blizzard.com/data/wow/guild/{settings.RealmSlug}/{settings.GuildName.ToLower().Replace(" ", "-")}/roster?namespace=profile-eu&locale=ru_RU&access_token=" + tokenWow);
             MainGuild guild = Functions.GetWebJson<MainGuild>($"https://eu.api.blizzard.com/data/wow/guild/{settings.RealmSlug}/{settings.GuildName.ToLower().Replace(" ", "-")}/roster?namespace=profile-eu&locale=ru_RU&access_token=" + tokenWow);
+            
             if (guild != null)
             {
                 foreach (Member character in guild.members)
@@ -40,6 +42,7 @@ namespace DiscordBot
             }
             else
             {
+                Console.WriteLine(1);
                 _guildInfoFull.Error = true;
             }
 
@@ -59,6 +62,7 @@ namespace DiscordBot
             }
             else
             {
+                Console.WriteLine(2);
                 _guildInfoFull.Error = true;
             }
         }
@@ -113,6 +117,7 @@ namespace DiscordBot
             }
             else
             {
+                Console.WriteLine(3);
                 _guildInfoFull.Error = true;
             }
 

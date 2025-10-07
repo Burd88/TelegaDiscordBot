@@ -4,6 +4,7 @@ using System.Collections.Generic;
 using System.IO;
 using System.Net;
 using System.Text.RegularExpressions;
+using System.Threading;
 using static DiscordBot.Program;
 
 namespace DiscordBot
@@ -109,7 +110,9 @@ namespace DiscordBot
             {
                 foreach (Result realm in realms.results)
                 {
-                    Dictionary<string, string> name = new()
+                    if (!realm.data.slug.Equals("eu-ps-realm-222"))
+                    {
+                        Dictionary<string, string> name = new()
                     {
                         { "it_IT", realm.data.name.it_IT },
                         { "ru_RU", realm.data.name.ru_RU },
@@ -124,11 +127,12 @@ namespace DiscordBot
                         { "fr_FR", realm.data.name.fr_FR },
                         { "de_DE", realm.data.name.fr_FR }
                     };
-
-                    Realms.Add(new RealmList { Name = name[settings.Locale], Slug = realm.data.slug });
-
+                   // Console.WriteLine(name[settings.Locale] + " - " + realm.data.slug);
+                    
+                        Realms.Add(new RealmList { Name = name[settings.Locale], Slug = realm.data.slug });
+                    }
                 }
-
+               // Thread.Sleep(35000);
                 Realms.Sort((a, b) => a.Name.CompareTo(b.Name));
 
                 WriteJSon(Realms, "RealmList");

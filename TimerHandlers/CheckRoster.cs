@@ -79,7 +79,7 @@ namespace DiscordBot
                             .AddField("Рейд прогресс:", fullInfo.RaidProgress, true).AddField("Счет Мифик+:", fullInfo.MythicPlus, true);
                         if (settings.TelegramNotificationEnable)
                         {
-                            await telegramClient.SendPhotoAsync(
+                            await telegramClient.SendPhoto(
                             photo: null,//fullInfo.ImageCharInset,
                             chatId: settings.TelegramChatID,
                             caption: $"{fullInfo.Name}({fullInfo.Lvl} уровень) {fullInfo.Race}\n{text}\nУровень предметов: {fullInfo.ILvl}\nКласс: {fullInfo.Class}\nСпециализация: {fullInfo.Spec}" +

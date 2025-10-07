@@ -48,7 +48,7 @@ namespace DiscordBot
                     {
 
 
-                        await telegramClient.SendTextMessageAsync(
+                        await telegramClient.SendMessage(
                                   chatId,
                                  text: $"Информация о Гильдии : <b>{fullInfo.Name}</b>" +
                             $"\nФракция: <b>{fullInfo.Faction}</b>" +
@@ -58,12 +58,12 @@ namespace DiscordBot
                             $"\nРейд Прогресс: <b>{fullInfo.RaidProgress}</b>" +
                             $"\nМесто: <b>{fullInfo.RaidRankRealm.Replace("**Сервер**:", "")}</b>" +
                             $"\nОснована: <b>{fullInfo.TimeCreate}</b>"
-                            , parseMode: ParseMode.Html, disableWebPagePreview: true);
+                            , parseMode: ParseMode.Html);//,  disableWebPagePreview: true);
                     }
                     else
                     {
 
-                        await telegramClient.SendTextMessageAsync(
+                        await telegramClient.SendMessage(
                                    chatId, "<b>Ошибка</b>\nПроблема на сервере.\nПопробуй позже.", parseMode: ParseMode.Html);
                     }
                     break;
@@ -72,8 +72,24 @@ namespace DiscordBot
                     var tokenprice = Functions.GetWebJson<TokenWarcraft>("https://eu.api.blizzard.com/data/wow/token/index?namespace=dynamic-eu&locale={settings.Locale}&access_token=" + Program.tokenWow);
                     if (tokenprice != null)
                     {
-                        await telegramClient.SendTextMessageAsync(
+                        await telegramClient.SendMessage(
                               chatId, $"<b>\"Жетон WoW\"</b>\nЦена: <b>{tokenprice.price / 10000}</b> золотых\nВремя обновления: {Functions.FromUnixTimeStampToDateTimeUTC(tokenprice.last_updated_timestamp.ToString())} (UTC)", parseMode: ParseMode.Html);
+
+                    }
+                    break;
+
+                case var s when s.Contains("/affix"):
+                    var affixs = Functions.GetWebJson<MythicPlusAffixCurrent>("https://raider.io/api/v1/mythic-plus/affixes?region=us&locale=ru");
+                    if (affixs != null)
+                    {
+                        var text = "Мифик+ аффиксы на эту неделю обновлены.\n" +
+                                          $"<b>(+2) {affixs.affix_details[0].name}</b>:\n {affixs.affix_details[0].description}\n" +
+                                            $"<b>(+4) {affixs.affix_details[1].name}</b>:\n {affixs.affix_details[1].description}\n" +
+                                           $"<b>(+7) {affixs.affix_details[2].name}</b>:\n {affixs.affix_details[2].description}\n" +
+                                        $"<b>(+10) {affixs.affix_details[3].name}</b>:\n {affixs.affix_details[3].description}\n" +
+                                        $"<b>(+12) Вероломство Ксал'атат</b>:\n Ксал'атат предает игроков и нарушает заключенные сделки, увеличивая запас здоровья и урон противников на 10%.\n";
+                        await telegramClient.SendMessage(
+                              chatId, text , parseMode: ParseMode.Html);
 
                     }
                     break;
@@ -95,7 +111,7 @@ namespace DiscordBot
                          $"\n<b><a href =\"https://wowanalyzer.com/report/{newLog.ID}\">WoWAnalyzer</a></b>" +
                          $"\n<b><a href =\"https://ru.warcraftlogs.com/guild/reports-list/47723/\">Все логи</a></b>";
                             var keyboard = new InlineKeyboardMarkup(InlineKeyboardButton.WithUrl("Просмотр", newLog.Link));
-                            await telegramClient.SendTextMessageAsync(chatId, text, replyMarkup: keyboard, parseMode: ParseMode.Html, disableWebPagePreview: true);
+                            await telegramClient.SendMessage(chatId, text, replyMarkup: keyboard, parseMode: ParseMode.Html);
 
                         }
                     }

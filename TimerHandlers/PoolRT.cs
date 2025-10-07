@@ -77,11 +77,11 @@ namespace DiscordBot
 
                                 telegrammessagepool = new();
                                 Console.WriteLine($"Сработал таймер для опроса о рт: {DateTime.Now}");
-                                string[] options = new string[3];
-                                options[0] = "Да";
-                                options[1] = "Нет";
-                                options[2] = "Опоздаю";
-                                telegrammessagepool = await telegramClient.SendPollAsync(settings.TelegramChatID, "Через час идем в рейд \"Гробница Предвечных\"! Тебя ждать?", options, 0, false);
+                                
+                                telegrammessagepool = await telegramClient.SendPoll(
+                                    settings.TelegramChatID, 
+                                    "Через час идем в рейд \"Гробница Предвечных\"! Тебя ждать?",
+                                    new InputPollOption[] { "Да", "Нет", "Опоздаю" });
                                 poolready = true;
                             }
 
@@ -98,7 +98,7 @@ namespace DiscordBot
                                 {
                                     await discordmessagepool.DeleteAsync();
                                     await discordmessageresultpool.DeleteAsync();
-                                    await telegramClient.DeleteMessageAsync(settings.TelegramChatID, telegrammessagepool.MessageId);
+                                    await telegramClient.DeleteMessage(settings.TelegramChatID, telegrammessagepool.MessageId);
                                     poolready = false;
                                 }
 
@@ -169,7 +169,15 @@ namespace DiscordBot
                                 options[0] = "Да";
                                 options[1] = "Нет";
                                 options[2] = "Опоздаю";
-                                telegrammessagepool = await telegramClient.SendPollAsync(settings.TelegramChatID, "Через час идем в рейд \"Гробница Предвечных\"! Тебя ждать?", options, 0, false);
+                                telegrammessagepool = await telegramClient.SendPoll(
+                                    settings.TelegramChatID,
+                                    "Через час идем в рейд \"Гробница Предвечных\"! Тебя ждать?",
+                                    new InputPollOption[]
+                                    {
+                                    "Да",
+                                    "Нет",
+                                    "Опоздаю"
+                                    });
                                 poolready = true;
                             }
 
@@ -186,7 +194,7 @@ namespace DiscordBot
                                 {
                                     await discordmessagepool.DeleteAsync();
                                     await discordmessageresultpool.DeleteAsync();
-                                    await telegramClient.DeleteMessageAsync(settings.TelegramChatID, telegrammessagepool.MessageId);
+                                    await telegramClient.DeleteMessage(settings.TelegramChatID, telegrammessagepool.MessageId);
                                     poolready = false;
                                 }
 

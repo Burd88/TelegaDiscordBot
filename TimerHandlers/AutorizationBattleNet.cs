@@ -39,7 +39,7 @@ namespace DiscordBot
                         return my_token.access_token;
 
                         // Console.ForegroundColor = ConsoleColor.Green;
-                        //     Console.WriteLine($"Battle.net Token success : {tokenWow}");
+                        Console.WriteLine($"Battle.net Token success : {tokenWow}");
                         //Functions.LoadRealmAll();
 
 

@@ -5,7 +5,7 @@ using System.Text;
 using System.Threading;
 using System.Threading.Tasks;
 using Telegram.Bot;
-using Telegram.Bot.Extensions.Polling;
+using Telegram.Bot.Polling;
 
 
 namespace DiscordBot
@@ -26,10 +26,12 @@ namespace DiscordBot
             settings = new BotSettings();
             settings = Functions.ReadJson<BotSettings>("BotSettings");
 
-
+/*
             if (settings.BatNetSecretKey != "0" && settings.BatNetToken != "0")
             {
                 tokenWow = await AutorizationBattleNet.OnTimerHandlerAutorizationBattleNet();
+                //Console.WriteLine(tokenWow);
+                //Thread.Sleep(55000);
 
             }
             if (tokenWow != null)
@@ -41,7 +43,7 @@ namespace DiscordBot
             }
 
 
-
+*/
 
             textAll = new($"BattleNetAutorizationToken  : {tokenWow}\n" +
                 $"EnableCheckReboot : {settings.EnableCheckReboot}\n" +
@@ -62,6 +64,7 @@ namespace DiscordBot
                 {
                     UseInteractionSnowflakeDate = false,
                     GatewayIntents = GatewayIntents.All
+                    
                 };
                 discordClient = new DiscordSocketClient(config);
                 discordClient.MessageReceived += DiscordTextCommands.CommandsHandler;
@@ -73,51 +76,51 @@ namespace DiscordBot
                 await discordClient.LoginAsync(TokenType.Bot, settings.DiscordBotToken);
                 await discordClient.StartAsync();
             }
-
+           
 
             //TimerCallback tmAutoriz = new(AutorizationBattleNet.OnTimerHandlerAutorizationBattleNet);
             //Timer timerAutoriz = new(tmAutoriz, null, 3000, 1000 * 60 * 60);
 
 
-            TimerCallback tmPoolRT = new(PoolRT.OnTimerHandlerPoolRT);
-            Timer timerPoolRT = new(tmPoolRT, null, 0, 1000);
+          //  TimerCallback tmPoolRT = new(PoolRT.OnTimerHandlerPoolRT);
+          //  Timer timerPoolRT = new(tmPoolRT, null, 0, 1000);
 
 
-            TimerCallback tmCheckReboot = new(CheckReboot.OnTimerHandlerCheckReboot);
-            Timer timerheckReboot = new(tmCheckReboot, null, 15000, 1000);
+          //  TimerCallback tmCheckReboot = new(CheckReboot.OnTimerHandlerCheckReboot);
+         //   Timer timerheckReboot = new(tmCheckReboot, null, 15000, 1000);
 
 
-            TimerCallback tmCheckTokenWoW = new(CheckTokenWow.OnTimerHandlerCheckTokenWow);
-            Timer timerheckTokenWoW = new(tmCheckTokenWoW, null, 15000, 600000);
+        //    TimerCallback tmCheckTokenWoW = new(CheckTokenWow.OnTimerHandlerCheckTokenWow);
+          //  Timer timerheckTokenWoW = new(tmCheckTokenWoW, null, 15000, 600000);
 
             TimerCallback tmCheckAffix = new(CheckAffix.OnTimerHandlerCheckAffix);
             Timer timerheckAffix = new(tmCheckAffix, null, 15000, 1000);
 
 
-            TimerCallback tmactivity = new(CheckActivity.OnTimerHandlerCheckActivity);
-            Timer timerActivity = new(tmactivity, null, 15000, 30000);
+          //  TimerCallback tmactivity = new(CheckActivity.OnTimerHandlerCheckActivity);
+          //  Timer timerActivity = new(tmactivity, null, 15000, 30000);
 
 
-            TimerCallback tmlog = new(CheckLog.OnTimerHandlerCheckLog);
-            Timer timerlog = new(tmlog, null, 15000, 15000);
+          //  TimerCallback tmlog = new(CheckLog.OnTimerHandlerCheckLog);
+          //  Timer timerlog = new(tmlog, null, 15000, 15000);
 
-            TimerCallback tmachieve = new(CheckAchievements.OnTimerHandlerCheckAchievements);
-            Timer timerAchievements = new(tmachieve, null, 15000, 30000);
-
-
-            TimerCallback tmroster = new(CheckRoster.OnTimerHandlerCheckRoster);
-            Timer timerRoster = new(tmroster, null, 15000, 300000);
+          //  TimerCallback tmachieve = new(CheckAchievements.OnTimerHandlerCheckAchievements);
+          //  Timer timerAchievements = new(tmachieve, null, 15000, 30000);
 
 
-            TimerCallback tmsetRole = new(SetDiscordUserRole.OnTimerHandlerSetDiscordUserRole);
-            Timer timerSetRole = new(tmsetRole, null, 10000, 60000 * 15);
+           // TimerCallback tmroster = new(CheckRoster.OnTimerHandlerCheckRoster);
+           // Timer timerRoster = new(tmroster, null, 15000, 300000);
+
+
+            //TimerCallback tmsetRole = new(SetDiscordUserRole.OnTimerHandlerSetDiscordUserRole);
+            //Timer timerSetRole = new(tmsetRole, null, 10000, 60000 * 15);
 
 
 
             // TimerCallback tmUpdateStatic = new(UpdateStatic.OnTimerHandlerUpdateStatic);
             //  Timer timerUpdateStatic = new(tmUpdateStatic, null, 10000, 60000 * 20);
 
-
+/*
             TimerCallback tmevents = new(WarframeCheckEvents.OnTimerHandlerCheckWarframeEvents);
             Timer timerevents = new(tmevents, null, 10000, 35000);
 
@@ -129,7 +132,7 @@ namespace DiscordBot
 
             TimerCallback tmevNightWave = new(WarframeCheckNightWave.OnTimerHandlerCheckWarframeNightWave);
             Timer timerNightWave = new(tmevNightWave, null, 13000, 25000);
-
+*/
             if (settings.TelegramBotToken != "0")
             {
                 telegramClient = new TelegramBotClient(settings.TelegramBotToken);
@@ -146,7 +149,7 @@ namespace DiscordBot
                     cancellationToken: cts.Token
                    );
 
-                var telebot = await telegramClient.GetMeAsync();
+                var telebot = await telegramClient.GetMe();
                 Console.WriteLine($"\nTelegram Bot started @{telebot.Username}\n");
             }
 

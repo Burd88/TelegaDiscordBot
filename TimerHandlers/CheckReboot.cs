@@ -30,7 +30,7 @@ namespace DiscordBot
                         await chan.SendMessageAsync(null, false, builder.Build());
                         if (settings.TelegramNotificationEnable)
                         {
-                            await telegramClient.SendTextMessageAsync(settings.TelegramChatID, $"{text[0]}\n{text[1]}", parseMode: ParseMode.Html);
+                            await telegramClient.SendMessage(settings.TelegramChatID, $"{text[0]}\n{text[1]}", parseMode: ParseMode.Html);
                         }
                         string message = ("Отправленно оповещение о Тех.Работах!");
                         Functions.WriteLogs(message, "notification");

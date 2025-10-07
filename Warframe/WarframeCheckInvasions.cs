@@ -17,7 +17,7 @@ namespace DiscordBot
             if (invasions != null)
             {
                 foreach (Invasions invas in invasions)
-                {
+                {Console.WriteLine(invasions.Count.ToString());
                     if (!invas.completed)
                     {
                         //   Console.WriteLine(invas.attackerReward.itemString +" "+ invas.defenderReward.itemString);
