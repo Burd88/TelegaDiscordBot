@@ -13,7 +13,7 @@ namespace DiscordBot
 
 
 
-            var fullInfo = pers.GetCharInfo((string)command.Data.Options.First().Value);
+            var fullInfo = await pers.GetCharInfo((string)command.Data.Options.First().Value);
 
             if (fullInfo != null)
             {

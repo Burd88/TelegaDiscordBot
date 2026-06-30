@@ -1,6 +1,6 @@
 ﻿namespace DiscordBot
 {
-    public class GuildCastleNathria
+    public class GuildRaidProgressionFull
     {
         public Normal normal { get; set; }
         public Heroic heroic { get; set; }

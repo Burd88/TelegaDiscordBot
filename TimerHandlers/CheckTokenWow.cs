@@ -15,7 +15,7 @@ namespace DiscordBot
                 try
                 {
 
-                    var tokenprice = Functions.GetWebJson<TokenWarcraft>("https://eu.api.blizzard.com/data/wow/token/index?namespace=dynamic-eu&locale={settings.Locale}&access_token=" + Program.tokenWow);
+                    var tokenprice = await Functions.GetWebJson<TokenWarcraft>("https://eu.api.blizzard.com/data/wow/token/index?namespace=dynamic-eu&locale={settings.Locale");
                     if (tokenprice != null)
                     {
 

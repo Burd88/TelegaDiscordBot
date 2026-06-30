@@ -8,6 +8,7 @@
         public string TelegramBotToken { get; set; }
         public string BatNetToken { get; set; }
         public string BatNetSecretKey { get; set; }
+        public int MuthicSeasonIndex { get; set; }
         public string RealmName { get; set; }
         public string RealmSlug { get; set; }
         public string RealmStatusType { get; set; }

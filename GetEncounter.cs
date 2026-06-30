@@ -1,4 +1,5 @@
-﻿using System.Collections.Generic;
+﻿using System;
+using System.Collections.Generic;
 using System.Threading.Tasks;
 
 namespace DiscordBot
@@ -12,19 +13,23 @@ namespace DiscordBot
         public static async Task LoadEncounterAll()
         {
             encounterAll = new();
-            EncounterAll encounters = Functions.GetWebJson<EncounterAll>("https://eu.api.blizzard.com/data/wow/journal-encounter/index?namespace=static-eu&locale=en_US&access_token=" + Program.tokenWow);
+            EncounterAll encounters = await Functions.GetWebJson<EncounterAll>("https://eu.api.blizzard.com/data/wow/journal-encounter/index?namespace=static-eu&locale=en_US");
+
             if (encounters != null)
             {
+                Console.WriteLine("Encounter loaded, wait...");
                 foreach (Encounter encount in encounters.encounters)
                 {
                     await Task.Run(() => GetEncounterAll(encount.key.href));
                 }
                 Functions.WriteJSon(encounterAll, "EncounterList");
+                Console.WriteLine("Encounter loaded, ok");
             }
+
         }
-        public static void GetEncounterAll(string link)
+        public static async void GetEncounterAll(string link)
         {
-            EncounterFullInfo encounter = Functions.GetWebJson<EncounterFullInfo>(link + "&access_token=" + Program.tokenWow);
+            EncounterFullInfo encounter = await Functions.GetWebJson<EncounterFullInfo>(link);
             if (encounter != null)
             {
                 if (encounter.creatures != null)
@@ -34,7 +39,7 @@ namespace DiscordBot
                         EncounterEN = encounter.name.en_US,
                         EncounterRU = encounter.name.ru_RU,
                         EncounterID = encounter.id,
-                        EncounterImg = Functions.GetBNetMedia(encounter.creatures[0].creature_display.key.href)
+                        EncounterImg = await Functions.GetBNetMedia(encounter.creatures[0].creature_display.key.href)
                     });
                 }
                 else

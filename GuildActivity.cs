@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Threading.Tasks;
 using static DiscordBot.Program;
 
 namespace DiscordBot
@@ -16,7 +17,7 @@ namespace DiscordBot
         private List<Activity> newActivity;
 
 
-        public List<Activity> GetGuildActivityChange()
+        public async Task<List<Activity>> GetGuildActivityChange()
         {
             try
             {
@@ -26,7 +27,7 @@ namespace DiscordBot
                 settings = Functions.ReadJson<BotSettings>("BotSettings");
 
 
-                GetGuildActivityNew();
+                await GetGuildActivityNew();
 
 
 
@@ -82,9 +83,9 @@ namespace DiscordBot
         }
 
 
-        private void GetGuildActivityNew()
+        private async Task GetGuildActivityNew()
         {
-            GuildActivitys activity = Functions.GetWebJson<GuildActivitys>($"https://eu.api.blizzard.com/data/wow/guild/{settings.RealmSlug}/{settings.GuildName.ToLower().Replace(" ", "-")}/activity?namespace=profile-eu&locale=ru_RU&access_token=" + tokenWow);
+            GuildActivitys activity = await Functions.GetWebJson<GuildActivitys>($"https://eu.api.blizzard.com/data/wow/guild/{settings.RealmSlug}/{settings.GuildName.ToLower().Replace(" ", "-")}/activity?namespace=profile-eu&locale=ru_RU");
 
             if (activity != null)
             {
@@ -102,12 +103,12 @@ namespace DiscordBot
                                 activNew.Mode = activity.activities[i].character_achievement.achievement.name;
                                 activNew.Time = Convert.ToInt64(activity.activities[i].timestamp);
                                 activNew.Type = "CHARACTER_ACHIEVEMENT";
-                                AchievChar activityInfo = Functions.GetWebJson<AchievChar>($"{activity.activities[i].character_achievement.achievement.key.href}&locale=ru_RU&access_token={tokenWow}");
+                                AchievChar activityInfo = await Functions.GetWebJson<AchievChar>($"{activity.activities[i].character_achievement.achievement.key.href}&locale=ru_RU");
                                 if (activityInfo != null)
                                 {
                                     activNew.Categor = activityInfo.category.name;
                                     activNew.Award = activityInfo.reward_description;
-                                    GetBNetMEdia activityMedia = Functions.GetWebJson<GetBNetMEdia>($"{activityInfo.media.key.href}&locale=ru_RU&access_token={tokenWow}");
+                                    BNetMEdia activityMedia = await Functions.GetWebJson<BNetMEdia>($"{activityInfo.media.key.href}&locale=ru_RU");
                                     if (activityMedia != null)
                                     {
                                         foreach (Asset asset in activityMedia.assets)
@@ -140,12 +141,12 @@ namespace DiscordBot
                                 activNew.Time = Convert.ToInt64(activity.activities[i].timestamp);
                                 activNew.Type = "ENCOUNTER";
                                 //GetGuildActivityInfo(activity.activities[i].encounter_completed.encounter.name, activity.activities[i].encounter_completed.mode.name, Convert.ToInt64(activity.activities[i].timestamp), activity.activities[i].encounter_completed.encounter.key.href, "ENCOUNTER");
-                                BossKill activityInfo = Functions.GetWebJson<BossKill>($"{activity.activities[i].encounter_completed.encounter.key.href}&locale=ru_RU&access_token={tokenWow}");
+                                BossKill activityInfo = await Functions.GetWebJson<BossKill>($"{activity.activities[i].encounter_completed.encounter.key.href}&locale=ru_RU&access_token={tokenWow}");
                                 if (activityInfo != null)
                                 {
                                     activNew.Categor = activityInfo.instance.name;
                                     activNew.Award = null;
-                                    GetBNetMEdia activityMedia = Functions.GetWebJson<GetBNetMEdia>($"{activityInfo.creatures[0].creature_display.key.href}&locale=ru_RU&access_token={tokenWow}");
+                                    BNetMEdia activityMedia = await Functions.GetWebJson<BNetMEdia>($"{activityInfo.creatures[0].creature_display.key.href}&locale=ru_RU&access_token={tokenWow}");
                                     if (activityMedia != null)
                                     {
                                         foreach (Asset asset in activityMedia.assets)

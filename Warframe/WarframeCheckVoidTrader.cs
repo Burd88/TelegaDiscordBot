@@ -15,7 +15,7 @@ namespace DiscordBot
             try
             {
 
-                VoidTrader voidTrader = Functions.GetWebJson<VoidTrader>($"https://api.warframestat.us/pc/ru/voidTrader");
+                VoidTrader voidTrader = await Functions.GetWebJson<VoidTrader>($"https://api.warframestat.us/pc/ru/voidTrader");
 
 
                 if (voidTrader != null)

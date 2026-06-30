@@ -13,7 +13,7 @@ namespace DiscordBot
             try
             {
 
-                NightWave nightWave = Functions.GetWebJson<NightWave>($"https://api.warframestat.us/pc/ru/nightwave");
+                NightWave nightWave = await Functions.GetWebJson<NightWave>($"https://api.warframestat.us/pc/ru/nightwave");
 
                 string nameSeasonWave = "";
                 string endTimeSeasonWave = "";

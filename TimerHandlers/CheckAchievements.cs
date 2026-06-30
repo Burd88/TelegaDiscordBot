@@ -17,7 +17,7 @@ namespace DiscordBot
                 {
                     var builder = new EmbedBuilder();
                     GuildAchievements guildAchive = new();
-                    var achiev = guildAchive.GetGuildAchievementChange();
+                    var achiev = await guildAchive.GetGuildAchievementChange();
                     if (achiev != null && achiev.Count != 0)
                     {
                         foreach (Achievement achieve in achiev)

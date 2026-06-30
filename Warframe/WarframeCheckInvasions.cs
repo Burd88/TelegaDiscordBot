@@ -10,14 +10,15 @@ namespace DiscordBot
     class WarframeCheckInvasions
     {
         private static List<SortRewardInvasion> invasionsList;
-        private static void GetInvasions()
+        private static async void GetInvasions()
         {
             invasionsList = new();
-            List<Invasions> invasions = Functions.GetWebJson<List<Invasions>>($"https://api.warframestat.us/pc/ru/invasions");
+            List<Invasions> invasions = await Functions.GetWebJson<List<Invasions>>($"https://api.warframestat.us/pc/ru/invasions");
             if (invasions != null)
             {
                 foreach (Invasions invas in invasions)
-                {Console.WriteLine(invasions.Count.ToString());
+                {
+                    Console.WriteLine(invasions.Count.ToString());
                     if (!invas.completed)
                     {
                         //   Console.WriteLine(invas.attackerReward.itemString +" "+ invas.defenderReward.itemString);

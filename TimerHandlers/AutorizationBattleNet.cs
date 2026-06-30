@@ -36,11 +36,10 @@ namespace DiscordBot
 
                         HttpResponseMessage response = await httpClient.SendAsync(request);
                         Token_for_api my_token = JsonConvert.DeserializeObject<Token_for_api>(response.Content.ReadAsStringAsync().Result);
+                        //    Console.WriteLine($"Battle.net Token success : {tokenWow}");
                         return my_token.access_token;
 
-                        // Console.ForegroundColor = ConsoleColor.Green;
-                        Console.WriteLine($"Battle.net Token success : {tokenWow}");
-                        //Functions.LoadRealmAll();
+
 
 
 

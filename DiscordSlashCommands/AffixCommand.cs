@@ -9,7 +9,7 @@ namespace DiscordBot
         public static async Task HandleAffixCommand(SocketSlashCommand command)
         {
 
-            var affixs = Functions.GetWebJson<MythicPlusAffixCurrent>("https://raider.io/api/v1/mythic-plus/affixes?region=us&locale=ru");
+            var affixs = await Functions.GetWebJson<MythicPlusAffixCurrent>("https://raider.io/api/v1/mythic-plus/affixes?region=us&locale=ru");
             if (affixs != null)
             {
 

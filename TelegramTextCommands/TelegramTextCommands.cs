@@ -41,7 +41,7 @@ namespace DiscordBot
             {
                 case var s when s.Contains("/guild"):
                     GuildInfo guildInfo = new();
-                    var fullInfo = guildInfo.GetGuildInfo();
+                    var fullInfo = await guildInfo.GetGuildInfo();
 
 
                     if (!fullInfo.Error)
@@ -69,17 +69,22 @@ namespace DiscordBot
                     break;
                 case var s when s.Contains("/token"):
 
-                    var tokenprice = Functions.GetWebJson<TokenWarcraft>("https://eu.api.blizzard.com/data/wow/token/index?namespace=dynamic-eu&locale={settings.Locale}&access_token=" + Program.tokenWow);
+                    var tokenprice = await Functions.GetWebJson<TokenWarcraft>("https://eu.api.blizzard.com/data/wow/token/index?namespace=dynamic-eu&locale={settings.Locale}&access_token=" + Program.tokenWow);
                     if (tokenprice != null)
                     {
                         await telegramClient.SendMessage(
                               chatId, $"<b>\"Жетон WoW\"</b>\nЦена: <b>{tokenprice.price / 10000}</b> золотых\nВремя обновления: {Functions.FromUnixTimeStampToDateTimeUTC(tokenprice.last_updated_timestamp.ToString())} (UTC)", parseMode: ParseMode.Html);
 
                     }
+                    else
+                    {
+                        string text = $"Ошибка сервреа, попробуйте позже...";
+                        await telegramClient.SendMessage(chatId, text, parseMode: ParseMode.Html);
+                    }
                     break;
 
                 case var s when s.Contains("/affix"):
-                    var affixs = Functions.GetWebJson<MythicPlusAffixCurrent>("https://raider.io/api/v1/mythic-plus/affixes?region=us&locale=ru");
+                    var affixs = await Functions.GetWebJson<MythicPlusAffixCurrent>("https://raider.io/api/v1/mythic-plus/affixes?region=us&locale=ru");
                     if (affixs != null)
                     {
                         var text = "Мифик+ аффиксы на эту неделю обновлены.\n" +
@@ -89,8 +94,13 @@ namespace DiscordBot
                                         $"<b>(+10) {affixs.affix_details[3].name}</b>:\n {affixs.affix_details[3].description}\n" +
                                         $"<b>(+12) Вероломство Ксал'атат</b>:\n Ксал'атат предает игроков и нарушает заключенные сделки, увеличивая запас здоровья и урон противников на 10%.\n";
                         await telegramClient.SendMessage(
-                              chatId, text , parseMode: ParseMode.Html);
+                              chatId, text, parseMode: ParseMode.Html);
 
+                    }
+                    else
+                    {
+                        string text = $"Ошибка сервреа, попробуйте позже...";
+                        await telegramClient.SendMessage(chatId, text, parseMode: ParseMode.Html);
                     }
                     break;
 
@@ -114,19 +124,28 @@ namespace DiscordBot
                             await telegramClient.SendMessage(chatId, text, replyMarkup: keyboard, parseMode: ParseMode.Html);
 
                         }
+                        else
+                        {
+                            string text = $"Ошибка сервреа, попробуйте позже...";
+                            await telegramClient.SendMessage(chatId, text, parseMode: ParseMode.Html);
+                        }
                     }
                     catch (WebException e)
                     {
                         if (e.Status == WebExceptionStatus.ProtocolError)
                         {
+                            string text = $"Ошибка сервреа, попробуйте позже...";
+                            await telegramClient.SendMessage(chatId, text, parseMode: ParseMode.Html);
                             string message = $"\nOnTimerHandlerLog Error: {e.Message}";
-                            Functions.WriteLogs(message, "error");
+                            Functions.WriteLogs(message, "error21");
                         }
                     }
                     catch (Exception e)
                     {
+                        string text = $"Ошибка сервреа, попробуйте позже...";
+                        await telegramClient.SendMessage(chatId, text, parseMode: ParseMode.Html);
                         string message = $"OnTimerHandlerLog Error: {e.Message}";
-                        Functions.WriteLogs(message, "error");
+                        Functions.WriteLogs(message, "error1");
                     }
                     break;
             }

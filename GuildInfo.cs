@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Threading.Tasks;
 using static DiscordBot.Program;
 
 namespace DiscordBot
@@ -9,12 +10,13 @@ namespace DiscordBot
     {
         #region Получение инфы о гильдии
         private GuildInfoFull _guildInfoFull;
-        public GuildInfoFull GetGuildInfo()
+        public async Task<GuildInfoFull> GetGuildInfo()
         {
             _guildInfoFull = new();
-            Guild_raid_progress();
-            GetGuildOtherInfo();
-            GetGuildRosterInfo();
+
+            await Guild_raid_progress();
+            await GetGuildOtherInfo();
+            await GetGuildRosterInfo();
             if (!_guildInfoFull.Error)
             {
                 return _guildInfoFull;
@@ -25,15 +27,15 @@ namespace DiscordBot
             }
         }
 
-        private void GetGuildRosterInfo()
+        private async Task GetGuildRosterInfo()
         {
-            Console.WriteLine($"https://eu.api.blizzard.com/data/wow/guild/{settings.RealmSlug}/{settings.GuildName.ToLower().Replace(" ", "-")}/roster?namespace=profile-eu&locale=ru_RU&access_token=" + tokenWow);
-            MainGuild guild = Functions.GetWebJson<MainGuild>($"https://eu.api.blizzard.com/data/wow/guild/{settings.RealmSlug}/{settings.GuildName.ToLower().Replace(" ", "-")}/roster?namespace=profile-eu&locale=ru_RU&access_token=" + tokenWow);
-            
+            MainGuild guild = await Functions.GetWebJson<MainGuild>($"https://eu.api.blizzard.com/data/wow/guild/{settings.RealmSlug}/{settings.GuildName.ToLower().Replace(" ", "-")}/roster?namespace=profile-eu&locale=ru_RU");
+
             if (guild != null)
             {
                 foreach (Member character in guild.members)
                 {
+                    Console.WriteLine(character.character.name);
                     if (character.rank == 0)
                     {
                         _guildInfoFull.Leader = $"{character.character.name}";
@@ -49,9 +51,9 @@ namespace DiscordBot
         }
 
 
-        private void GetGuildOtherInfo()
+        private async Task GetGuildOtherInfo()
         {
-            GuildMain guildmain = Functions.GetWebJson<GuildMain>($"https://eu.api.blizzard.com/data/wow/guild/{settings.RealmSlug}/{settings.GuildName.ToLower().Replace(" ", "-")}?namespace=profile-eu&locale=ru_RU&access_token=" + tokenWow);
+            GuildMain guildmain = await Functions.GetWebJson<GuildMain>($"https://eu.api.blizzard.com/data/wow/guild/{settings.RealmSlug}/{settings.GuildName.ToLower().Replace(" ", "-")}?namespace=profile-eu&locale=ru_RU");
             if (guildmain != null)
             {
                 _guildInfoFull.TimeCreate = $"{Functions.FromUnixTimeStampToDateTime(guildmain.created_timestamp.ToString())}";
@@ -68,17 +70,21 @@ namespace DiscordBot
         }
 
 
-        private void Guild_raid_progress()
+        private async Task Guild_raid_progress()
         {
-            GuildRaiderIO rio_guild = Functions.GetWebJson<GuildRaiderIO>($"https://raider.io/api/v1/guilds/profile?region=eu&realm={settings.RealmSlug}&name={settings.GuildName.ToLower()}&fields=raid_progression%2Craid_rankings");
+            GuildRaiderIO rio_guild = await Functions.GetWebJson<GuildRaiderIO>($"https://raider.io/api/v1/guilds/profile?region=eu&realm={settings.RealmSlug}&name={settings.GuildName.ToLower()}&fields=raid_progression%2Craid_rankings");
+
             if (rio_guild != null)
             {
-                _guildInfoFull.RaidProgress = rio_guild.raid_progression.aberrustheshadowedcrucible.summary;
-                if (rio_guild.raid_rankings.aberrustheshadowedcrucible.mythic.world == 0)
+                _guildInfoFull.RaidProgress = rio_guild.raid_progression.midNightOneSeason.summary;
+                GuildRaidProgressionFull raidProgression = rio_guild.raid_progression.midNightOneSeason;
+                GuildRaidProgressionFull raidRankings = rio_guild.raid_rankings.midNightOneSeason;
+                Console.WriteLine(rio_guild.raid_progression.midNightOneSeason.summary);
+                if (raidProgression.mythic_bosses_killed == 0)
                 {
-                    if (rio_guild.raid_rankings.aberrustheshadowedcrucible.heroic.world == 0)
+                    if (raidProgression.heroic_bosses_killed == 0)
                     {
-                        if (rio_guild.raid_rankings.aberrustheshadowedcrucible.normal.world == 0)
+                        if (raidProgression.normal_bosses_killed == 0)
                         {
                             _guildInfoFull.RaidRankName = "**Сложность**: Обычный";
                             _guildInfoFull.RaidRankWorld = "**Мир**: -";
@@ -89,9 +95,9 @@ namespace DiscordBot
                         else
                         {
                             _guildInfoFull.RaidRankName = "**Сложность**: Обычный";
-                            _guildInfoFull.RaidRankWorld = $"**Мир**: {rio_guild.raid_rankings.aberrustheshadowedcrucible.normal.world} место";
-                            _guildInfoFull.RaidRankRegion = $"**Регион**: {rio_guild.raid_rankings.aberrustheshadowedcrucible.normal.region} место";
-                            _guildInfoFull.RaidRankRealm = $"**Сервер**: {rio_guild.raid_rankings.aberrustheshadowedcrucible.normal.realm} место";
+                            _guildInfoFull.RaidRankWorld = $"**Мир**: {raidRankings.normal.world} место";
+                            _guildInfoFull.RaidRankRegion = $"**Регион**: {raidRankings.normal.region} место";
+                            _guildInfoFull.RaidRankRealm = $"**Сервер**: {raidRankings.normal.realm} место";
                         }
 
 
@@ -99,18 +105,18 @@ namespace DiscordBot
                     else
                     {
                         _guildInfoFull.RaidRankName = "**Сложность**: Героический";
-                        _guildInfoFull.RaidRankWorld = $"**Мир**: {rio_guild.raid_rankings.aberrustheshadowedcrucible.heroic.world} место";
-                        _guildInfoFull.RaidRankRegion = $"**Регион**: {rio_guild.raid_rankings.aberrustheshadowedcrucible.heroic.region} место";
-                        _guildInfoFull.RaidRankRealm = $"**Сервер**: {rio_guild.raid_rankings.aberrustheshadowedcrucible.heroic.realm} место";
+                        _guildInfoFull.RaidRankWorld = $"**Мир**: {raidRankings.heroic.world} место";
+                        _guildInfoFull.RaidRankRegion = $"**Регион**: {raidRankings.heroic.region} место";
+                        _guildInfoFull.RaidRankRealm = $"**Сервер**: {raidRankings.heroic.realm} место";
                     }
 
                 }
                 else
                 {
                     _guildInfoFull.RaidRankName = "**Сложность**: Мифический";
-                    _guildInfoFull.RaidRankWorld = $"**Мир**: {rio_guild.raid_rankings.aberrustheshadowedcrucible.mythic.world} место";
-                    _guildInfoFull.RaidRankRegion = $"**Регион**: {rio_guild.raid_rankings.aberrustheshadowedcrucible.mythic.region} место";
-                    _guildInfoFull.RaidRankRealm = $"**Сервер**: {rio_guild.raid_rankings.aberrustheshadowedcrucible.mythic.realm} место";
+                    _guildInfoFull.RaidRankWorld = $"**Мир**: {raidRankings.mythic.world} место";
+                    _guildInfoFull.RaidRankRegion = $"**Регион**: {raidRankings.mythic.region} место";
+                    _guildInfoFull.RaidRankRealm = $"**Сервер**: {raidRankings.mythic.realm} место";
                 }
                 _guildInfoFull.RAidFull = $"{_guildInfoFull.RaidProgress}\n{_guildInfoFull.RaidRankWorld}\n{_guildInfoFull.RaidRankRegion}\n{_guildInfoFull.RaidRankRealm}";
 
@@ -152,7 +158,7 @@ namespace DiscordBot
                 return null;
             }
         }
-        public void GetGuildRosterChange()
+        public async Task GetGuildRosterChange()
         {
             try
             {
@@ -165,7 +171,7 @@ namespace DiscordBot
 
                 beforeRoster = Functions.ReadJson<List<RosterLeaveInv>>("Roster");
 
-                GetGuildRosterFull();
+                afterRoster = await GetGuildRosterFull();
                 //Functions.WriteJSon<List<RosterLeaveInv>>(afterRoster, "BeforeRoster");
                 if (beforeRoster != null && beforeRoster.Count != 0)
                 {
@@ -195,6 +201,7 @@ namespace DiscordBot
                 }
                 else
                 {
+                    Console.WriteLine("1afterRoster - " + afterRoster.Count);
                     Functions.WriteJSon(afterRoster, "Roster");
                 }
             }
@@ -206,20 +213,25 @@ namespace DiscordBot
                 Functions.WriteLogs(message, "error");
             }
         }
-        private void GetGuildRosterFull()
+        private async Task<List<RosterLeaveInv>> GetGuildRosterFull()
         {
-            MainGuild guild = Functions.GetWebJson<MainGuild>($"https://eu.api.blizzard.com/data/wow/guild/{settings.RealmSlug}/{settings.GuildName.ToLower().Replace(" ", "-")}/roster?namespace=profile-eu&locale=ru_RU&access_token=" + tokenWow);
+            List<RosterLeaveInv> rosterList = new();
+            MainGuild guild = await Functions.GetWebJson<MainGuild>($"https://eu.api.blizzard.com/data/wow/guild/{settings.RealmSlug}/{settings.GuildName.ToLower().Replace(" ", "-")}/roster?namespace=profile-eu&locale=ru_RU");
             if (guild != null)
             {
                 foreach (Member character in guild.members)
+
                 {
-                    afterRoster.Add(new RosterLeaveInv { Name = character.character.name, Class = character.character.playable_class.id.ToString(), LVL = character.character.level.ToString(), Race = character.character.playable_race.id.ToString(), Rank = character.rank });
+                    //Console.WriteLine(character.character.name + " " + character.character.level);
+                    rosterList.Add(new RosterLeaveInv { Name = character.character.name, Class = character.character.playable_class.id.ToString(), LVL = character.character.level.ToString(), Race = character.character.playable_race.id.ToString(), Rank = character.rank });
 
                 }
+                return rosterList;
             }
             else
             {
                 error = true;
+                return null;
             }
 
 

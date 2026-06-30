@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Threading.Tasks;
 
 namespace DiscordBot
 {
@@ -58,7 +59,7 @@ namespace DiscordBot
             }
 
         }
-        public static void GetStaticRoster(StaticRoster roster)
+        public static async Task GetStaticRoster(StaticRoster roster)
         {
 
             tank = "";
@@ -75,31 +76,31 @@ namespace DiscordBot
             foreach (StaticChar member in roster.Static)
             {
                 CharInfo pers = new();
-                var persinfo = pers.GetCharInfo(member.Name);
-                if (persinfo != null)
+                var persInfo = await pers.GetCharInfo(member.Name);
+                if (persInfo != null)
                 {
                     if (member.Role == "танк")
                     {
                         tankid++;
-                        tank += $"**{tankid})** [{persinfo.Name}](https://worldofwarcraft.com/ru-ru/character/eu/howling-fjord/{persinfo.Name.ToLower()})(**{persinfo.ILvl}**)\n**{persinfo.Class}**-**{persinfo.Spec}**\n__Рейд: **{persinfo.RaidProgress}** Миф+: **{persinfo.MythicPlus}** {persinfo.SetcountItem}__\n";
+                        tank += $"**{tankid})** [{persInfo.Name}](https://worldofwarcraft.com/ru-ru/character/eu/howling-fjord/{persInfo.Name.ToLower()})(**{persInfo.ILvl}**)\n**{persInfo.Class}**-**{persInfo.Spec}**\n__Рейд: **{persInfo.RaidProgress}** Миф+: **{persInfo.MythicPlus}** {persInfo.SetcountItem}__\n";
                     }
                     else if (member.Role == "хил")
                     {
                         healid++;
-                        heal += $"**{healid})** [{persinfo.Name}](https://worldofwarcraft.com/ru-ru/character/eu/howling-fjord/{persinfo.Name.ToLower()})(**{persinfo.ILvl}**)\n**{persinfo.Class}**-**{persinfo.Spec}**\n__Рейд: **{persinfo.RaidProgress}** Миф+: **{persinfo.MythicPlus}** {persinfo.SetcountItem}__\n";
+                        heal += $"**{healid})** [{persInfo.Name}](https://worldofwarcraft.com/ru-ru/character/eu/howling-fjord/{persInfo.Name.ToLower()})(**{persInfo.ILvl}**)\n**{persInfo.Class}**-**{persInfo.Spec}**\n__Рейд: **{persInfo.RaidProgress}** Миф+: **{persInfo.MythicPlus}** {persInfo.SetcountItem}__\n";
                     }
                     else if (member.Role == "мдд")
                     {
                         mddid++;
-                        mdd += $"**{mddid})** [{persinfo.Name}](https://worldofwarcraft.com/ru-ru/character/eu/howling-fjord/{persinfo.Name.ToLower()})(**{persinfo.ILvl}**)\n**{persinfo.Class}**-**{persinfo.Spec}**\n__Рейд: **{persinfo.RaidProgress}** Миф+: **{persinfo.MythicPlus}** {persinfo.SetcountItem}__\n";
+                        mdd += $"**{mddid})** [{persInfo.Name}](https://worldofwarcraft.com/ru-ru/character/eu/howling-fjord/{persInfo.Name.ToLower()})(**{persInfo.ILvl}**)\n**{persInfo.Class}**-**{persInfo.Spec}**\n__Рейд: **{persInfo.RaidProgress}** Миф+: **{persInfo.MythicPlus}** {persInfo.SetcountItem}__\n";
                     }
                     else if (member.Role == "рдд")
                     {
                         rddid++;
-                        rdd += $"**{rddid})** [{persinfo.Name}](https://worldofwarcraft.com/ru-ru/character/eu/howling-fjord/{persinfo.Name.ToLower()})(**{persinfo.ILvl}**)\n**{persinfo.Class}**-**{persinfo.Spec}**\n__Рейд: **{persinfo.RaidProgress}** Миф+: **{persinfo.MythicPlus}** {persinfo.SetcountItem}__\n";
+                        rdd += $"**{rddid})** [{persInfo.Name}](https://worldofwarcraft.com/ru-ru/character/eu/howling-fjord/{persInfo.Name.ToLower()})(**{persInfo.ILvl}**)\n**{persInfo.Class}**-**{persInfo.Spec}**\n__Рейд: **{persInfo.RaidProgress}** Миф+: **{persInfo.MythicPlus}** {persInfo.SetcountItem}__\n";
                     }
-                    everage += Convert.ToInt32(persinfo.ILvl);
-                    newroster.Add(new StaticChar { Name = persinfo.Name.Replace("**", ""), Role = member.Role, Class = persinfo.Class, Ilvl = persinfo.ILvl, Raid = persinfo.RaidProgress, Spec = persinfo.Spec });
+                    everage += Convert.ToInt32(persInfo.ILvl);
+                    newroster.Add(new StaticChar { Name = persInfo.Name.Replace("**", ""), Role = member.Role, Class = persInfo.Class, Ilvl = persInfo.ILvl, Raid = persInfo.RaidProgress, Spec = persInfo.Spec });
                 }
 
             }

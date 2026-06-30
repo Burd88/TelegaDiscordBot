@@ -142,7 +142,7 @@ namespace DiscordBot
                         {
                             var builder = new EmbedBuilder();
                             WowRealmInfo realmcheck = new();
-                            var realStatus = realmcheck.GetRealmInfo();
+                            var realStatus = await realmcheck.GetRealmInfo();
 
 
 
@@ -173,7 +173,7 @@ namespace DiscordBot
                         {
                             var builder = new EmbedBuilder();
 
-                            var affixs = Functions.GetWebJson<MythicPlusAffixCurrent>("https://raider.io/api/v1/mythic-plus/affixes?region=us&locale=ru");
+                            var affixs = await Functions.GetWebJson<MythicPlusAffixCurrent>("https://raider.io/api/v1/mythic-plus/affixes?region=us&locale=ru");
                             if (affixs != null)
                             {
 
@@ -241,20 +241,28 @@ namespace DiscordBot
 
                             string name = messege.Replace("!char ", "").Replace("!чар ", "").Trim();
                             var builder = new EmbedBuilder();
-                            var fullInfo = pers.GetCharInfo(name);
-
+                            var fullInfo = await pers.GetCharInfo(name);
+                            string guildName = "";
+                            if (fullInfo.Guild != null)
+                            {
+                                guildName = $"\nГильдия : {fullInfo.Guild}";
+                            }
                             if (fullInfo != null)
                             {
                                 builder = new EmbedBuilder()
-                                    .WithTitle($"{fullInfo.Name}({fullInfo.Lvl} уровень) {fullInfo.Race}")
-                                    .WithUrl(fullInfo.LinkBnet).WithDescription($"Информация о персонаже  :")
+                                    .WithTitle($"{fullInfo.Name}" +
+                                    $"\n{fullInfo.Lvl} уровень" +
+                                    $"\n{fullInfo.Race}-{fullInfo.Class}-{fullInfo.Spec}" +
+                                    $"{guildName}")
+                                    .WithUrl(fullInfo.LinkBnet)
+                                    .WithDescription($"Информация о персонаже  :")
                                     .WithColor(Discord.Color.DarkRed).AddField("Уровень\nпредметов:", fullInfo.ILvl, true)
                                     .WithImageUrl(fullInfo.ImageCharMainRaw)
-                                    .AddField("Класс:", fullInfo.Class, true)
-                                    .AddField("Специализация:", fullInfo.Spec, true)
-                                    .AddField("Гильдия:", fullInfo.Guild, true)
-                                    .AddField("Ковенант:", fullInfo.Coven, true)
-                                    .AddField("Медиум:", fullInfo.CovenSoul, true)
+                                    //.AddField("Класс:", fullInfo.Class, true)
+                                    //.AddField("Специализация:", fullInfo.Spec, true).WithUrl(fullInfo.LinkBnet)
+                                    .AddField("Достижений:", fullInfo.achievement_points, true)
+                                    // .AddField("Сет:", fullInfo.SetcountItem, true)
+                                    //.AddField("Медиум:", fullInfo.CovenSoul, true)
                                     .AddField("Рейд прогресс:", fullInfo.RaidProgress, true)
                                     .AddField("Счет Мифик+:", fullInfo.MythicPlus, true)
                                     .AddField("Статы:", fullInfo.Stats, true).AddField("В игре:", fullInfo.LastLogin, true);
@@ -316,8 +324,7 @@ namespace DiscordBot
                         {
                             var builder = new EmbedBuilder();
                             GuildInfo guildInfo = new();
-                            var fullInfo = guildInfo.GetGuildInfo();
-
+                            var fullInfo = await guildInfo.GetGuildInfo();
 
                             if (!fullInfo.Error)
                             {

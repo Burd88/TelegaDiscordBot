@@ -1,4 +1,6 @@
 ﻿using System;
+using System.Threading.Tasks;
+using Telegram.Bot.Types.Enums;
 using static DiscordBot.Functions;
 using static DiscordBot.Program;
 
@@ -9,10 +11,10 @@ namespace DiscordBot
 
         private CharInfoAll _charInfo;
 
-        public CharInfoAll GetCharInfo(string name)
+        public async Task<CharInfoAll> GetCharInfo(string name)
         {
             _charInfo = new();
-            GetLinkForChar(name);
+            await GetLinkForChar(name);
             if (!_charInfo.Error)
             {
                 return _charInfo;
@@ -22,7 +24,7 @@ namespace DiscordBot
                 return null;
             }
         }
-        private void GetLinkForChar(string text)
+        private async Task GetLinkForChar(string text)
         {
             if (text.Contains('-'))
             {
@@ -31,62 +33,77 @@ namespace DiscordBot
                 {
                     if (rlm.Name.ToLower() == str[1].ToLower())
                     {
-                        GetCharacterMainInfo(str[0], rlm.Slug);
+                        await GetCharacterMainInfo(str[0], rlm.Slug);
                     }
                 }
             }
             else
             {
-                GetCharacterMainInfo(text, settings.RealmSlug);
+                await GetCharacterMainInfo(text, settings.RealmSlug);
             }
         }
-        private void GetCharacterMainInfo(string name, string realm)
+        private async Task GetCharacterMainInfo(string name, string realm)
         {
-            string mainLink = $"https://eu.api.blizzard.com/profile/wow/character/{realm}/{name.ToLower()}?namespace=profile-eu&locale={settings.Locale}&access_token={tokenWow}";
-            CharFullInfo character = GetWebJson<CharFullInfo>(mainLink);
+
+            string mainLink = $"https://eu.api.blizzard.com/profile/wow/character/{realm}/{name.ToLower()}?namespace=profile-eu&locale={settings.Locale}";
+            CharFullInfo character = await GetWebJson<CharFullInfo>(mainLink);
             if (character != null)
             {
-                if (character.equipped_item_level.ToString() == "error")
+                if (character.code != 404)
                 {
-                    _charInfo.ILvl = "0";
+                    if (character.equipped_item_level.ToString() == "error")
+                    {
+                        _charInfo.ILvl = "0";
+                    }
+                    else
+                    {
+                        _charInfo.ILvl = character.equipped_item_level.ToString();
+                    }
+                    _charInfo.Name = character.name;
+                    if (character.active_spec != null)
+                    {
+                        _charInfo.Spec = character.active_spec.name;
+
+                    }
+                    if (character.character_class != null)
+                    {
+                        _charInfo.Class = character.character_class.name;
+                    }
+                    if (character.guild != null)
+                    {
+                        _charInfo.Guild = character.guild.name;
+                    }
+                    if (character.active_title != null)
+                    {
+                        _charInfo.Name = character.active_title.display_string.Replace("{name}", character.name);
+                    }
+                    _charInfo.Race = character.race.name;
+                    _charInfo.Lvl = character.level.ToString();
+                    _charInfo.achievement_points = character.achievement_points.ToString();
+
+                    _charInfo.LastLogin = Relative_time(FromUnixTimeStampToDateTime(character.last_login_timestamp.ToString()));
+                    if (character.covenant_progress != null)
+                    {
+                        _charInfo.Coven = character.covenant_progress.chosen_covenant.name + " (" + character.covenant_progress.renown_level.ToString() + ")";
+                    }
+
+                    //string soulbindsLink = $"https://eu.api.blizzard.com/profile/wow/character/{realm}/{name.ToLower()}/soulbinds?namespace=profile-eu&locale={settings.Locale}&access_token={tokenWow}";
+                    string raidLink = $"https://raider.io/api/v1/characters/profile?region=eu&realm={realm}&name={Char.ToUpper(name[0]) + name[1..].ToLower()}&fields=mythic_plus_scores_by_season:current%2Craid_progression";
+                    string mediaLink = $"https://eu.api.blizzard.com/profile/wow/character/{realm}/{name.ToLower()}/character-media?namespace=profile-eu&locale={settings.Locale}";
+                    string setLink = $"https://eu.api.blizzard.com/profile/wow/character/{realm}/{name.ToLower()}/equipment?namespace=profile-eu&locale={settings.Locale}";
+                    string statsLink = $"https://eu.api.blizzard.com/profile/wow/character/{realm}/{name.ToLower()}/statistics?namespace=profile-eu&locale={settings.Locale}";
+                    //GetSoulbindsCharacter(soulbindsLink);
+                    await Character_raid_progress(raidLink);
+                    await GetCharMedia(mediaLink, realm, name);
+                   //await GetCharSet(setLink);
+                    await GetCharStats(statsLink);
                 }
                 else
                 {
-                    _charInfo.ILvl = character.equipped_item_level.ToString();
+                    Console.WriteLine($"Character {name}-{realm}, {character.detail}");
+                    _charInfo.Name = name;
+                    _charInfo.code = character.code;
                 }
-                _charInfo.Name = character.name;
-                if (character.active_spec != null)
-                {
-                    _charInfo.Spec = character.active_spec.name;
-
-                }
-                if (character.character_class != null)
-                {
-                    _charInfo.Class = character.character_class.name;
-                }
-                if (character.guild != null)
-                {
-                    _charInfo.Guild = character.guild.name;
-                }
-                _charInfo.Race = character.race.name;
-                _charInfo.Lvl = character.level.ToString();
-
-                _charInfo.LastLogin = Relative_time(FromUnixTimeStampToDateTime(character.last_login_timestamp.ToString()));
-                if (character.covenant_progress != null)
-                {
-                    _charInfo.Coven = character.covenant_progress.chosen_covenant.name + " (" + character.covenant_progress.renown_level.ToString() + ")";
-                }
-
-                //string soulbindsLink = $"https://eu.api.blizzard.com/profile/wow/character/{realm}/{name.ToLower()}/soulbinds?namespace=profile-eu&locale={settings.Locale}&access_token={tokenWow}";
-                string raidLink = $"https://raider.io/api/v1/characters/profile?region=eu&realm={realm}&name={Char.ToUpper(name[0]) + name[1..].ToLower()}&fields=mythic_plus_scores%2Craid_progression";
-                string mediaLink = $"https://eu.api.blizzard.com/profile/wow/character/{realm}/{name.ToLower()}/character-media?namespace=profile-eu&locale={settings.Locale}&access_token={tokenWow}";
-                string setLink = $"https://eu.api.blizzard.com/profile/wow/character/{realm}/{name.ToLower()}/equipment?namespace=profile-eu&locale={settings.Locale}&access_token={tokenWow}";
-                string statsLink = $"https://eu.api.blizzard.com/profile/wow/character/{realm}/{name.ToLower()}/statistics?namespace=profile-eu&locale={settings.Locale}&access_token={tokenWow}";
-                //GetSoulbindsCharacter(soulbindsLink);
-                Character_raid_progress(raidLink);
-                GetCharMedia(mediaLink, realm, name);
-                GetCharSet(setLink);
-                GetCharStats(statsLink);
             }
             else
             {
@@ -111,20 +128,43 @@ namespace DiscordBot
                     }
                 }
             }*/
-        private void Character_raid_progress(string link)
+        private async Task Character_raid_progress(string link)
         {
-
-            RaiderIOCharInfo character = GetWebJson<RaiderIOCharInfo>(link);
+            Console.WriteLine(link);
+            RaiderIOCharInfo character = await GetWebJson<RaiderIOCharInfo>(link);
             if (character != null)
             {
-                _charInfo.RaidProgress = character.raid_progression.aberrustheshadowedcrucible.summary;
-                _charInfo.MythicPlus = character.mythic_plus_scores.all;
+                if (character.statusCode != 400)
+                {
+                    if (character.raid_progression.midNightOneSeason.summary.Equals(""))
+                    {
+                        _charInfo.RaidProgress = "0";
+                    }
+                    else
+                    {
+                        _charInfo.RaidProgress = character.raid_progression.midNightOneSeason.summary;
+                    }
+
+                    if (character.mythic_plus_scores_by_season != null)
+                    {
+                        _charInfo.MythicPlus = ((int)character.mythic_plus_scores_by_season[0].scores.all).ToString();
+                    }
+                    else
+                    {
+                        _charInfo.MythicPlus = "0";
+                    }
+                } else
+                {
+                    _charInfo.RaidProgress = "0";
+                    _charInfo.MythicPlus = "0";
+                }
+
             }
 
         }
-        private void GetCharMedia(string link, string realm, string name)
+        private async Task GetCharMedia(string link, string realm, string name)
         {
-            CharMedia charMedia = GetWebJson<CharMedia>(link);
+            CharMedia charMedia = await GetWebJson<CharMedia>(link);
             if (charMedia != null)
             {
                 foreach (Asset media in charMedia.assets)
@@ -144,9 +184,9 @@ namespace DiscordBot
                 _charInfo.LinkBnet = lnk;
             }
         }
-        private void GetCharSet(string link)
+        private async Task GetCharSet(string link)
         {
-            CharEquip charEquip = GetWebJson<CharEquip>(link);
+            CharEquip charEquip = await GetWebJson<CharEquip>(link);
             if (charEquip != null)
             {
                 if (charEquip.equipped_item_sets != null)
@@ -155,7 +195,11 @@ namespace DiscordBot
                     {
                         if (setequip.display_string.Contains("/5)"))
                         {
-                            _charInfo.SetcountItem = "Set:**" + setequip.display_string.Replace(setequip.item_set.name, "") + "**";
+
+                        }
+                        else
+                        {
+                            _charInfo.SetcountItem = "Set:**0/0**";
                             _charInfo.SetNameItem += $"**{setequip.display_string}**\n";
                         }
 
@@ -164,9 +208,9 @@ namespace DiscordBot
                 }
             }
         }
-        private void GetCharStats(string link)
+        private async Task GetCharStats(string link)
         {
-            CharStats charStats = GetWebJson<CharStats>(link);
+            CharStats charStats = await GetWebJson<CharStats>(link);
             if (charStats != null)
             {
                 double crit = charStats.melee_crit.value;

@@ -14,10 +14,10 @@ namespace DiscordBot
             {
                 if (DateTime.Now.DayOfWeek == DayOfWeek.Wednesday)
                 {
-
+                   
                     WowRealmInfo realmcheck = new();
 
-                    string[] text = realmcheck.GetRealmInfoForTimer();
+                    string[] text = await realmcheck.GetRealmInfoForTimer();
 
                     if (text != null)
                     {

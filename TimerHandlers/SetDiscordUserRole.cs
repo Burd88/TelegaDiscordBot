@@ -16,7 +16,7 @@ namespace DiscordBot
             {
                 try
                 {
-                    //  Console.WriteLine("\n Начинаю сверять роли ВОВ-ДИСКОРД \n");
+                    // Console.WriteLine("\n Начинаю сверять роли ВОВ-ДИСКОРД \n");
                     var allUser = discordClient.GetGuild(settings.DiscordChatId).GetUsersAsync(RequestOptions.Default);
 
                     rosterGuild = new();
@@ -54,7 +54,7 @@ namespace DiscordBot
                                         {
 
                                             var nick = rosterGuild.Find(x => us.Nickname.ToLower().Contains(x.Name.ToLower()));
-                                            
+
                                             if (nick != null)
                                             {
 
@@ -72,7 +72,7 @@ namespace DiscordBot
                                                             {
 
                                                                 admin = true;
-                                                                // Console.WriteLine($"Изменение роли на сервере для Username: {us.Username}, Nickname: {us.Nickname}, Admin");
+                                                                //  Console.WriteLine($"Изменение роли на сервере для Username: {us.Username}, Nickname: {us.Nickname}, Admin");
                                                             }
                                                         }
                                                         if (!admin)
@@ -93,12 +93,12 @@ namespace DiscordBot
                                                             if (role == roleAdmin)
                                                             {
                                                                 admin = true;
-                                                                //   Console.WriteLine($"Изменение роли на сервере для Username: {us.Username}, Nickname: {us.Nickname}, Admin");
+                                                                //Console.WriteLine($"Изменение роли на сервере для Username: {us.Username}, Nickname: {us.Nickname}, Admin");
                                                             }
                                                         }
                                                         if (!admin)
                                                         {
-                                                            //   Console.WriteLine($"Изменение роли на сервере для Username: {us.Username}, Nickname: {us.Nickname}, {client.GetGuild(settings.DiscordMainChatId).GetRole(us.RoleIds.ElementAt(1)).Id}    1  {roleNewbie}   2 {nick.Rank}   {roleList[nick.Rank]}    3   {roleList[7]}");
+                                                            // Console.WriteLine($"Изменение роли на сервере для Username: {us.Username}, Nickname: {us.Nickname}, {client.GetGuild(settings.DiscordMainChatId).GetRole(us.RoleIds.ElementAt(1)).Id}    1  {roleNewbie}   2 {nick.Rank}   {roleList[nick.Rank]}    3   {roleList[7]}");
 
                                                             if (us.RoleIds.ElementAt(1) != roleList[nick.Rank])
                                                             {

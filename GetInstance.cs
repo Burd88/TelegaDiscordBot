@@ -1,4 +1,5 @@
-﻿using System.Collections.Generic;
+﻿using System;
+using System.Collections.Generic;
 using System.Threading.Tasks;
 using static DiscordBot.Program;
 
@@ -12,9 +13,11 @@ namespace DiscordBot
         public static async Task LoadInstanceAll()
         {
             instanceAll = new();
-            WoWInstance instances = Functions.GetWebJson<WoWInstance>("https://eu.api.blizzard.com/data/wow/journal-instance/index?namespace=static-eu&locale=en_US&access_token=" + Program.tokenWow);
+            WoWInstance instances = await Functions.GetWebJson<WoWInstance>("https://eu.api.blizzard.com/data/wow/journal-instance/index?namespace=static-eu&locale=en_US");
+            Console.WriteLine(instances);
             if (instances != null)
             {
+                Console.WriteLine("Instance loaded, wait...");
                 foreach (Instance instance in instances.instances)
                 {
 
@@ -23,11 +26,12 @@ namespace DiscordBot
 
                 Functions.WriteJSon(instanceAll, "InstanceList");
 
+                Console.WriteLine("Instance loaded, ok");
             }
         }
-        public static void GetInstanceAll(string link, string nameEn)
+        public static async Task GetInstanceAll(string link, string nameEn)
         {
-            InstanceMainInfo instance = Functions.GetWebJson<InstanceMainInfo>(link + $"&locale={settings.Locale}&access_token=" + Program.tokenWow);
+            InstanceMainInfo instance = await Functions.GetWebJson<InstanceMainInfo>(link + $"&locale={settings.Locale}&");
             if (instance != null)
             {
 
@@ -38,7 +42,7 @@ namespace DiscordBot
                     InstanceEN = nameEn,
                     InstanceRU = instance.name,
                     InstanceID = instance.id,
-                    InstanceImg = Functions.GetBNetMedia(instance.media.key.href)
+                    InstanceImg = await Functions.GetBNetMedia(instance.media.key.href)
                 });
 
 

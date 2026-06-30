@@ -5,18 +5,21 @@ namespace DiscordBot
     public class GuildRaidProgression
     {
         [JsonProperty("castle-nathria")]
-        public GuildCastleNathria CastleNathria { get; set; }
+        public GuildRaidProgressionFull CastleNathria { get; set; }
 
         [JsonProperty("sanctum-of-domination")]
-        public GuildSanctumOfDomination SanctumOfDomination { get; set; }
+        public GuildRaidProgressionFull SanctumOfDomination { get; set; }
 
         [JsonProperty("sepulcher-of-the-first-ones")]
-        public GuildSepulcherOfTheFirstOnes SepulcherOfTheFirstOnes { get; set; }
+        public GuildRaidProgressionFull SepulcherOfTheFirstOnes { get; set; }
 
         [JsonProperty("aberrus-the-shadowed-crucible")]
-        public AberrusTheShadowedCrucible aberrustheshadowedcrucible { get; set; }
+        public GuildRaidProgressionFull aberrustheshadowedcrucible { get; set; }
 
         [JsonProperty("vault-of-the-incarnates")]
-        public VaultOfTheIncarnates vaultoftheincarnates { get; set; }
+        public GuildRaidProgressionFull vaultoftheincarnates { get; set; }
+
+        [JsonProperty("tier-mn-1")]
+        public GuildRaidProgressionFull midNightOneSeason { get; set; }
     }
 }

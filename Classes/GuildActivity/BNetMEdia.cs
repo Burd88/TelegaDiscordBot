@@ -2,7 +2,7 @@
 
 namespace DiscordBot
 {
-    public class GetBNetMEdia
+    public class BNetMEdia
     {
         public Links _links { get; set; }
         public List<Asset> assets { get; set; }

@@ -9,10 +9,10 @@ namespace DiscordBot
     class WarframeCheckEvents
     {
         private static List<string> eventsList;
-        private static void GetEvents()
+        private static async void GetEvents()
         {
             eventsList = new();
-            List<Events> events = Functions.GetWebJson<List<Events>>($"https://api.warframestat.us/pc/ru/events");
+            List<Events> events = await Functions.GetWebJson<List<Events>>($"https://api.warframestat.us/pc/ru/events");
             if (events != null)
             {
                 if (events.Count != 0)

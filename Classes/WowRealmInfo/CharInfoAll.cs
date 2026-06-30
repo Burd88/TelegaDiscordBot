@@ -23,6 +23,8 @@
         public string LinkBnet { get; set; }
         public string SetcountItem { get; set; }
         public string SetNameItem { get; set; }
+        public string achievement_points { get; set; }
+        public int code { get; set; }
 
         public CharInfoAll()
         {

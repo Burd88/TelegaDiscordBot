@@ -3,8 +3,9 @@ using System;
 using System.Collections.Generic;
 using System.IO;
 using System.Net;
+using System.Net.Http;
 using System.Text.RegularExpressions;
-using System.Threading;
+using System.Threading.Tasks;
 using static DiscordBot.Program;
 
 namespace DiscordBot
@@ -102,10 +103,10 @@ namespace DiscordBot
         }
 
         public static List<RealmList> Realms;
-        public static void LoadRealmAll()
+        public static async void LoadRealmAll()
         {
             Realms = new List<RealmList>();
-            Allrealm_ realms = GetWebJson<Allrealm_>("https://eu.api.blizzard.com/data/wow/search/realm?namespace=dynamic-eu&_page=1&_pageSize=1000&locale={settings.Locale}&access_token=" + Program.tokenWow);
+            Allrealm_ realms = await GetWebJson<Allrealm_>("https://eu.api.blizzard.com/data/wow/search/realm?namespace=dynamic-eu&_page=1&_pageSize=1000&locale=ru_RU");
             if (realms != null)
             {
                 foreach (Result realm in realms.results)
@@ -127,12 +128,12 @@ namespace DiscordBot
                         { "fr_FR", realm.data.name.fr_FR },
                         { "de_DE", realm.data.name.fr_FR }
                     };
-                   // Console.WriteLine(name[settings.Locale] + " - " + realm.data.slug);
-                    
+                        //Console.WriteLine(name[settings.Locale] + " - " + realm.data.slug);
+
                         Realms.Add(new RealmList { Name = name[settings.Locale], Slug = realm.data.slug });
                     }
                 }
-               // Thread.Sleep(35000);
+                // Thread.Sleep(35000);
                 Realms.Sort((a, b) => a.Name.CompareTo(b.Name));
 
                 WriteJSon(Realms, "RealmList");
@@ -160,7 +161,7 @@ namespace DiscordBot
             {
 
                 string message = $"{e.GetType().Name} Error: {e.Message}";
-                WriteLogs(message, "error");
+                WriteLogs(message, "error4");
                 return null;
             }
             return null;
@@ -354,47 +355,55 @@ namespace DiscordBot
                 return default;
             }
         }
-        public static T GetWebJson<T>(string link)
+        static HttpClient httpClient = new HttpClient();
+
+
+        public static async Task<T> GetWebJson<T>(string link)
         {
             try
             {
+                using var request = new HttpRequestMessage(HttpMethod.Get, link);
+                if (link.Contains("eu.api.blizzard.com"))
+                {
+                    request.Headers.Add("authorization", "Bearer " + tokenWow);
+                }
 
 
-                WebRequest request = WebRequest.Create(link);
-                WebResponse responce = request.GetResponse();
+                using var response = await httpClient.SendAsync(request);
+                var responseText = await response.Content.ReadAsStringAsync();
+               //Console.WriteLine(responseText);
 
-                using Stream stream = responce.GetResponseStream();
-                using StreamReader reader = new(stream);
-
-                string line = reader.ReadToEnd();
-
-
-                return JsonConvert.DeserializeObject<T>(line);
+                // Console.WriteLine(link);
+                //  Console.WriteLine(response.StatusCode);
+                return JsonConvert.DeserializeObject<T>(responseText);
             }
             catch (WebException e)
             {
                 if (e.Status == WebExceptionStatus.ProtocolError)
                 {
+                    Console.WriteLine("Error GetWebJson 2 " + link);
                     return default;
 
                 }
             }
             catch (Exception)
             {
+               Console.WriteLine("Error GetWebJson 3 " + link);
                 return default;
 
             }
             return default;
         }
 
-        public static string GetBNetMedia(string link)
+        public static async Task<string> GetBNetMedia(string link)
         {
 
-            GetBNetMEdia activity = GetWebJson<GetBNetMEdia>($"{link}&locale={settings.Locale}&access_token={tokenWow}");
+            BNetMEdia activity = await GetWebJson<BNetMEdia>($"{link}&locale={settings.Locale}");
             if (activity != null)
             {
                 foreach (Asset asset in activity.assets)
                 {
+                   
                     return asset.value;
 
                 }

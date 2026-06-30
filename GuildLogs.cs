@@ -41,7 +41,7 @@ namespace DiscordBot
             {
 
                 string message = $"GetGuildActivityChange Error: {e.Message}";
-                Functions.WriteLogs(message, "error");
+                Functions.WriteLogs(message, "error3");
                 return null;
             }
 
@@ -49,37 +49,41 @@ namespace DiscordBot
 
 
 
-        private void Update_warcraftlogs_data()
+        private async void Update_warcraftlogs_data()
         {
-            List<Logs_all> logs = Functions.GetWebJson<List<Logs_all>>($"https://www.warcraftlogs.com/v1/reports/guild/{Program.settings.GuildName.ToLower()}/{Functions.GetRealmSlug(Program.settings.RealmName)}/eu?api_key=c2c9093c70e642ac6ec003d4b0904c33");
-            if (logs != null)
+            try
             {
-                if (logs[0].zone == 29)
+                List<Logs_all> logs = await Functions.GetWebJson<List<Logs_all>>($"https://www.warcraftlogs.com/v1/reports/guild/{Program.settings.GuildName.ToLower()}/{Functions.GetRealmSlug(Program.settings.RealmName)}/eu?api_key=c2c9093c70e642ac6ec003d4b0904c33");
+                if (logs != null)
                 {
+                    if (logs[0].zone == 29)
+                    {
 
-                    GetLogInfo(logs[0].id, logs[0].title, Functions.FromUnixTimeStampToDateTime(logs[0].start).ToString(), $"https://ru.warcraftlogs.com/reports/{logs[0].id}");
+                        GetLogInfo(logs[0].id, logs[0].title, Functions.FromUnixTimeStampToDateTime(logs[0].start).ToString(), $"https://ru.warcraftlogs.com/reports/{logs[0].id}");
+                    }
+                    else
+                    {
+                        _log.Error = true;
+                        return;
+                    }
+
+
                 }
                 else
                 {
                     _log.Error = true;
                     return;
                 }
-
-
             }
-            else
-            {
-                _log.Error = true;
-                return;
-            }
+            catch (Exception e) { }
 
 
 
         }
 
-        private void GetLogInfo(string id, string dungeon, string date, string link)
+        private async void GetLogInfo(string id, string dungeon, string date, string link)
         {
-            LogInfo log = Functions.GetWebJson<LogInfo>("https://www.warcraftlogs.com/v1/report/fights/" + id + "?translate=true&api_key=c2c9093c70e642ac6ec003d4b0904c33");
+            LogInfo log = await Functions.GetWebJson<LogInfo>("https://www.warcraftlogs.com/v1/report/fights/" + id + "?translate=true&api_key=c2c9093c70e642ac6ec003d4b0904c33");
             if (log != null)
             {
                 int kills = 0;

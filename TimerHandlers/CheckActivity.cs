@@ -17,7 +17,7 @@ namespace DiscordBot
                 {
                     var builder = new EmbedBuilder();
                     GuildActivity activity = new();
-                    var activNew = activity.GetGuildActivityChange();
+                    var activNew = await activity.GetGuildActivityChange();
 
                     if (activNew != null && activNew.Count != 0)
                     {

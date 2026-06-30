@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Threading.Tasks;
 using static DiscordBot.Program;
 
 namespace DiscordBot
@@ -8,21 +9,21 @@ namespace DiscordBot
     {
         private WoWRealStatus wowRealmStatus;
 
-        public WoWRealStatus GetRealmInfo()
+        public async Task<WoWRealStatus> GetRealmInfo()
         {
             wowRealmStatus = new();
-            GetRealmConnectedLink();
+            await GetRealmConnectedLink();
 
             return wowRealmStatus;
         }
 
 
-        public string[] GetRealmInfoForTimer()
+        public async Task<string[]> GetRealmInfoForTimer()
         {
             settings = Functions.ReadJson<BotSettings>("BotSettings");
 
             wowRealmStatus = new();
-            GetRealmConnectedLink();
+            await GetRealmConnectedLink();
             if (!wowRealmStatus.Error)
             {
                 string str = CheckRealmStatus(settings.RealmStatusType);
@@ -82,14 +83,15 @@ namespace DiscordBot
 
             return null;
         }
-        private void GetRealmConnectedLink()
+        private async Task GetRealmConnectedLink()
         {
+            RealmInfo realm = await Functions.GetWebJson<RealmInfo>($"https://eu.api.blizzard.com/data/wow/realm/{settings.RealmSlug}?namespace=dynamic-eu&locale={settings.Locale}");
 
-            RealmInfo realm = Functions.GetWebJson<RealmInfo>($"https://eu.api.blizzard.com/data/wow/realm/{settings.RealmSlug}?namespace=dynamic-eu&locale={settings.Locale}&access_token={tokenWow}");
             if (realm != null)
             {
+
                 wowRealmStatus.Error = false;
-                RealmUpdateFunction(realm.id.ToString());
+                await RealmUpdateFunction(realm.id.ToString());
 
             }
             else
@@ -102,11 +104,11 @@ namespace DiscordBot
 
         }
 
-        private void RealmUpdateFunction(string id)
+        private async Task RealmUpdateFunction(string id)
         {
 
+            Realms realm = await Functions.GetWebJson<Realms>($"https://eu.api.blizzard.com/data/wow/connected-realm/{id}?namespace=dynamic-eu&locale={settings.Locale}");
 
-            Realms realm = Functions.GetWebJson<Realms>($"https://eu.api.blizzard.com/data/wow/connected-realm/{id}?namespace=dynamic-eu&locale={settings.Locale}&access_token={tokenWow}");
             if (realm != null)
             {
                 if (realm.status.type == "UP")
